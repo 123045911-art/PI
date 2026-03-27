@@ -1,0 +1,171 @@
+/* Variablespara las cosas */
+:root {
+    --sidebar-width: 200px;
+    --sidebar-bg: #0D1B2A;
+    --content-bg: #f8f9fa;
+    --highlight-color: #4cc9f0;
+    --text-muted: #8fa3b8;
+
+    --kpi-total-bg: #313860;
+    --kpi-active-bg: #2d99d3;
+    --kpi-enter-bg: #38a169;
+    --kpi-exit-bg: #f6ad55;
+}
+
+/* estructura */
+body {
+    background-color: var(--content-bg);
+    display: flex;
+    min-height: 100vh;
+}
+
+/* sidebar */
+#sidebar-menu {
+    width: var(--sidebar-width);
+    background-color: var(--sidebar-bg);
+    color: white;
+    flex-shrink: 0;
+    position: fixed;
+    height: 100vh;
+    z-index: 1030;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 1.5rem;
+}
+
+/* logo */
+#sidebar-menu img {
+    width: 200px;
+    border-radius: 8px;
+    margin-bottom: -10px !important;
+    margin-top: -40px !important;
+
+}
+
+/* visioflow */
+#sidebar-menu .company-name {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #cbd5e1;
+    margin-top: -20px !important;
+    margin-bottom: -10px !important;
+
+}
+
+/* divi */
+#sidebar-menu hr {
+    width: 60%;
+    border-color: rgba(255,255,255,0.08);
+    margin: 0.7rem 0 1rem 0;
+}
+
+/* link */
+#sidebar-menu .nav-link {
+    width: 100%;
+    text-align: center;
+    padding: 12px 0;
+    color: var(--text-muted);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-radius: 0;
+    position: relative;
+    transition: 0.2s;
+}
+
+/* Iconos */
+#sidebar-menu .nav-link i {
+    font-size: 2rem;
+    margin-bottom: 5px;
+}
+
+/* Texto debajo */
+#sidebar-menu .nav-link .label {
+    font-size: 0.75rem;
+}
+
+/* Hover */
+#sidebar-menu .nav-link:hover {
+    color: white;
+}
+
+/* Active – barraizq */
+#sidebar-menu .nav-link.active::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    width: 5px;
+    height: 100%;
+    background: var(--highlight-color);
+    border-radius: 0 4px 4px 0;
+}
+
+/* Active - color */
+#sidebar-menu .nav-link.active {
+    background: rgba(255,255,255,0.08);
+    color: white;
+}
+
+/* Contenido principal */
+.main-content {
+    margin-left: var(--sidebar-width);
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Tarjetas kpi */
+.kpi-card-custom {
+    border: none;
+    border-radius: 1rem;
+    transition: transform 0.2s, box-shadow 0.2s;
+    min-height: 130px;
+    color: white;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+.kpi-card-custom:hover {
+    transform: translateY(-3px);
+}
+
+.kpi-value-custom {
+    font-size: 3rem;
+    font-weight: 700;
+    line-height: 1.1;
+}
+
+.kpi-icon-custom {
+    opacity: 0.3;
+    font-size: 3.5rem;
+}
+
+/* Fondos de los kpi */
+.bg-kpi-total { background-color: var(--kpi-total-bg) !important; }
+.bg-kpi-active { background-color: var(--kpi-active-bg) !important; }
+.bg-kpi-enter { background-color: var(--kpi-enter-bg) !important; }
+.bg-kpi-exit { background-color: var(--kpi-exit-bg) !important; }
+
+/* Tabla de eventos */
+.event-table-container {
+    max-height: 450px;
+    overflow-y: auto;
+}
+
+/* Alineación de la barra activa */
+#sidebar-menu .nav-link {
+    line-height: normal !important;
+    padding-top: 14px;
+    padding-bottom: 14px;
+    position: relative;
+}
+
+#sidebar-menu .nav-link i {
+    line-height: 1;
+}
+
+#sidebar-menu .nav-link.active::before {
+    top: 0;
+    bottom: 0;
+}

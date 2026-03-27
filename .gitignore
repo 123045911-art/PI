@@ -1,0 +1,47 @@
+# Entornos virtuales de Python
+venv/
+env/
+ENV/
+.venv/
+
+# Archivos compilados de Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Archivos generados por Ultralytics/YOLO (si no se quieren subir los resultados o pesos pesados)
+runs/
+# yolov8n.pt # (Opcional: descomentar si no quieres subir el modelo base)
+
+# Logs y bases de datos locales
+*.csv
+*.log
+*.sqlite
+*.sqlite3
+
+# Entornos y variables
+.env
+.env.backup
+.env.local
+
+# IDEs y Editores
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ==========================================
+# Ignorados para el lado del Dashboard (Laravel/Node)
+# (Aunque contador_dashboard tenga el suyo, es buena práctica tenerlos en el root si se inicializa git aquí)
+# ==========================================
+contador_dashboard/vendor/
+contador_dashboard/node_modules/
+contador_dashboard/public/build/
+contador_dashboard/public/hot
+contador_dashboard/public/storage
+contador_dashboard/storage/*.key
+contador_dashboard/.env
+contador_dashboard/database/database.sqlite
+contador_dashboard/.phpunit.result.cache
+npm-debug.log
+yarn-error.log
