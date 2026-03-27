@@ -1,12 +1,22 @@
 # Sistema de Visión Computarizada y Dashboard (PI)
 
-Este proyecto se divide en dos partes principales:
-1. **Contador de Personas (Python):** Un script de visión computarizada que utiliza YOLOv8 y DeepSORT para detectar personas, rastrearlas y registrar su entrada/salida en diferentes áreas.
+Este proyecto se divide en los siguientes módulos:
+1. **Contador de Personas (Python / Flask):** Un script de visión computarizada que utiliza YOLOv8 y DeepSORT para detectar personas, rastrearlas y registrar su entrada/salida en diferentes áreas. Se gestiona desde una página web desarrollada en Flask..
 2. **Dashboard de Análisis (Laravel):** Una aplicación web para visualizar los datos generados por el script de Python.
+3. **API (FastAPI):** Aplicación de FastAPI para gestionar información mediante endpoints y una estructura de carpetas que divide el proyecto en secciones:
+- Modelos
+- Datos
+- Rutas
+- Seguridad
+4. **Base de datos (PostgreSQL):** Sistema de gestión de base de datos para almacenamiento y administración de información manejada por el proyecto.
 
 ---
 
-## 1. Contador de Personas (Python)
+## 1. Configuración de Docker
+
+El proyecto funciona mediante el uso de contenedores de Docker. Es necesaria la instalación de **Docker Desktop** para la correcta construcción y levantamiento de todos los módulos del sistema. Esto asegura una ejecución segura de todos los servicios para un correcto funcionamiento del proyecto.
+
+## 2. Contador de Personas (Python)
 
 Ubicación: `contador_personas/`
 
@@ -50,7 +60,7 @@ python PI.py
 
 ---
 
-## 2. Dashboard de Análisis (Laravel)
+## 3. Dashboard de Análisis (Laravel)
 
 Ubicación: `contador_dashboard/`
 

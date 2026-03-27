@@ -1,0 +1,69 @@
+services:
+  # --- SERVIDOR FASTAPI ---
+  fastapi:
+    build: ./fastapi-app
+    container_name: FastAPIVisioflow
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./fastapi-app:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://admin:visioflow123@postgres:5432/contador_personas
+
+  # # --- SERVICIO FLASK ---
+  # flask:
+  #   build: ./flask-app
+  #   container_name: FlaskVisioflow
+  #   ports:
+  #     - "5000:5000"
+  #   volumes:
+  #     - ./flask-app:/app
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #   environment:
+  #     DATABASE_URL: postgresql://admin:123456@postgres:5432/contador_personas
+
+  # # --- SERVICIO LARAVEL ---
+  # laravel:
+  #   build: ./laravel-app
+  #   container_name: LaravelVisioflow
+  #   ports:
+  #     - "8080:80"
+  #   volumes:
+  #     - ./laravel-app:/var/www/html
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #   environment:
+  #     DB_CONNECTION: pgsql
+  #     DB_HOST: postgres
+  #     DB_PORT: 5432
+  #     DB_DATABASE: contador_personas
+  #     DB_USERNAME: admin
+  #     DB_PASSWORD: 123456
+
+  # --- BASE DE DATOS ---
+  postgres:
+    image: postgres:15
+    container_name: PostgreSqlVisioflow
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: visioflow123
+      POSTGRES_DB: contador_personas
+    ports:
+      - "5435:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d contador_personas"]
+      interval: 5s
+      retries: 5
+      timeout: 5s
+
+volumes:
+  postgres_data:
