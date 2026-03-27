@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Contador de Personas</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  </head>
+  <body>
+    <main class="layout">
+      <section class="panel video-panel">
+        <h1>Contador de Personas - Flask + YOLOv8 + DeepSort</h1>
+        <p class="subtitle">Stream en vivo y conteo por areas rectangulares</p>
+        <div class="video-wrapper">
+          <img id="video-stream" src="{{ url_for('main.video_feed') }}" alt="Video en vivo" />
+        </div>
+      </section>
+
+      <aside class="panel side-panel">
+        <h2>Agregar area</h2>
+        <form id="area-form">
+          <label>
+            Nombre
+            <input type="text" id="name" name="name" placeholder="Ej: Caja 1" required />
+          </label>
+
+          <div class="grid">
+            <label>
+              X1
+              <input type="number" id="x1" name="x1" required />
+            </label>
+            <label>
+              Y1
+              <input type="number" id="y1" name="y1" required />
+            </label>
+            <label>
+              X2
+              <input type="number" id="x2" name="x2" required />
+            </label>
+            <label>
+              Y2
+              <input type="number" id="y2" name="y2" required />
+            </label>
+          </div>
+
+          <button type="submit">Guardar area</button>
+          <p id="form-message" class="form-message"></p>
+        </form>
+
+        <h2>Estadisticas</h2>
+        <div id="stats-container" class="stats-container"></div>
+      </aside>
+    </main>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+  </body>
+</html>

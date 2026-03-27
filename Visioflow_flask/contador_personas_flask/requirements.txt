@@ -1,0 +1,7 @@
+Flask
+opencv-python
+ultralytics
+deep-sort-realtime
+numpy
+mysql-connector-python
+python-dotenv
