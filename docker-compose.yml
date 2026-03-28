@@ -13,19 +13,21 @@ services:
     environment:
       DATABASE_URL: postgresql://admin:visioflow123@postgres:5432/contador_personas
 
-  # # --- SERVICIO FLASK ---
-  # flask:
-  #   build: ./flask-app
-  #   container_name: FlaskVisioflow
-  #   ports:
-  #     - "5000:5000"
-  #   volumes:
-  #     - ./flask-app:/app
-  #   depends_on:
-  #     postgres:
-  #       condition: service_healthy
-  #   environment:
-  #     DATABASE_URL: postgresql://admin:123456@postgres:5432/contador_personas
+  flask_service:
+    build:
+      context: ./contador_personas_flask
+      dockerfile: Dockerfile
+    container_name: FlaskVisioflow
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./contador_personas_flask:/app
+    depends_on:
+      - fastapi
+    environment:
+      - FASTAPI_URL=http://127.0.0.1:8000
+      - FLASK_APP=run.py
+      - FLASK_DEBUG=1
 
   # # --- SERVICIO LARAVEL ---
   # laravel:
