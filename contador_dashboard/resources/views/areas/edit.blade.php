@@ -10,7 +10,7 @@
                     </div>
                     <div class="card-body">
                         {{-- Formulario de actualización --}}
-                        <form action="{{ route('areas.update', $area) }}" method="POST">
+                        <form action="{{ route('areas.update', $area->id) }}" method="POST">
                             @csrf
                             @method('PUT') {{-- Método HTTP necesario para la acción update --}}
                             <div class="mb-3">

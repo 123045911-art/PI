@@ -8,6 +8,7 @@ ENV/
 __pycache__/
 *.py[cod]
 *$py.class
+.pytest_cache/
 
 # Archivos generados por Ultralytics/YOLO (si no se quieren subir los resultados o pesos pesados)
 runs/
@@ -18,11 +19,14 @@ runs/
 *.log
 *.sqlite
 *.sqlite3
+database/*.sqlite
+database/*.sqlite3
 
 # Entornos y variables
 .env
 .env.backup
 .env.local
+.env.*.local
 
 # IDEs y Editores
 .vscode/
@@ -30,18 +34,29 @@ runs/
 *.swp
 *.swo
 
-# ==========================================
-# Ignorados para el lado del Dashboard (Laravel/Node)
-# (Aunque contador_dashboard tenga el suyo, es buena práctica tenerlos en el root si se inicializa git aquí)
-# ==========================================
-contador_dashboard/vendor/
-contador_dashboard/node_modules/
-contador_dashboard/public/build/
-contador_dashboard/public/hot
-contador_dashboard/public/storage
-contador_dashboard/storage/*.key
-contador_dashboard/.env
-contador_dashboard/database/database.sqlite
-contador_dashboard/.phpunit.result.cache
+# OS generados
+.DS_Store
+Thumbs.db
+
+# Node y Frontend
+node_modules/
 npm-debug.log
 yarn-error.log
+public/build/
+public/hot
+
+# PHP / Laravel Framework
+vendor/
+.phpunit.result.cache
+storage/*.key
+storage/framework/cache/
+storage/framework/sessions/
+storage/framework/views/
+storage/logs/
+bootstrap/cache/
+
+# ==========================================
+# Ignorados específicos o legacy
+# ==========================================
+contador_dashboard/public/storage
+fastapi-app/

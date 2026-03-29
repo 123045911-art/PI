@@ -86,7 +86,7 @@
                                 </tr>
                             </thead>
                             <tbody id="eventos-table-body">
-                                {{-- esto ya se pone con lo de abajo en la parte de scripts --}}
+                                {{-- Se llena dinámicamente vía JS --}}
                             </tbody>
                         </table>
                     </div>
@@ -95,7 +95,9 @@
         </div>
     </div>
 @endsection
+
 {{-- Lógica de Gráfico y Actualización en Tiempo Real --}}
+@push('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const ctx = document.getElementById('conteoChart').getContext('2d');
@@ -105,7 +107,8 @@
             'name' => $area->name,
             'count' => $area->estado->people_count ?? 0,
         ]));
-        // Función para inicializar el grafico
+
+        // Función para inicializar el gráfico
         function initChart(data) {
             const labels = data.map(item => item.name);
             const counts = data.map(item => item.count);
@@ -144,49 +147,62 @@
                 }
             });
         }
-        // Inicializar el grafico con datos estáticos del primer render
+
+        // Inicializar el gráfico con datos estáticos del primer render
         initChart(initialData);
-        // Función para actualizar los datos
+
+        // Función para actualizar los datos desde la API
         function updateDashboard() {
             fetch(apiUrl)
                 .then(response => response.json())
                 .then(data => {
-                    // Actualizar todos loskpis
+                    // Actualizar todos los KPIs
                     document.getElementById('kpi-total-personas').textContent = data.total_personas;
                     document.getElementById('kpi-areas-activas').textContent = data.areas_activas;
                     document.getElementById('kpi-entradas-hoy').textContent = data.entradas_hoy;
                     document.getElementById('kpi-salidas-hoy').textContent = data.salidas_hoy;
+
                     // Actualizar Tabla de Eventos Recientes
                     const eventosBody = document.getElementById('eventos-table-body');
                     let newTableHtml = '';
-                    data.eventos_recientes.forEach(evento => {
-                        // Determinar la clase del badge (bg-success para ENTER, bg-danger para EXIT)
-                        const badgeClass = evento.event === 'ENTER' ? 'bg-success' : 'bg-danger';
-                        newTableHtml += `
-                            <tr>
-                                <td>${evento.hora}</td>
-                                <td>${evento.area_name}</td>
-                                <td>
-                                    <span class="badge ${badgeClass}">
-                                        ${evento.event}
-                                    </span>
-                                </td>
-                                <td>${evento.track_id}</td>
-                            </tr>
-                        `;
-                    });
-                    // Reemplazar el contenido de la tabla
+                    if (data.eventos_recientes && data.eventos_recientes.length > 0) {
+                        data.eventos_recientes.forEach(evento => {
+                            const badgeClass = evento.event === 'ENTER' ? 'bg-success' : 'bg-danger';
+                            newTableHtml += `
+                                <tr>
+                                    <td>${evento.hora}</td>
+                                    <td>${evento.area_name}</td>
+                                    <td>
+                                        <span class="badge ${badgeClass}">
+                                            ${evento.event}
+                                        </span>
+                                    </td>
+                                    <td>${evento.track_id}</td>
+                                </tr>
+                            `;
+                        });
+                    } else {
+                        newTableHtml = '<tr><td colspan="4" class="text-center text-muted">Sin eventos recientes</td></tr>';
+                    }
                     eventosBody.innerHTML = newTableHtml;
+
                     // Actualizar Gráfico
-                    const newLabels = data.conteo_por_area.map(item => item.name);
-                    const newCounts = data.conteo_por_area.map(item => item.count);
-                    conteoChart.data.labels = newLabels;
-                    conteoChart.data.datasets[0].data = newCounts;
-                    conteoChart.update();
+                    if (data.conteo_por_area && data.conteo_por_area.length > 0) {
+                        const newLabels = data.conteo_por_area.map(item => item.name);
+                        const newCounts = data.conteo_por_area.map(item => item.count);
+                        conteoChart.data.labels = newLabels;
+                        conteoChart.data.datasets[0].data = newCounts;
+                        conteoChart.update();
+                    }
                 })
                 .catch(error => console.error('Error al actualizar dashboard:', error));
         }
-        // Conteo en tiempo real aqui son 3 segundos de actualizacion
+
+        // Cargar datos iniciales inmediatamente
+        updateDashboard();
+
+        // Actualización en tiempo real cada 3 segundos
         setInterval(updateDashboard, 3000);
     });
 </script>
+@endpush

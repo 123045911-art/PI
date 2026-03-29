@@ -1,4 +1,5 @@
 import csv
+import logging
 import threading
 import time
 from datetime import datetime
@@ -10,7 +11,9 @@ import numpy as np
 from deep_sort_realtime.deepsort_tracker import DeepSort
 from ultralytics import YOLO
 
-from app.core.db_logger import MySQLLogger
+from app.core.api_client import VisioFlowApiClient
+
+logger = logging.getLogger("visioflow.api")
 
 
 class TrackerService:
@@ -24,7 +27,7 @@ class TrackerService:
         self.project_root = Path(__file__).resolve().parents[2]
         self.csv_path = self.project_root / "areas_log.csv"
 
-        self.mysql_logger = MySQLLogger()
+        self.api_client = VisioFlowApiClient()
 
         self.model = YOLO("yolov8n.pt")
         self.tracker = DeepSort(max_age=40, n_init=3, max_iou_distance=0.6)
@@ -51,6 +54,7 @@ class TrackerService:
 
             area = {
                 "id": area_id,
+                "api_id": None,
                 "name": name,
                 "x1": rx1,
                 "y1": ry1,
@@ -62,23 +66,62 @@ class TrackerService:
                 "total_dwell_seconds": 0.0,
             }
             self.areas[area_id] = area
-            self.mysql_logger.insert_area(area)
-            return area
+
+        created = self.api_client.create_area(
+            name=name,
+            x1=rx1,
+            y1=ry1,
+            x2=rx2,
+            y2=ry2,
+        )
+
+        with self.lock:
+            if area_id in self.areas:
+                if created and created.get("id") is not None:
+                    self.areas[area_id]["api_id"] = int(created["id"])
+                else:
+                    logger.warning(
+                        "Área local creada pero no hay api_id de FastAPI; "
+                        "POST /events no se usará para esta área hasta que exista id remoto. "
+                        "local_id=%s name=%s",
+                        area_id,
+                        name,
+                    )
+            return self.areas[area_id]
 
     def _point_in_area(self, cx: int, cy: int, area: dict) -> bool:
         return area["x1"] <= cx <= area["x2"] and area["y1"] <= cy <= area["y2"]
 
     def _log_event(self, track_id: int, area: dict, event_type: str, dwell_seconds: float) -> None:
+        event_time = datetime.now().isoformat(timespec="seconds")
+        dwell_rounded = round(float(dwell_seconds), 2)
         event = {
-            "event_time": datetime.now().isoformat(timespec="seconds"),
+            "event_time": event_time,
             "track_id": track_id,
             "area_id": area["id"],
             "area_name": area["name"],
             "event_type": event_type,
-            "dwell_seconds": round(dwell_seconds, 2),
+            "dwell_seconds": dwell_rounded,
         }
         self.event_buffer.append(event)
-        self.mysql_logger.insert_event(event)
+
+        api_id = area.get("api_id")
+        if api_id is None:
+            logger.warning(
+                "Evento sin api_id; no se envía a FastAPI (área no sincronizada). "
+                "local_area_id=%s track_id=%s event=%s",
+                area["id"],
+                track_id,
+                event_type,
+            )
+        else:
+            self.api_client.send_event(
+                area_id=int(api_id),
+                track_id=track_id,
+                event=event_type,
+                timestamp_iso=event_time,
+                dwell=dwell_rounded,
+            )
 
     def _handle_transitions(self, track_id: int, inside_now: Set[int], timestamp: float) -> None:
         state = self.track_states.setdefault(
@@ -137,9 +180,6 @@ class TrackerService:
                 area = self.areas.get(area_id)
                 if area:
                     area["current_count"] += 1
-
-        for area in self.areas.values():
-            self.mysql_logger.upsert_area_status(area)
 
     def _flush_events_to_csv_if_needed(self) -> None:
         now = time.time()
@@ -286,6 +326,7 @@ class TrackerService:
                 areas.append(
                     {
                         "id": area["id"],
+                        "api_id": area.get("api_id"),
                         "name": area["name"],
                         "rect": [area["x1"], area["y1"], area["x2"], area["y2"]],
                         "current_count": area["current_count"],

@@ -1,71 +1,118 @@
 services:
-  # --- SERVIDOR FASTAPI ---
-  fastapi:
-    build: ./fastapi-app
-    container_name: FastAPIVisioflow
-    ports:
-      - "8000:8000"
-    volumes:
-      - ./fastapi-app:/app
-    depends_on:
-      postgres:
-        condition: service_healthy
-    environment:
-      DATABASE_URL: postgresql://admin:visioflow123@postgres:5432/contador_personas
-
-  flask_service:
-    build:
-      context: ./contador_personas_flask
-      dockerfile: Dockerfile
-    container_name: FlaskVisioflow
-    ports:
-      - "5000:5000"
-    volumes:
-      - ./contador_personas_flask:/app
-    depends_on:
-      - fastapi
-    environment:
-      - FASTAPI_URL=http://127.0.0.1:8000
-      - FLASK_APP=run.py
-      - FLASK_DEBUG=1
-
-  # # --- SERVICIO LARAVEL ---
-  # laravel:
-  #   build: ./laravel-app
-  #   container_name: LaravelVisioflow
-  #   ports:
-  #     - "8080:80"
-  #   volumes:
-  #     - ./laravel-app:/var/www/html
-  #   depends_on:
-  #     postgres:
-  #       condition: service_healthy
-  #   environment:
-  #     DB_CONNECTION: pgsql
-  #     DB_HOST: postgres
-  #     DB_PORT: 5432
-  #     DB_DATABASE: contador_personas
-  #     DB_USERNAME: admin
-  #     DB_PASSWORD: 123456
-
   # --- BASE DE DATOS ---
-  postgres:
+  db:
     image: postgres:15
     container_name: PostgreSqlVisioflow
     restart: always
     environment:
       POSTGRES_USER: admin
-      POSTGRES_PASSWORD: visioflow123
-      POSTGRES_DB: contador_personas
+      POSTGRES_PASSWORD: "123456"
+      POSTGRES_DB: visio_flow
     ports:
       - "5435:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U admin -d contador_personas"]
+      test: ["CMD-SHELL", "pg_isready -U admin -d visio_flow"]
       interval: 5s
       retries: 5
       timeout: 5s
+    networks:
+      - visioflow-net
+
+  # --- SERVIDOR FASTAPI ---
+  api:
+    build: ./API
+    container_name: FastAPIVisioflow
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_HOST: db
+      DB_PORT: "5432"
+      DB_USER: admin
+      DB_PASSWORD: "123456"
+      DB_NAME: visio_flow
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    networks:
+      - visioflow-net
+
+  # --- SERVICIO FLASK ---
+  flask_service:
+    build: ./contador_personas_flask
+    container_name: FlaskVisioflow
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      VISIOFLOW_API_BASE_URL: http://api:8000
+      API_BASE_URL: http://api:8000
+      FLASK_HOST: "0.0.0.0"
+      FLASK_PORT: "5000"
+      FLASK_DEBUG: "0"
+      PYTHONUNBUFFERED: "1"
+    networks:
+      - visioflow-net
+
+  # --- SERVICIO LARAVEL DASHBOARD ---
+  laravel:
+    build: ./contador_dashboard
+    container_name: LaravelVisioflow
+    ports:
+      - "8085:8000"
+    volumes:
+      - ./contador_dashboard:/var/www/html
+      - /var/www/html/vendor
+    depends_on:
+      api:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    environment:
+      # URL interna del API usando el nombre del servicio Docker
+      - INTERNAL_API_URL=http://api:8000
+      - APP_ENV=local
+      - APP_DEBUG=true
+      # Key por defecto para no romper el arranque inicial
+      - APP_KEY=base64:9KM+d724Xbh0CPIzWgi18RZxHByd0rKwICoM7BR9IdU=
+      # Laravel NO debe tocar la DB. Forzamos drivers sin DB.
+      - DB_CONNECTION=null
+      - DATABASE_URL=null
+      # --- OPTIMIZACIÓN OCTANE ---
+      - SESSION_DRIVER=redis
+      - CACHE_STORE=redis
+      - REDIS_HOST=redis
+      - QUEUE_CONNECTION=sync
+      - LOG_CHANNEL=stack
+      # Octane Variables
+      - OCTANE_SERVER=swoole
+    networks:
+      - visioflow-net
+
+  # --- REDIS PARA CACHÉ Y SESIONES ---
+  redis:
+    image: redis:alpine
+    container_name: RedisVisioflow
+    ports:
+      - "6379:6379"
+    networks:
+      - visioflow-net
 
 volumes:
   postgres_data:
+
+networks:
+  visioflow-net:
+    driver: bridge
