@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ "Editar" if user else "Nuevo" }} Usuario - VisioFlow</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<body>
+    <nav class="top-nav">
+      <div class="nav-brand">VisioFlow</div>
+      <div class="nav-links">
+        <a href="{{ url_for('users.index') }}" class="nav-link">Gestión de Usuarios</a>
+        <span class="user-info">Hola, {{ session.user.username }}</span>
+        <a href="{{ url_for('auth.logout') }}" class="nav-link logout">Cerrar Sesión</a>
+      </div>
+    </nav>
+
+    <main class="management-container">
+        <div class="panel form-panel">
+            <a href="{{ url_for('users.index') }}" class="back-link">← Volver al listado</a>
+            
+            <h1>{{ "Editar" if user else "Crear Nuevo" }} Usuario</h1>
+            <p class="subtitle">{{ "Modifica los datos del usuario" if user else "Ingresa los datos para el nuevo acceso" }}</p>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                <div class="flashes">
+                  {% for category, message in messages %}
+                    <div class="flash flash-{{ category }}">{{ message }}</div>
+                  {% endfor %}
+                </div>
+              {% endif %}
+            {% endwith %}
+
+            <form method="POST">
+                <div class="form-group">
+                    <label for="username">Nombre de Usuario</label>
+                    <input type="text" id="username" name="username" value="{{ user.username if user else '' }}" required autocomplete="off">
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Contraseña {{ '(opcional, dejar vacío para no cambiar)' if user else '' }}</label>
+                    <input type="password" id="password" name="password" {{ 'required' if not user else '' }} placeholder="••••••••">
+                </div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" id="is_admin" name="is_admin" {{ 'checked' if user and user.is_admin else '' }}>
+                    <label for="is_admin">Es Administrador</label>
+                </div>
+
+                <div style="margin-top: 2rem;">
+                    <button type="submit" class="btn-primary">{{ "Guardar Cambios" if user else "Crear Usuario" }}</button>
+                </div>
+            </form>
+        </div>
+    </main>
+</body>
+</html>

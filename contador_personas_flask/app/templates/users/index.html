@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Usuarios - VisioFlow</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<body>
+    <nav class="top-nav">
+      <div class="nav-brand">VisioFlow</div>
+      <div class="nav-links">
+        <a href="{{ url_for('main.index') }}" class="nav-link">Cámaras</a>
+        <span class="user-info">Hola, {{ session.user.username }}</span>
+        <a href="{{ url_for('auth.logout') }}" class="nav-link logout">Cerrar Sesión</a>
+      </div>
+    </nav>
+
+    <main class="management-container">
+        <div class="panel table-panel">
+            <div class="panel-header">
+                <div>
+                    <h1>Gestión de Usuarios</h1>
+                    <p class="subtitle">Administra los accesos al sistema</p>
+                </div>
+                <a href="{{ url_for('users.create') }}" class="btn-primary">+ Nuevo Usuario</a>
+            </div>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                <div class="flashes">
+                  {% for category, message in messages %}
+                    <div class="flash flash-{{ category }}">{{ message }}</div>
+                  {% endfor %}
+                </div>
+              {% endif %}
+            {% endwith %}
+
+            <form action="{{ url_for('users.index') }}" method="GET" class="search-form">
+                <input type="text" name="name" placeholder="Buscar por nombre..." value="{{ request.args.get('name', '') }}">
+                <button type="submit" style="width: auto; padding: 0.6rem 1rem; margin-top: 0;">Buscar</button>
+            </form>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Usuario</th>
+                        <th>Rol</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr>
+                        <td>{{ user.id }}</td>
+                        <td style="font-weight: 600;">{{ user.username }}</td>
+                        <td>
+                            {% if user.is_admin %}
+                            <span class="badge badge-admin">Administrador</span>
+                            {% else %}
+                            <span class="badge badge-user">Usuario</span>
+                            {% endif %}
+                        </td>
+                        <td class="actions">
+                            <a href="{{ url_for('users.edit', user_id=user.id) }}" class="action-link">Editar</a>
+                            <form action="{{ url_for('users.delete', user_id=user.id) }}" method="POST" onsubmit="return confirm('¿Estás seguro de eliminar este usuario?')">
+                                <button type="submit" class="action-btn-danger">Eliminar</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" style="text-align: center; color: var(--muted); padding: 2rem;">No se encontraron usuarios.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </main>
+</body>
+</html>
