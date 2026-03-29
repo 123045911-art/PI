@@ -1,5 +1,6 @@
 # Importaciones
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from app.data.db import engine
 from app.data import areas as AreasDB, area_events as AreaEventsDB, area_state as AreaStateDB, heatmap_points as HeatmapPointsDB
 from app.router import areas, cameras, dashboard, events_heatmap, system
@@ -14,6 +15,15 @@ HeatmapPointsDB.Base.metadata.create_all(bind = engine)
 app = FastAPI(
     title="API Visioflow",
     version="1.0"
+)
+
+# Configuración de CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], # En producción, especificar el dominio real
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 app.include_router(system.router)

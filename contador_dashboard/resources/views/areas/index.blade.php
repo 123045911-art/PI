@@ -23,18 +23,18 @@
                                 <td><span class="fw-bold">{{ $area->name }}</span></td>
                                 <td>
                                     {{ $area->estado->people_count ?? 0 }}
-                                    @if (!$area->estado)
+                                    @if (!isset($area->estado) || $area->estado === null)
                                         <span class="badge bg-danger ms-2">Sin datos</span>
                                     @endif
                                 </td>
                                 <td>{{ $area->estado->last_update ?? 'N/A' }}</td>
                                 <td>
-                                    <a href="{{ route('areas.edit', $area) }}" class="btn btn-sm btn-info text-white me-2">
+                                    <a href="{{ route('areas.edit', $area->id) }}" class="btn btn-sm btn-info text-white me-2">
                                         Renombrar
                                     </a>
                                     
                                     {{-- Formulario para Eliminar --}}
-                                    <form action="{{ route('areas.destroy', $area) }}" method="POST" class="d-inline" onsubmit="return confirm('¿Estás seguro de que quieres eliminar el área {{ $area->name }} y todos sus eventos? Esta acción es irreversible.');">
+                                    <form action="{{ route('areas.destroy', $area->id) }}" method="POST" class="d-inline" onsubmit="return confirm('¿Estás seguro de que quieres eliminar el área {{ $area->name }} y todos sus eventos? Esta acción es irreversible.');">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>

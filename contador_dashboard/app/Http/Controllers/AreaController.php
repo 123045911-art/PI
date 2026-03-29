@@ -1,51 +1,91 @@
 <?php
+
 namespace App\Http\Controllers;
+
 use Illuminate\Http\Request;
-use App\Models\Area;
-use App\Models\AreaState;
-use App\Models\AreaEvent;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+
 class AreaController extends Controller
 {
-    public function index()
+    protected $apiUrl;
+
+    public function __construct()
     {
-        $areas = Area::with('estado')->orderBy('id', 'asc')->get();
-        return view('areas.index', compact('areas'));
+        $this->apiUrl = config('services.api.url', 'http://fastapi:8000/api/v1');
     }
 
-    //formulario para editar un área
-    public function edit(Area $area)
+    public function index()
     {
-        return view('areas.edit', compact('area'));
+        try {
+            $response = Http::get($this->apiUrl . '/areas');
+            
+            if ($response->successful()) {
+                $areas = collect($response->json())->map(function($area) {
+                    return (object)[
+                        'id' => $area['id'],
+                        'name' => $area['name'],
+                        'estado' => (object)[
+                            'people_count' => $area['people_count'] ?? 0,
+                            'last_update' => $area['last_update'] ?? 'N/A'
+                        ]
+                    ];
+                });
+                return view('areas.index', compact('areas'));
+            }
+            throw new \Exception("Error API: " . $response->status());
+        } catch (\Exception $e) {
+            Log::error("Area Index Error: " . $e->getMessage());
+            $areas = collect([]);
+            return view('areas.index', compact('areas'))->with('error', 'No se pudieron cargar las áreas.');
+        }
     }
-    public function update(Request $request, Area $area)
+
+    public function edit($id)
     {
-        // Validación del nuevo nombre
+        try {
+            $response = Http::get($this->apiUrl . '/areas/' . $id);
+            if ($response->successful()) {
+                $area = (object)$response->json();
+                return view('areas.edit', compact('area'));
+            }
+            return redirect()->route('areas.index')->with('error', 'Área no encontrada.');
+        } catch (\Exception $e) {
+            return redirect()->route('areas.index')->with('error', 'Error al buscar el área.');
+        }
+    }
+
+    public function update(Request $request, $id)
+    {
         $request->validate([
             'name' => 'required|string|max:255',
         ]);
-        // Actualización en la BD
+
         try {
-            $area->name = $request->input('name');
-            $area->save();
-            // Alerta de éxito
-            return redirect()->route('areas.index')
-                ->with('success', 'El área "' . $area->name . '" ha sido renombrada exitosamente.');
+            $response = Http::patch($this->apiUrl . '/areas/' . $id, [
+                'name' => $request->input('name')
+            ]);
+
+            if ($response->successful()) {
+                return redirect()->route('areas.index')
+                    ->with('success', 'El área ha sido renombrada exitosamente.');
+            }
+            throw new \Exception("Error API: " . $response->status());
         } catch (\Exception $e) {
-            // Alerta de error
             return redirect()->route('areas.index')
                 ->with('error', 'Error al renombrar el área: ' . $e->getMessage());
         }
     }
-    // Elimina un area
-    public function destroy(Area $area)
+
+    public function destroy($id)
     {
-        $areaName = $area->name;
         try {
-            AreaState::where('area_id', $area->id)->delete();
-            AreaEvent::where('area_id', $area->id)->delete();
-            $area->delete();
-            return redirect()->route('areas.index')
-                ->with('success', 'El área "' . $areaName . '" y sus datos asociados han sido eliminados.');
+            $response = Http::delete($this->apiUrl . '/areas/' . $id);
+            if ($response->successful()) {
+                return redirect()->route('areas.index')
+                    ->with('success', 'El área y sus datos asociados han sido eliminados.');
+            }
+            throw new \Exception("Error API: " . $response->status());
         } catch (\Exception $e) {
             return redirect()->route('areas.index')
                 ->with('error', 'Error al eliminar el área: ' . $e->getMessage());

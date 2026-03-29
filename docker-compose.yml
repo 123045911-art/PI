@@ -12,6 +12,14 @@ services:
         condition: service_healthy
     environment:
       DATABASE_URL: postgresql://admin:visioflow123@postgres:5432/contador_personas
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    networks:
+      - visioflow-net
 
   flask_service:
     build:
@@ -25,28 +33,39 @@ services:
     depends_on:
       - fastapi
     environment:
-      - FASTAPI_URL=http://127.0.0.1:8000
+      - FASTAPI_URL=http://fastapi:8000
       - FLASK_APP=run.py
       - FLASK_DEBUG=1
+    networks:
+      - visioflow-net
 
-  # # --- SERVICIO LARAVEL ---
-  # laravel:
-  #   build: ./laravel-app
-  #   container_name: LaravelVisioflow
-  #   ports:
-  #     - "8080:80"
-  #   volumes:
-  #     - ./laravel-app:/var/www/html
-  #   depends_on:
-  #     postgres:
-  #       condition: service_healthy
-  #   environment:
-  #     DB_CONNECTION: pgsql
-  #     DB_HOST: postgres
-  #     DB_PORT: 5432
-  #     DB_DATABASE: contador_personas
-  #     DB_USERNAME: admin
-  #     DB_PASSWORD: 123456
+  # --- SERVICIO LARAVEL DASHBOARD ---
+  laravel:
+    build: ./contador_dashboard
+    container_name: LaravelVisioflow
+    ports:
+      - "8085:80"
+    volumes:
+      - ./contador_dashboard:/var/www/html
+    depends_on:
+      fastapi:
+        condition: service_healthy
+    environment:
+      # URL interna del API usando el nombre del servicio Docker
+      - INTERNAL_API_URL=http://fastapi:8000/api/v1
+      - APP_ENV=local
+      - APP_DEBUG=true
+      # Key por defecto para no romper el arranque inicial
+      - APP_KEY=base64:9KM+d724Xbh0CPIzWgi18RZxHByd0rKwICoM7BR9IdU=
+      # Laravel NO debe tocar la DB. Forzamos drivers sin DB.
+      - DB_CONNECTION=null
+      - DATABASE_URL=null
+      - SESSION_DRIVER=file
+      - CACHE_STORE=file
+      - QUEUE_CONNECTION=sync
+      - LOG_CHANNEL=stack
+    networks:
+      - visioflow-net
 
   # --- BASE DE DATOS ---
   postgres:
@@ -66,6 +85,12 @@ services:
       interval: 5s
       retries: 5
       timeout: 5s
+    networks:
+      - visioflow-net
 
 volumes:
   postgres_data:
+
+networks:
+  visioflow-net:
+    driver: bridge
