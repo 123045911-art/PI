@@ -38,6 +38,16 @@
                     <span class="label">Historial</span>
                 </a>
             </li>
+            {{-- La gestión de usuarios ha sido movida a la aplicación Flask --}}
+            <li class="nav-item mt-auto mb-3">
+                <form action="{{ route('logout') }}" method="POST" class="w-100">
+                    @csrf
+                    <button type="submit" class="nav-link modern-link text-danger border-0 bg-transparent w-100">
+                        <i class="fas fa-sign-out-alt icon"></i>
+                        <span class="label">Salir</span>
+                    </button>
+                </form>
+            </li>
         </ul>
     </div>
     <div class="main-content">

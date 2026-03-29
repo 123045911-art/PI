@@ -1,4 +1,4 @@
-from flask import Blueprint, Response, current_app, jsonify, render_template, request
+from flask import Blueprint, Response, current_app, jsonify, render_template, request, session
 
 
 main_bp = Blueprint("main", __name__)
@@ -30,6 +30,10 @@ def stats():
 
 @main_bp.route("/add_area", methods=["POST"])
 def add_area():
+    # Solo el administrador puede crear zonas
+    if not session.get("is_admin", False):
+        return jsonify({"ok": False, "error": "Acceso denegado. Solo administradores pueden crear zonas."}), 403
+
     service = get_tracker_service()
     payload = request.get_json(silent=True) or request.form.to_dict()
 
@@ -45,6 +49,7 @@ def add_area():
             y1=int(payload["y1"]),
             x2=int(payload["x2"]),
             y2=int(payload["y2"]),
+            is_admin=True # El check anterior ya validó session.get("is_admin")
         )
         return jsonify({"ok": True, "area": area}), 201
     except ValueError as exc:

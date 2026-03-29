@@ -8,7 +8,11 @@ from app.security.hash import hash_password, verify_password
 
 
 def register_user(db: Session, data: UserRegister) -> User:
-    user = User(username=data.username.strip(), password=hash_password(data.password))
+    user = User(
+        username=data.username.strip(),
+        password=hash_password(data.password),
+        is_admin=data.is_admin,
+    )
     db.add(user)
     try:
         db.commit()

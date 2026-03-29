@@ -1,9 +1,13 @@
 import logging
+import os
 
-from flask import Flask
+from flask import Flask, session, redirect, url_for, request
 
 from app.core.tracker_service import TrackerService
+from app.core.api_client import VisioFlowApiClient
 from app.routes import main_bp
+from app.auth_routes import auth_bp
+from app.user_routes import user_bp
 
 
 def create_app() -> Flask:
@@ -15,9 +19,25 @@ def create_app() -> Flask:
 
     app = Flask(__name__)
     app.config["JSON_SORT_KEYS"] = False
+    app.secret_key = os.getenv("FLASK_SECRET_KEY", "super-secret-key-123")
 
+    # Extensiones
+    api_client = VisioFlowApiClient()
+    app.extensions["api_client"] = api_client
+    
     tracker_service = TrackerService()
     app.extensions["tracker_service"] = tracker_service
 
+    # Blueprints
     app.register_blueprint(main_bp)
+    app.register_blueprint(auth_bp)
+    app.register_blueprint(user_bp)
+
+    @app.before_request
+    def require_login():
+        # Rutas que no requieren login
+        exempt_routes = ["auth.login", "static"]
+        if request.endpoint not in exempt_routes and "user" not in session:
+            return redirect(url_for("auth.login"))
+
     return app

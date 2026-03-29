@@ -1,24 +1,16 @@
-"""
-Cliente HTTP hacia la API FastAPI de Visio Flow (PostgreSQL vía backend central).
-Sin autenticación. Los fallos de red no deben propagarse al caller del tracker.
-"""
-
 from __future__ import annotations
-
 import logging
 import os
 from typing import Any
-
 import requests
 
 logger = logging.getLogger("visioflow.api")
 
 DEFAULT_BASE_URL = "http://localhost:8000"
-DEFAULT_TIMEOUT = (3.0, 10.0)  # (connect, read) segundos
+DEFAULT_TIMEOUT = (3.0, 10.0)
 
 
 def _env_base_url() -> str:
-    # Docker Compose suele usar API_BASE_URL=http://api:8000; local puede usar VISIOFLOW_API_BASE_URL
     raw = (
         os.getenv("VISIOFLOW_API_BASE_URL")
         or os.getenv("API_BASE_URL")
@@ -46,11 +38,13 @@ class VisioFlowApiClient:
         y1: int,
         x2: int,
         y2: int,
+        is_admin: bool = False,
     ) -> dict[str, Any] | None:
         """
         POST /areas. Devuelve el JSON del área creado (incluye id de PostgreSQL) o None si falla.
         """
         url = f"{self.base_url}/areas"
+        headers = {"X-Is-Admin": str(is_admin).lower()}
         payload = {
             "name": name,
             "x1": x1,
@@ -59,7 +53,7 @@ class VisioFlowApiClient:
             "y2": y2,
         }
         try:
-            response = requests.post(url, json=payload, timeout=self.timeout)
+            response = requests.post(url, json=payload, headers=headers, timeout=self.timeout)
             if 200 <= response.status_code < 300:
                 data = response.json()
                 rid = data.get("id")
@@ -150,4 +144,85 @@ class VisioFlowApiClient:
                 url,
                 payload,
             )
+            return False
+    def login(self, username: str, password: str) -> dict[str, Any] | None:
+        """POST /auth/login. Devuelve el JSON de LoginResponse o None."""
+        url = f"{self.base_url}/auth/login"
+        payload = {"username": username, "password": password}
+        try:
+            response = requests.post(url, json=payload, timeout=self.timeout)
+            if response.status_code == 200:
+                return response.json()
+            return None
+        except requests.RequestException:
+            return None
+
+    def list_users(self, name_filter: str | None = None, is_admin: bool = False) -> list[dict[str, Any]]:
+        """GET /users."""
+        url = f"{self.base_url}/users"
+        params = {"name": name_filter} if name_filter else {}
+        headers = {"X-Is-Admin": str(is_admin).lower()}
+        try:
+            response = requests.get(url, params=params, headers=headers, timeout=self.timeout)
+            if response.status_code == 200:
+                return response.json()
+            return []
+        except requests.RequestException:
+            return []
+
+    def get_user(self, user_id: int, current_user_is_admin: bool = False) -> dict[str, Any] | None:
+        """GET /users/{id}."""
+        url = f"{self.base_url}/users/{user_id}"
+        headers = {"X-Is-Admin": str(current_user_is_admin).lower()}
+        try:
+            response = requests.get(url, headers=headers, timeout=self.timeout)
+            if response.status_code == 200:
+                return response.json()
+            return None
+        except requests.RequestException:
+            return None
+
+    def register_user(self, username: str, password: str, is_admin_val: bool = False, current_user_is_admin: bool = False) -> dict[str, Any] | None:
+        """POST /users/."""
+        url = f"{self.base_url}/users/"
+        payload = {"username": username, "password": password, "is_admin": is_admin_val}
+        headers = {"X-Is-Admin": str(current_user_is_admin).lower()}
+        try:
+            response = requests.post(url, json=payload, headers=headers, timeout=self.timeout)
+            if response.status_code == 201:
+                return response.json()
+            return None
+        except requests.RequestException:
+            return None
+
+    def update_user(self, user_id: int, username: str, password: str | None = None, is_admin_val: bool = False, current_user_is_admin: bool = False) -> bool:
+        """PUT /users/{id}."""
+        url = f"{self.base_url}/users/{user_id}"
+        payload = {"username": username, "is_admin": is_admin_val}
+        headers = {"X-Is-Admin": str(current_user_is_admin).lower()}
+        if password:
+            payload["password"] = password
+        try:
+            response = requests.put(url, json=payload, headers=headers, timeout=self.timeout)
+            return response.status_code == 200
+        except requests.RequestException:
+            return False
+
+    def patch_user(self, user_id: int, **kwargs) -> bool:
+        """PATCH /users/{id}."""
+        url = f"{self.base_url}/users/{user_id}"
+        try:
+            response = requests.patch(url, json=kwargs, timeout=self.timeout)
+            return response.status_code == 200
+        except requests.RequestException:
+            return False
+
+    def delete_user(self, user_id: int, current_user_is_admin: bool = False) -> bool:
+        """DELETE /users/{id}."""
+        url = f"{self.base_url}/users/{user_id}"
+        headers = {"X-Is-Admin": str(current_user_is_admin).lower()}
+        try:
+            response = requests.delete(url, headers=headers, timeout=self.timeout)
+            return response.status_code == 204
+        except requests.RequestException:
             return False

@@ -13,7 +13,9 @@
                                 <th>Nombre del área</th>
                                 <th>Personas dentro</th>
                                 <th>Última actualización</th>
+                                @if(Session::get('is_admin'))
                                 <th>Acciones</th>
+                                @endif
                             </tr>
                         </thead>
                         <tbody>
@@ -28,6 +30,7 @@
                                     @endif
                                 </td>
                                 <td>{{ $area->estado->last_update ?? 'N/A' }}</td>
+                                @if(Session::get('is_admin'))
                                 <td>
                                     <a href="{{ route('areas.edit', $area->id) }}" class="btn btn-sm btn-info text-white me-2">
                                         Renombrar
@@ -40,6 +43,7 @@
                                         <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
                                     </form>
                                 </td>
+                                @endif
                             </tr>
                             @empty
                             <tr>

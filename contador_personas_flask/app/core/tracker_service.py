@@ -9,7 +9,7 @@ from typing import Dict, List, Set
 import cv2
 import numpy as np
 from deep_sort_realtime.deepsort_tracker import DeepSort
-from ultralytics import YOLO
+from ultralytics import YOLO # 
 
 from app.core.api_client import VisioFlowApiClient
 
@@ -39,14 +39,16 @@ class TrackerService:
         self.event_buffer: List[dict] = []
         self.last_flush_ts = time.time()
 
-    def add_area(self, name: str, x1: int, y1: int, x2: int, y2: int) -> dict:
+    def add_area(self, name: str, x1: int, y1: int, x2: int, y2: int, is_admin: bool = False) -> dict:
         if not name:
             raise ValueError("El nombre del area es obligatorio.")
 
         rx1, rx2 = sorted((x1, x2))
         ry1, ry2 = sorted((y1, y2))
         if rx1 == rx2 or ry1 == ry2:
-            raise ValueError("El rectangulo del area no puede tener lados de longitud cero.")
+            raise ValueError(
+                "El rectangulo del area no puede tener lados de longitud cero."
+            )
 
         with self.lock:
             area_id = self.next_area_id
@@ -73,6 +75,7 @@ class TrackerService:
             y1=ry1,
             x2=rx2,
             y2=ry2,
+            is_admin=is_admin
         )
 
         with self.lock:
@@ -92,7 +95,9 @@ class TrackerService:
     def _point_in_area(self, cx: int, cy: int, area: dict) -> bool:
         return area["x1"] <= cx <= area["x2"] and area["y1"] <= cy <= area["y2"]
 
-    def _log_event(self, track_id: int, area: dict, event_type: str, dwell_seconds: float) -> None:
+    def _log_event(
+        self, track_id: int, area: dict, event_type: str, dwell_seconds: float
+    ) -> None:
         event_time = datetime.now().isoformat(timespec="seconds")
         dwell_rounded = round(float(dwell_seconds), 2)
         event = {
@@ -123,7 +128,9 @@ class TrackerService:
                 dwell=dwell_rounded,
             )
 
-    def _handle_transitions(self, track_id: int, inside_now: Set[int], timestamp: float) -> None:
+    def _handle_transitions(
+        self, track_id: int, inside_now: Set[int], timestamp: float
+    ) -> None:
         state = self.track_states.setdefault(
             track_id,
             {"inside_areas": set(), "entry_times": {}, "last_seen": timestamp},
@@ -213,7 +220,9 @@ class TrackerService:
     def _draw_areas(self, frame: np.ndarray) -> None:
         for area in self.areas.values():
             color = (56, 189, 248)
-            cv2.rectangle(frame, (area["x1"], area["y1"]), (area["x2"], area["y2"]), color, 2)
+            cv2.rectangle(
+                frame, (area["x1"], area["y1"]), (area["x2"], area["y2"]), color, 2
+            )
             label = f'{area["name"]} | now:{area["current_count"]}'
             cv2.putText(
                 frame,
@@ -311,8 +320,7 @@ class TrackerService:
                 continue
             jpg_bytes = encoded.tobytes()
             yield (
-                b"--frame\r\n"
-                b"Content-Type: image/jpeg\r\n\r\n" + jpg_bytes + b"\r\n"
+                b"--frame\r\n" b"Content-Type: image/jpeg\r\n\r\n" + jpg_bytes + b"\r\n"
             )
 
     def get_stats(self) -> dict:
@@ -321,7 +329,9 @@ class TrackerService:
             for area in self.areas.values():
                 total_entries = area["total_entries"]
                 avg_dwell = (
-                    area["total_dwell_seconds"] / total_entries if total_entries > 0 else 0.0
+                    area["total_dwell_seconds"] / total_entries
+                    if total_entries > 0
+                    else 0.0
                 )
                 areas.append(
                     {

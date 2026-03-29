@@ -7,6 +7,16 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
   </head>
   <body>
+    <nav class="top-nav">
+      <div class="nav-brand">VisioFlow</div>
+      <div class="nav-links">
+        {% if session.is_admin %}
+        <a href="{{ url_for('users.index') }}" class="nav-link">Gestionar Usuarios</a>
+        {% endif %}
+        <span class="user-info">Hola, {{ session.user.username }}</span>
+        <a href="{{ url_for('auth.logout') }}" class="nav-link logout">Cerrar Sesión</a>
+      </div>
+    </nav>
     <main class="layout">
       <section class="panel video-panel">
         <h1>Contador de Personas - Flask + YOLOv8 + DeepSort</h1>
@@ -19,6 +29,7 @@
       </section>
 
       <aside class="panel side-panel">
+        {% if session.get('is_admin') %}
         <h2>Agregar area</h2>
         <form id="area-form">
           <label>
@@ -39,6 +50,7 @@
           <button type="submit" id="btn-save" disabled>Guardar area</button>
           <p id="form-message" class="form-message"></p>
         </form>
+        {% endif %}
 
         <h2>Estadisticas</h2>
         <div id="stats-container" class="stats-container"></div>

@@ -4,6 +4,7 @@ from pydantic import BaseModel, Field
 class UserRegister(BaseModel):
     username: str = Field(..., min_length=1, max_length=50)
     password: str = Field(..., min_length=1, max_length=255)
+    is_admin: bool = False
 
 
 class UserLogin(BaseModel):
@@ -14,6 +15,7 @@ class UserLogin(BaseModel):
 class UserOut(BaseModel):
     id: int
     username: str
+    is_admin: bool
 
     model_config = {"from_attributes": True}
 

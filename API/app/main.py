@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse
 from sqlalchemy import text
 
 from app.data.db import engine
-from app.router import areas, auth, dashboard, events, heatmap, state
+from app.router import areas, auth, dashboard, events, heatmap, state, users
 
 app = FastAPI(
     title="Visio Flow API",
@@ -46,3 +46,4 @@ app.include_router(events.router)
 app.include_router(state.router)
 app.include_router(heatmap.router)
 app.include_router(dashboard.router)
+app.include_router(users.router)
