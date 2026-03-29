@@ -1,19 +1,44 @@
 services:
+  # --- BASE DE DATOS ---
+  db:
+    image: postgres:15
+    container_name: PostgreSqlVisioflow
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: "123456"
+      POSTGRES_DB: visio_flow
+    ports:
+      - "5435:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d visio_flow"]
+      interval: 5s
+      retries: 5
+      timeout: 5s
+    networks:
+      - visioflow-net
+
   # --- SERVIDOR FASTAPI ---
-  fastapi:
-    build: ./fastapi-app
+  api:
+    build: ./API
     container_name: FastAPIVisioflow
+    restart: unless-stopped
     ports:
       - "8000:8000"
-    volumes:
-      - ./fastapi-app:/app
     depends_on:
-      postgres:
+      db:
         condition: service_healthy
     environment:
-      DATABASE_URL: postgresql://admin:visioflow123@postgres:5432/contador_personas
+      DB_HOST: db
+      DB_PORT: "5432"
+      DB_USER: admin
+      DB_PASSWORD: "123456"
+      DB_NAME: visio_flow
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -21,21 +46,23 @@ services:
     networks:
       - visioflow-net
 
+  # --- SERVICIO FLASK ---
   flask_service:
-    build:
-      context: ./contador_personas_flask
-      dockerfile: Dockerfile
+    build: ./contador_personas_flask
     container_name: FlaskVisioflow
+    restart: unless-stopped
     ports:
       - "5000:5000"
-    volumes:
-      - ./contador_personas_flask:/app
     depends_on:
-      - fastapi
+      api:
+        condition: service_healthy
     environment:
-      - FASTAPI_URL=http://fastapi:8000
-      - FLASK_APP=run.py
-      - FLASK_DEBUG=1
+      VISIOFLOW_API_BASE_URL: http://api:8000
+      API_BASE_URL: http://api:8000
+      FLASK_HOST: "0.0.0.0"
+      FLASK_PORT: "5000"
+      FLASK_DEBUG: "0"
+      PYTHONUNBUFFERED: "1"
     networks:
       - visioflow-net
 
@@ -49,13 +76,13 @@ services:
       - ./contador_dashboard:/var/www/html
       - /var/www/html/vendor
     depends_on:
-      fastapi:
+      api:
         condition: service_healthy
       redis:
         condition: service_started
     environment:
       # URL interna del API usando el nombre del servicio Docker
-      - INTERNAL_API_URL=http://fastapi:8000/api/v1
+      - INTERNAL_API_URL=http://api:8000
       - APP_ENV=local
       - APP_DEBUG=true
       # Key por defecto para no romper el arranque inicial
@@ -80,27 +107,6 @@ services:
     container_name: RedisVisioflow
     ports:
       - "6379:6379"
-    networks:
-      - visioflow-net
-
-  # --- BASE DE DATOS ---
-  postgres:
-    image: postgres:15
-    container_name: PostgreSqlVisioflow
-    restart: always
-    environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: visioflow123
-      POSTGRES_DB: contador_personas
-    ports:
-      - "5435:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U admin -d contador_personas"]
-      interval: 5s
-      retries: 5
-      timeout: 5s
     networks:
       - visioflow-net
 

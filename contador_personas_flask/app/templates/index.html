@@ -11,9 +11,11 @@
       <section class="panel video-panel">
         <h1>Contador de Personas - Flask + YOLOv8 + DeepSort</h1>
         <p class="subtitle">Stream en vivo y conteo por areas rectangulares</p>
-        <div class="video-wrapper">
+        <div class="video-wrapper" id="video-wrapper">
           <img id="video-stream" src="{{ url_for('main.video_feed') }}" alt="Video en vivo" />
+          <canvas id="draw-overlay" class="draw-overlay" aria-hidden="true"></canvas>
         </div>
+        <p id="draw-hint" class="draw-hint"></p>
       </section>
 
       <aside class="panel side-panel">
@@ -21,29 +23,20 @@
         <form id="area-form">
           <label>
             Nombre
-            <input type="text" id="name" name="name" placeholder="Ej: Caja 1" required />
+            <input type="text" id="name" name="name" placeholder="Ej: Caja 1" required autocomplete="off" />
           </label>
 
-          <div class="grid">
-            <label>
-              X1
-              <input type="number" id="x1" name="x1" required />
-            </label>
-            <label>
-              Y1
-              <input type="number" id="y1" name="y1" required />
-            </label>
-            <label>
-              X2
-              <input type="number" id="x2" name="x2" required />
-            </label>
-            <label>
-              Y2
-              <input type="number" id="y2" name="y2" required />
-            </label>
+          <input type="hidden" id="x1" name="x1" />
+          <input type="hidden" id="y1" name="y1" />
+          <input type="hidden" id="x2" name="x2" />
+          <input type="hidden" id="y2" name="y2" />
+
+          <div class="form-actions">
+            <button type="button" id="btn-draw" class="btn-secondary">Dibujar area en el video</button>
+            <button type="button" id="btn-cancel-draw" class="btn-ghost hidden">Cancelar dibujo</button>
           </div>
 
-          <button type="submit">Guardar area</button>
+          <button type="submit" id="btn-save" disabled>Guardar area</button>
           <p id="form-message" class="form-message"></p>
         </form>
 

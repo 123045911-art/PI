@@ -1,12 +1,8 @@
 __pycache__
 *.py[cod]
-*$py.class
-.Python
 venv
 .env
 .git
 .gitignore
 *.md
-areas_log.csv
 .pytest_cache
-.mypy_cache

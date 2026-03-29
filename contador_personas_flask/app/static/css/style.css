@@ -59,6 +59,7 @@ h2 {
 }
 
 .video-wrapper {
+  position: relative;
   overflow: hidden;
   border-radius: 10px;
   border: 1px solid var(--border);
@@ -68,6 +69,73 @@ h2 {
 #video-stream {
   width: 100%;
   display: block;
+  vertical-align: middle;
+}
+
+.draw-overlay {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  cursor: default;
+}
+
+.draw-overlay.active {
+  pointer-events: auto;
+  cursor: crosshair;
+}
+
+.draw-overlay.preview-locked {
+  pointer-events: none;
+}
+
+.draw-hint {
+  min-height: 1.25rem;
+  margin: 0.5rem 0 0;
+  font-size: 0.85rem;
+  color: var(--accent);
+}
+
+.form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.6rem;
+}
+
+.btn-secondary {
+  background: var(--panel-alt);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.btn-secondary:hover {
+  filter: brightness(1.08);
+  border-color: var(--accent);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--muted);
+  border: 1px dashed var(--border);
+  font-weight: 500;
+}
+
+.btn-ghost:hover {
+  color: var(--text);
+  border-color: var(--muted);
+}
+
+.hidden {
+  display: none !important;
+}
+
+button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  filter: none;
 }
 
 .side-panel {

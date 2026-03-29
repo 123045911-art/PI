@@ -1,7 +1,7 @@
 Flask
-requests
 opencv-python
 ultralytics
 deep-sort-realtime
 numpy
 python-dotenv
+requests>=2.31.0
