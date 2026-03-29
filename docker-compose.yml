@@ -44,12 +44,15 @@ services:
     build: ./contador_dashboard
     container_name: LaravelVisioflow
     ports:
-      - "8085:80"
+      - "8085:8000"
     volumes:
       - ./contador_dashboard:/var/www/html
+      - /var/www/html/vendor
     depends_on:
       fastapi:
         condition: service_healthy
+      redis:
+        condition: service_started
     environment:
       # URL interna del API usando el nombre del servicio Docker
       - INTERNAL_API_URL=http://fastapi:8000/api/v1
@@ -60,10 +63,23 @@ services:
       # Laravel NO debe tocar la DB. Forzamos drivers sin DB.
       - DB_CONNECTION=null
       - DATABASE_URL=null
-      - SESSION_DRIVER=file
-      - CACHE_STORE=file
+      # --- OPTIMIZACIÓN OCTANE ---
+      - SESSION_DRIVER=redis
+      - CACHE_STORE=redis
+      - REDIS_HOST=redis
       - QUEUE_CONNECTION=sync
       - LOG_CHANNEL=stack
+      # Octane Variables
+      - OCTANE_SERVER=swoole
+    networks:
+      - visioflow-net
+
+  # --- REDIS PARA CACHÉ Y SESIONES ---
+  redis:
+    image: redis:alpine
+    container_name: RedisVisioflow
+    ports:
+      - "6379:6379"
     networks:
       - visioflow-net
 
