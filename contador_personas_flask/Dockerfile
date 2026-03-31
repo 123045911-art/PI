@@ -1,5 +1,5 @@
 # Visio Flow - contador Flask (OpenCV, YOLOv8, DeepSort). Habla con FastAPI por HTTP, no con PostgreSQL.
-FROM python:3.11-slim
+FROM python:3.11-slim-bookworm
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \

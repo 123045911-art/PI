@@ -5,3 +5,8 @@ deep-sort-realtime
 numpy
 python-dotenv
 requests>=2.31.0
+torch
+torchvision
+openvino
+onnxruntime
+psutil

@@ -51,6 +51,8 @@ services:
     build: ./contador_personas_flask
     container_name: FlaskVisioflow
     restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     ports:
       - "5000:5000"
     depends_on:

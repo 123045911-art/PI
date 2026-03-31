@@ -25,6 +25,7 @@ def create_app() -> Flask:
     api_client = VisioFlowApiClient()
     app.extensions["api_client"] = api_client
     
+    print("DEBUG: Instantiating TrackerService...")
     tracker_service = TrackerService()
     app.extensions["tracker_service"] = tracker_service
 
@@ -36,7 +37,11 @@ def create_app() -> Flask:
     @app.before_request
     def require_login():
         # Rutas que no requieren login
-        exempt_routes = ["auth.login", "static"]
+        exempt_routes = ["auth.login", "static", "main.health"]
+        
+        if request.endpoint is None:
+            return # Permitir que Flask maneje 404 sin intentar redirigir
+
         if request.endpoint not in exempt_routes and "user" not in session:
             return redirect(url_for("auth.login"))
 
