@@ -23,9 +23,23 @@
                                     </div>
                                 @enderror
                             </div>
-                            <button type="submit" class="btn btn-primary">Guardar cambios</button>
-                            <a href="{{ route('areas.index') }}" class="btn btn-secondary">Cancelar</a>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                                    <a href="{{ route('areas.index') }}" class="btn btn-secondary">Cancelar</a>
+                                </div>
+                            </div>
                         </form>
+
+                        @if(session('is_admin'))
+                            <div class="mt-3 pt-3 border-top d-flex justify-content-end">
+                                <form action="{{ route('areas.destroy', $area->id) }}" method="POST" onsubmit="return confirm('¿Estás seguro de que deseas eliminar esta área? Esta acción es irreversible.');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">Eliminar Área</button>
+                                </form>
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>

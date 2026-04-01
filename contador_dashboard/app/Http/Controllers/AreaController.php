@@ -62,7 +62,9 @@ class AreaController extends Controller
         ]);
 
         try {
-            $response = Http::patch($this->apiUrl . '/areas/' . $id, [
+            $response = Http::withHeaders([
+                'X-Is-Admin' => session('is_admin', false)
+            ])->patch($this->apiUrl . '/areas/' . $id, [
                 'name' => $request->input('name')
             ]);
 
@@ -80,7 +82,9 @@ class AreaController extends Controller
     public function destroy($id)
     {
         try {
-            $response = Http::delete($this->apiUrl . '/areas/' . $id);
+            $response = Http::withHeaders([
+                'X-Is-Admin' => session('is_admin', false)
+            ])->delete($this->apiUrl . '/areas/' . $id);
             if ($response->successful()) {
                 return redirect()->route('areas.index')
                     ->with('success', 'El área y sus datos asociados han sido eliminados.');

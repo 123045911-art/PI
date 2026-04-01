@@ -1,3 +1,5 @@
+from typing import TYPE_CHECKING
+
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
@@ -5,6 +7,9 @@ from app.data.db import get_db
 from app.schemas.area import AreaCreate, AreaOut, AreaUpdate
 from app.services import area_service
 from app.security.auth import verify_admin
+
+if TYPE_CHECKING:
+    from app.models.area_state import AreaState
 
 router = APIRouter(tags=["areas"])
 
@@ -25,6 +30,7 @@ def get_area(area_id: int, db: Session = Depends(get_db)):
 
 
 @router.put("/areas/{area_id}", response_model=AreaOut, dependencies=[Depends(verify_admin)])
+@router.patch("/areas/{area_id}", response_model=AreaOut, dependencies=[Depends(verify_admin)])
 def update_area(area_id: int, payload: AreaUpdate, db: Session = Depends(get_db)):
     return area_service.update_area(db, area_id, payload)
 

@@ -35,6 +35,7 @@ echo [EXITO] ¡Sistema en linea!
 echo.
 echo - Camara activa en puerto 5001
 echo - Dashboard VISIOFLOW activo en: http://localhost:5000
+echo - Flask VISIOFLOW activo en: http://localhost:5001
 echo ===================================================
 echo.
 pause

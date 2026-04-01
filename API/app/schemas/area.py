@@ -26,6 +26,8 @@ class AreaOut(BaseModel):
     y1: int
     x2: int
     y2: int
+    people_count: int = 0
+    last_update: datetime | None = None
     created_at: datetime
 
     model_config = {"from_attributes": True}
