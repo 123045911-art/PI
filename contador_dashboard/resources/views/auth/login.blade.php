@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VisioFlow | Iniciar Sesión</title>
+    <title>VISIOFLOW | Iniciar Sesión</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <style>
@@ -98,7 +98,7 @@
             <button type="submit" class="btn-primary w-100">Iniciar Sesión</button>
         </form>
         
-        <p class="mt-4 text-secondary x-small" style="font-size: 0.7rem;">&copy; {{ date('Y') }} VisioFlow Systems</p>
+        <p class="mt-4 text-secondary x-small" style="font-size: 0.7rem;">&copy; {{ date('Y') }} VISIOFLOW Systems</p>
     </div>
 </body>
 </html>

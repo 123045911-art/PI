@@ -3,12 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Contador de Personas</title>
+    <title>VISIOFLOW - Contador</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
   </head>
   <body>
     <nav class="top-nav">
-      <div class="nav-brand">VisioFlow</div>
+      <div class="nav-brand">VISIOFLOW</div>
       <div class="nav-links">
         {% if session.is_admin %}
         <a href="{{ url_for('users.index') }}" class="nav-link">Gestionar Usuarios</a>

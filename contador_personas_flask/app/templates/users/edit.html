@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ "Editar" if user else "Nuevo" }} Usuario - VisioFlow</title>
+    <title>{{ "Editar" if user else "Nuevo" }} Usuario - VISIOFLOW</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
 </head>
 <body>
     <nav class="top-nav">
-      <div class="nav-brand">VisioFlow</div>
+      <div class="nav-brand">VISIOFLOW</div>
       <div class="nav-links">
         <a href="{{ url_for('users.index') }}" class="nav-link">Gestión de Usuarios</a>
         <span class="user-info">Hola, {{ session.user.username }}</span>
