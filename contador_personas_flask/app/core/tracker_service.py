@@ -10,19 +10,25 @@ import numpy as np
 from deep_sort_realtime.deepsort_tracker import DeepSort
 from ultralytics.models.yolo import YOLO
 import queue
+import os
 
 from app.core.api_client import VisioFlowApiClient
 
 logger = logging.getLogger("visioflow.api")
 
 class AsyncVideoCapture:
-    def __init__(self, src="http://host.docker.internal:5001/video"):
+    def __init__(self, src=None):
+        if src is None:
+            src = os.environ.get("CAMERA_SOURCE", "http://host.docker.internal:5001/video")
+            if str(src).isdigit():
+                src = int(src)
+                
         self.cap = cv2.VideoCapture(src)
         
         if self.cap and self.cap.isOpened():
-            logger.info(f"VISIOFLOW: Conectado con éxito al stream MJPEG en {src}")
+            logger.info(f"VISIOFLOW: Conectado con éxito al stream/camara en {src}")
         else:
-            logger.error(f"VISIOFLOW: No se pudo conectar al stream MJPEG en {src}")
+            logger.error(f"VISIOFLOW: No se pudo conectar al stream/camara en {src}")
             if self.cap:
                 self.cap.release()
             self.cap = None
