@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from app.data.db import get_db
 from app.schemas.area import AreaCreate, AreaOut, AreaUpdate
 from app.services import area_service
-from app.security.auth import verify_admin
+from app.security.auth import get_current_user, verify_admin
 
 if TYPE_CHECKING:
     from app.models.area_state import AreaState
@@ -19,12 +19,12 @@ def create_area(payload: AreaCreate, db: Session = Depends(get_db)):
     return area_service.create_area(db, payload)
 
 
-@router.get("/areas", response_model=list[AreaOut])
+@router.get("/areas", response_model=list[AreaOut], dependencies=[Depends(get_current_user)])
 def list_areas(db: Session = Depends(get_db)):
     return area_service.list_areas(db)
 
 
-@router.get("/areas/{area_id}", response_model=AreaOut)
+@router.get("/areas/{area_id}", response_model=AreaOut, dependencies=[Depends(get_current_user)])
 def get_area(area_id: int, db: Session = Depends(get_db)):
     return area_service.get_area(db, area_id)
 

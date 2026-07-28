@@ -33,9 +33,8 @@ class UserController extends Controller
         
         try {
             $name = $request->input('name');
-            $response = Http::withHeaders([
-                'X-Is-Admin' => Session::get('is_admin', false)
-            ])->get($this->apiUrl . '/users', [
+            $response = Http::withHeaders($this->apiAuthHeaders())
+                ->get($this->apiUrl . '/users', [
                 'name' => $name
             ]);
             
@@ -67,9 +66,8 @@ class UserController extends Controller
         ]);
 
         try {
-            $response = Http::withHeaders([
-                'X-Is-Admin' => Session::get('is_admin', false)
-            ])->post($this->apiUrl . '/users/', [
+            $response = Http::withHeaders($this->apiAuthHeaders())
+                ->post($this->apiUrl . '/users/', [
                 'username' => $request->username,
                 'password' => $request->password,
                 'is_admin' => $request->has('is_admin')
@@ -91,9 +89,8 @@ class UserController extends Controller
         $this->checkAdmin();
         
         try {
-            $response = Http::withHeaders([
-                'X-Is-Admin' => Session::get('is_admin', false)
-            ])->get($this->apiUrl . '/users/' . $id);
+            $response = Http::withHeaders($this->apiAuthHeaders())
+                ->get($this->apiUrl . '/users/' . $id);
             if ($response->successful()) {
                 $user = (object)$response->json();
                 return view('users.edit', compact('user'));
@@ -123,9 +120,8 @@ class UserController extends Controller
                 $payload['password'] = $request->password;
             }
 
-            $response = Http::withHeaders([
-                'X-Is-Admin' => Session::get('is_admin', false)
-            ])->put($this->apiUrl . '/users/' . $id, $payload);
+            $response = Http::withHeaders($this->apiAuthHeaders())
+                ->put($this->apiUrl . '/users/' . $id, $payload);
 
             if ($response->successful()) {
                 return redirect()->route('users.index')->with('success', 'Usuario actualizado.');
@@ -142,9 +138,8 @@ class UserController extends Controller
         $this->checkAdmin();
         
         try {
-            $response = Http::withHeaders([
-                'X-Is-Admin' => Session::get('is_admin', false)
-            ])->delete($this->apiUrl . '/users/' . $id);
+            $response = Http::withHeaders($this->apiAuthHeaders())
+                ->delete($this->apiUrl . '/users/' . $id);
             if ($response->successful()) {
                 return redirect()->route('users.index')->with('success', 'Usuario eliminado.');
             }

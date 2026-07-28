@@ -5,17 +5,18 @@ from sqlalchemy.orm import Session
 
 from app.data.db import get_db
 from app.schemas.heatmap import HeatmapCreate, HeatmapListOut, HeatmapOut
+from app.security.auth import get_current_user
 from app.services import heatmap_service
 
 router = APIRouter(prefix="/heatmap", tags=["heatmap"])
 
 
-@router.post("", response_model=HeatmapOut, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=HeatmapOut, status_code=status.HTTP_201_CREATED, dependencies=[Depends(get_current_user)])
 def create_heatmap_point(payload: HeatmapCreate, db: Session = Depends(get_db)):
     return heatmap_service.create_heatmap_point(db, payload)
 
 
-@router.get("", response_model=HeatmapListOut)
+@router.get("", response_model=HeatmapListOut, dependencies=[Depends(get_current_user)])
 def list_heatmap_points(
     db: Session = Depends(get_db),
     area_id: int | None = Query(None),
@@ -32,3 +33,4 @@ def list_heatmap_points(
         skip=skip,
         limit=limit,
     )
+

@@ -83,7 +83,7 @@ class AsyncVideoCapture:
 
 
 class TrackerService:
-    def __init__(self) -> None:
+    def __init__(self, api_client: VisioFlowApiClient | None = None) -> None:
         self.lock = threading.RLock()
         self.conf_threshold = 0.35
         self.flush_interval_seconds = 5.0
@@ -92,7 +92,7 @@ class TrackerService:
         self.project_root = Path(__file__).resolve().parents[2]
         self.csv_path = self.project_root / "areas_log.csv"
 
-        self.api_client = VisioFlowApiClient()
+        self.api_client = api_client or VisioFlowApiClient()
         
         # LAZY INITIALIZATION: No cargamos el modelo ni abrimos la camara aqui para no bloquear Flask
         self.model: Optional[YOLO] = None

@@ -16,8 +16,12 @@ def login():
         
         if result and "user" in result:
             user_data = result["user"]
+            access_token = result.get("access_token")
             session["user"] = user_data
             session["is_admin"] = user_data.get("is_admin", False)
+            session["access_token"] = access_token
+            if access_token:
+                client.set_user_token(access_token)
             flash(f"Bienvenido, {user_data['username']}!", "success")
             return redirect(url_for("main.index"))
         else:

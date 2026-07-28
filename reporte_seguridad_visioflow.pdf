@@ -1,0 +1,743 @@
+%PDF-1.4
+%âãÏÓ
+1 0 obj
+<< /Type /Catalog /Pages 27 0 R >>
+endobj
+2 0 obj
+<< /Title (Reporte de Seguridad â€” Visio Flow API) /Author (Analisis de Seguridad Automatizado) /Subject (OWASP API Security Top 10) /CreationDate (D:20260709151103) >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>
+endobj
+5 0 obj
+<< /Length 2677 >>
+stream
+0.10 0.10 0.18 rg 0 0 595 842 re f
+0.20 0.60 1.00 rg 0 836 595 6 re f
+0.20 0.60 1.00 rg 0 0 595 6 re f
+0.20 0.60 1.00 rg 0 0 4 842 re f
+0.13 0.13 0.22 rg 40 540 515 210 re f
+2 w 0.20 0.60 1.00 RG 40 740 m 555 740 l S
+BT /F2 22 Tf 1 1 1 rg 60 700 Td (REPORTE DE ANÁLISIS DE SEGURIDAD) Tj ET
+BT /F1 14 Tf 0.60 0.80 1.00 rg 60 670 Td (API Visio Flow ? Sistema de Conteo de Personas) Tj ET
+0.15 0.15 0.25 rg 40 540 515 110 re f
+BT /F1 11 Tf 0.65 0.65 0.75 rg 60 630 Td (Fecha del análisis:  2026-07-09 15:11) Tj ET
+BT /F1 11 Tf 0.65 0.65 0.75 rg 60 610 Td (Tecnologías evaluadas:) Tj ET
+BT /F1 10 Tf 0.92 0.92 0.95 rg 60 593 Td (FastAPI \(Python\)  |  Flask \(Python\)  |  PostgreSQL  |  Redis  |  Docker Compose) Tj ET
+BT /F1 10 Tf 0.92 0.92 0.95 rg 60 573 Td (Estándar aplicado:  OWASP API Security Top 10 ? 2023) Tj ET
+BT /F1 10 Tf 0.92 0.92 0.95 rg 60 555 Td (Clasificación:      Académico / Uso interno) Tj ET
+0.13 0.13 0.22 rg 40 390 515 130 re f
+BT /F2 13 Tf 0.60 0.80 1.00 rg 60 500 Td (RESUMEN EJECUTIVO) Tj ET
+0.5 w 0.20 0.60 1.00 RG 60 492 m 535 492 l S
+0.10 0.10 0.18 rg 50 400 160 80 re f
+BT /F2 28 Tf 0.90 0.20 0.20 rg 120 450 Td (10) Tj ET
+BT /F1 9 Tf 0.90 0.20 0.20 rg 60 410 Td (CRÍTICAS) Tj ET
+0.10 0.10 0.18 rg 220 400 160 80 re f
+BT /F2 28 Tf 0.95 0.55 0.10 rg 290 450 Td ( 7) Tj ET
+BT /F1 9 Tf 0.95 0.55 0.10 rg 230 410 Td (MEDIAS) Tj ET
+0.10 0.10 0.18 rg 390 400 160 80 re f
+BT /F2 28 Tf 0.20 0.60 1.00 rg 460 450 Td (17) Tj ET
+BT /F1 9 Tf 0.20 0.60 1.00 rg 400 410 Td (TOTAL) Tj ET
+0.13 0.13 0.22 rg 40 230 515 140 re f
+BT /F2 13 Tf 0.60 0.80 1.00 rg 60 350 Td (SERVICIOS ANALIZADOS) Tj ET
+0.5 w 0.20 0.60 1.00 RG 60 342 m 535 342 l S
+BT /F1 10 Tf 0.20 0.60 1.00 rg 60 330 Td (? FastAPI :8000) Tj ET
+BT /F1 9 Tf 0.65 0.65 0.75 rg 185 330 Td (API central ? autenticación, áreas, eventos, heatmap, dashboard, usuarios) Tj ET
+BT /F1 10 Tf 0.20 0.60 1.00 rg 60 314 Td (? Flask   :5000) Tj ET
+BT /F1 9 Tf 0.65 0.65 0.75 rg 185 314 Td (Servicio de visión computacional ? YOLOv8, captura MJPEG, tracking) Tj ET
+BT /F1 10 Tf 0.20 0.60 1.00 rg 60 298 Td (? Laravel :8085) Tj ET
+BT /F1 9 Tf 0.65 0.65 0.75 rg 185 298 Td (Dashboard web ? consume API FastAPI vía HTTP interno) Tj ET
+BT /F1 10 Tf 0.20 0.60 1.00 rg 60 282 Td (? PostgreSQL) Tj ET
+BT /F1 9 Tf 0.65 0.65 0.75 rg 185 282 Td (Base de datos principal ? 5 tablas: areas, events, state, heatmap, users) Tj ET
+BT /F1 10 Tf 0.20 0.60 1.00 rg 60 266 Td (? Redis) Tj ET
+BT /F1 9 Tf 0.65 0.65 0.75 rg 185 266 Td (Caché de sesiones Laravel ? sin autenticación previa al fix) Tj ET
+BT /F1 8 Tf 0.65 0.65 0.75 rg 60 20 Td (Visio Flow ? Reporte de Seguridad) Tj ET
+BT /F1 8 Tf 0.65 0.65 0.75 rg 495 20 Td (Página 1) Tj ET
+endstream
+endobj
+6 0 obj
+<< /Type /Page /Parent 5 0 R /MediaBox [0 0 595 842] /Contents 5 0 R /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> >>
+endobj
+7 0 obj
+<< /Length 3006 >>
+stream
+0.10 0.10 0.18 rg 0 0 595 842 re f
+0.20 0.60 1.00 rg 0 836 595 6 re f
+0.20 0.60 1.00 rg 0 0 595 6 re f
+0.20 0.60 1.00 rg 0 0 4 842 re f
+BT /F2 16 Tf 0.60 0.80 1.00 rg 40 792 Td (1. INTRODUCCIÓN Y METODOLOGÍA) Tj ET
+1 w 0.20 0.60 1.00 RG 40 784 m 555 784 l S
+BT /F2 12 Tf 0.20 0.60 1.00 rg 40 762 Td (1.1 Objetivo) Tj ET
+BT /F1 9 Tf 0.92 0.92 0.95 rg 50 744 Td (Identificar vulnerabilidades de seguridad en el sistema Visio Flow, implementar correcciones) Tj ET
+BT /F1 9 Tf 0.92 0.92 0.95 rg 50 731 Td (directamente en el código fuente, y documentar el proceso con evidencia técnica.) Tj ET
+BT /F2 12 Tf 0.20 0.60 1.00 rg 40 710 Td (1.2 Alcance) Tj ET
+BT /F1 9 Tf 0.92 0.92 0.95 rg 50 692 Td (? API FastAPI \(puerto 8000\): 7 routers, 25+ endpoints) Tj ET
+BT /F1 9 Tf 0.92 0.92 0.95 rg 50 679 Td (? Flask Vision Service \(puerto 5000\): 5 rutas + autenticación por sesión) Tj ET
+BT /F1 9 Tf 0.92 0.92 0.95 rg 50 666 Td (? Infraestructura Docker Compose: 5 servicios) Tj ET
+BT /F1 9 Tf 0.92 0.92 0.95 rg 50 653 Td (? Base de datos PostgreSQL: esquema y configuración) Tj ET
+BT /F1 9 Tf 0.92 0.92 0.95 rg 50 640 Td (? Redis: configuración de caché y autenticación) Tj ET
+BT /F2 12 Tf 0.20 0.60 1.00 rg 40 619 Td (1.3 Metodología) Tj ET
+BT /F1 9 Tf 0.92 0.92 0.95 rg 50 601 Td (Se siguió el estándar OWASP API Security Top 10 \(2023\) como marco de referencia.) Tj ET
+BT /F1 9 Tf 0.92 0.92 0.95 rg 50 588 Td (El análisis se realizó mediante revisión estática del código fuente \(SAST manual\),) Tj ET
+BT /F1 9 Tf 0.92 0.92 0.95 rg 50 575 Td (inspeccionando cada archivo de configuración, router, servicio y esquema de datos.) Tj ET
+BT /F1 9 Tf 0.92 0.92 0.95 rg 50 562 Td () Tj ET
+BT /F1 9 Tf 0.92 0.92 0.95 rg 50 549 Td (Fases del análisis:) Tj ET
+BT /F1 9 Tf 0.92 0.92 0.95 rg 50 536 Td (  1. Reconocimiento ? listado de endpoints y servicios) Tj ET
+BT /F1 9 Tf 0.92 0.92 0.95 rg 50 523 Td (  2. Clasificación ? categorización por riesgo \(CRÍTICA / MEDIA\)) Tj ET
+BT /F1 9 Tf 0.92 0.92 0.95 rg 50 510 Td (  3. Explotabilidad ? evaluación del impacto potencial) Tj ET
+BT /F1 9 Tf 0.92 0.92 0.95 rg 50 497 Td (  4. Remediación ? implementación de controles de seguridad) Tj ET
+BT /F1 9 Tf 0.92 0.92 0.95 rg 50 484 Td (  5. Verificación ? revisión post-cambio del código corregido) Tj ET
+BT /F2 12 Tf 0.20 0.60 1.00 rg 40 463 Td (1.4 Herramientas utilizadas) Tj ET
+BT /F1 9 Tf 0.92 0.92 0.95 rg 50 445 Td (? Revisión manual de código fuente \(Python, YAML, SQL\)) Tj ET
+BT /F1 9 Tf 0.92 0.92 0.95 rg 50 432 Td (? OWASP API Security Top 10 2023 como lista de referencia) Tj ET
+BT /F1 9 Tf 0.92 0.92 0.95 rg 50 419 Td (? python-jose \(JWT HS256\) para implementación de tokens) Tj ET
+BT /F1 9 Tf 0.92 0.92 0.95 rg 50 406 Td (? slowapi para rate limiting) Tj ET
+BT /F1 9 Tf 0.92 0.92 0.95 rg 50 393 Td (? passlib + bcrypt para hashing \(ya existía, validado correcto\)) Tj ET
+BT /F1 8 Tf 0.65 0.65 0.75 rg 60 20 Td (Visio Flow ? Reporte de Seguridad) Tj ET
+BT /F1 8 Tf 0.65 0.65 0.75 rg 495 20 Td (Página 2) Tj ET
+endstream
+endobj
+8 0 obj
+<< /Type /Page /Parent 5 0 R /MediaBox [0 0 595 842] /Contents 7 0 R /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> >>
+endobj
+9 0 obj
+<< /Length 5751 >>
+stream
+0.10 0.10 0.18 rg 0 0 595 842 re f
+0.20 0.60 1.00 rg 0 836 595 6 re f
+0.20 0.60 1.00 rg 0 0 595 6 re f
+0.20 0.60 1.00 rg 0 0 4 842 re f
+BT /F2 16 Tf 0.60 0.80 1.00 rg 40 792 Td (2. HALLAZGOS ? RESUMEN POR SEVERIDAD) Tj ET
+1 w 0.20 0.60 1.00 RG 40 784 m 555 784 l S
+0.18 0.18 0.30 rg 40 751 515 20 re f
+BT /F2 9 Tf 0.20 0.60 1.00 rg 44 757 Td (ID) Tj ET
+BT /F2 9 Tf 0.20 0.60 1.00 rg 84 757 Td (SEV) Tj ET
+BT /F2 9 Tf 0.20 0.60 1.00 rg 120 757 Td (TÍTULO) Tj ET
+BT /F2 9 Tf 0.20 0.60 1.00 rg 370 757 Td (COMPONENTE) Tj ET
+0.12 0.12 0.20 rg 40 730 515 17 re f
+BT /F1 8 Tf 0.20 0.60 1.00 rg 44 735 Td (VF-001) Tj ET
+BT /F1 8 Tf 0.90 0.20 0.20 rg 84 735 Td (CRÍTICA) Tj ET
+BT /F1 8 Tf 0.92 0.92 0.95 rg 120 735 Td (Autenticación basada en header HTTP falsif...) Tj ET
+BT /F1 8 Tf 0.65 0.65 0.75 rg 370 735 Td (auth.py) Tj ET
+0.10 0.10 0.18 rg 40 713 515 17 re f
+BT /F1 8 Tf 0.20 0.60 1.00 rg 44 718 Td (VF-002) Tj ET
+BT /F1 8 Tf 0.90 0.20 0.20 rg 84 718 Td (CRÍTICA) Tj ET
+BT /F1 8 Tf 0.92 0.92 0.95 rg 120 718 Td (Login no genera token de sesión seguro \(si...) Tj ET
+BT /F1 8 Tf 0.65 0.65 0.75 rg 370 718 Td (auth.py) Tj ET
+0.12 0.12 0.20 rg 40 696 515 17 re f
+BT /F1 8 Tf 0.20 0.60 1.00 rg 44 701 Td (VF-003) Tj ET
+BT /F1 8 Tf 0.90 0.20 0.20 rg 84 701 Td (CRÍTICA) Tj ET
+BT /F1 8 Tf 0.92 0.92 0.95 rg 120 701 Td (Endpoint POST /events sin autenticación) Tj ET
+BT /F1 8 Tf 0.65 0.65 0.75 rg 370 701 Td (events.py) Tj ET
+0.10 0.10 0.18 rg 40 679 515 17 re f
+BT /F1 8 Tf 0.20 0.60 1.00 rg 44 684 Td (VF-004) Tj ET
+BT /F1 8 Tf 0.90 0.20 0.20 rg 84 684 Td (CRÍTICA) Tj ET
+BT /F1 8 Tf 0.92 0.92 0.95 rg 120 684 Td (Endpoints POST/GET /heatmap sin autenticación) Tj ET
+BT /F1 8 Tf 0.65 0.65 0.75 rg 370 684 Td (heatmap.py) Tj ET
+0.12 0.12 0.20 rg 40 662 515 17 re f
+BT /F1 8 Tf 0.20 0.60 1.00 rg 44 667 Td (VF-005) Tj ET
+BT /F1 8 Tf 0.90 0.20 0.20 rg 84 667 Td (CRÍTICA) Tj ET
+BT /F1 8 Tf 0.92 0.92 0.95 rg 120 667 Td (Endpoints GET /state sin autenticación) Tj ET
+BT /F1 8 Tf 0.65 0.65 0.75 rg 370 667 Td (state.py) Tj ET
+0.10 0.10 0.18 rg 40 645 515 17 re f
+BT /F1 8 Tf 0.20 0.60 1.00 rg 44 650 Td (VF-006) Tj ET
+BT /F1 8 Tf 0.90 0.20 0.20 rg 84 650 Td (CRÍTICA) Tj ET
+BT /F1 8 Tf 0.92 0.92 0.95 rg 120 650 Td (4 endpoints de dashboard sin autenticación) Tj ET
+BT /F1 8 Tf 0.65 0.65 0.75 rg 370 650 Td (dashboard.py) Tj ET
+0.12 0.12 0.20 rg 40 628 515 17 re f
+BT /F1 8 Tf 0.20 0.60 1.00 rg 44 633 Td (VF-007) Tj ET
+BT /F1 8 Tf 0.90 0.20 0.20 rg 84 633 Td (CRÍTICA) Tj ET
+BT /F1 8 Tf 0.92 0.92 0.95 rg 120 633 Td (Credenciales de DB en texto plano \(passwor...) Tj ET
+BT /F1 8 Tf 0.65 0.65 0.75 rg 370 633 Td (docker-compose.yml) Tj ET
+0.10 0.10 0.18 rg 40 611 515 17 re f
+BT /F1 8 Tf 0.20 0.60 1.00 rg 44 616 Td (VF-008) Tj ET
+BT /F1 8 Tf 0.90 0.20 0.20 rg 84 616 Td (CRÍTICA) Tj ET
+BT /F1 8 Tf 0.92 0.92 0.95 rg 120 616 Td (Redis sin contraseña y puerto 6379 expuest...) Tj ET
+BT /F1 8 Tf 0.65 0.65 0.75 rg 370 616 Td (docker-compose.yml) Tj ET
+0.12 0.12 0.20 rg 40 594 515 17 re f
+BT /F1 8 Tf 0.20 0.60 1.00 rg 44 599 Td (VF-009) Tj ET
+BT /F1 8 Tf 0.90 0.20 0.20 rg 84 599 Td (CRÍTICA) Tj ET
+BT /F1 8 Tf 0.92 0.92 0.95 rg 120 599 Td (Endpoint /db-test expuesto públicamente) Tj ET
+BT /F1 8 Tf 0.65 0.65 0.75 rg 370 599 Td (main.py) Tj ET
+0.10 0.10 0.18 rg 40 577 515 17 re f
+BT /F1 8 Tf 0.20 0.60 1.00 rg 44 582 Td (VF-010) Tj ET
+BT /F1 8 Tf 0.90 0.20 0.20 rg 84 582 Td (CRÍTICA) Tj ET
+BT /F1 8 Tf 0.92 0.92 0.95 rg 120 582 Td (Flask secret_key hardcodeada como fallback...) Tj ET
+BT /F1 8 Tf 0.65 0.65 0.75 rg 370 582 Td (__init__.py) Tj ET
+0.12 0.12 0.20 rg 40 560 515 17 re f
+BT /F1 8 Tf 0.20 0.60 1.00 rg 44 565 Td (VF-011) Tj ET
+BT /F1 8 Tf 0.95 0.55 0.10 rg 84 565 Td (MEDIA) Tj ET
+BT /F1 8 Tf 0.92 0.92 0.95 rg 120 565 Td (Documentación /docs y /redoc expuesta en p...) Tj ET
+BT /F1 8 Tf 0.65 0.65 0.75 rg 370 565 Td (main.py) Tj ET
+0.10 0.10 0.18 rg 40 543 515 17 re f
+BT /F1 8 Tf 0.20 0.60 1.00 rg 44 548 Td (VF-012) Tj ET
+BT /F1 8 Tf 0.95 0.55 0.10 rg 84 548 Td (MEDIA) Tj ET
+BT /F1 8 Tf 0.92 0.92 0.95 rg 120 548 Td (Sin rate limiting en ningún endpoint) Tj ET
+BT /F1 8 Tf 0.65 0.65 0.75 rg 370 548 Td (main.py) Tj ET
+0.12 0.12 0.20 rg 40 526 515 17 re f
+BT /F1 8 Tf 0.20 0.60 1.00 rg 44 531 Td (VF-013) Tj ET
+BT /F1 8 Tf 0.95 0.55 0.10 rg 84 531 Td (MEDIA) Tj ET
+BT /F1 8 Tf 0.92 0.92 0.95 rg 120 531 Td (Sin configuración de CORS) Tj ET
+BT /F1 8 Tf 0.65 0.65 0.75 rg 370 531 Td (main.py) Tj ET
+0.10 0.10 0.18 rg 40 509 515 17 re f
+BT /F1 8 Tf 0.20 0.60 1.00 rg 44 514 Td (VF-014) Tj ET
+BT /F1 8 Tf 0.95 0.55 0.10 rg 84 514 Td (MEDIA) Tj ET
+BT /F1 8 Tf 0.92 0.92 0.95 rg 120 514 Td (Contraseñas débiles permitidas \(min_length=1\)) Tj ET
+BT /F1 8 Tf 0.65 0.65 0.75 rg 370 514 Td (auth.py) Tj ET
+0.12 0.12 0.20 rg 40 492 515 17 re f
+BT /F1 8 Tf 0.20 0.60 1.00 rg 44 497 Td (VF-015) Tj ET
+BT /F1 8 Tf 0.95 0.55 0.10 rg 84 497 Td (MEDIA) Tj ET
+BT /F1 8 Tf 0.92 0.92 0.95 rg 120 497 Td (Puerto de PostgreSQL expuesto al host \(0.0...) Tj ET
+BT /F1 8 Tf 0.65 0.65 0.75 rg 370 497 Td (docker-compose.yml) Tj ET
+0.10 0.10 0.18 rg 40 475 515 17 re f
+BT /F1 8 Tf 0.20 0.60 1.00 rg 44 480 Td (VF-016) Tj ET
+BT /F1 8 Tf 0.95 0.55 0.10 rg 84 480 Td (MEDIA) Tj ET
+BT /F1 8 Tf 0.92 0.92 0.95 rg 120 480 Td (APP_KEY de Laravel hardcodeada en docker-c...) Tj ET
+BT /F1 8 Tf 0.65 0.65 0.75 rg 370 480 Td (docker-compose.yml) Tj ET
+0.12 0.12 0.20 rg 40 458 515 17 re f
+BT /F1 8 Tf 0.20 0.60 1.00 rg 44 463 Td (VF-017) Tj ET
+BT /F1 8 Tf 0.95 0.55 0.10 rg 84 463 Td (MEDIA) Tj ET
+BT /F1 8 Tf 0.92 0.92 0.95 rg 120 463 Td (APP_DEBUG=true en producción \(Laravel\)) Tj ET
+BT /F1 8 Tf 0.65 0.65 0.75 rg 370 463 Td ( Flask) Tj ET
+BT /F1 8 Tf 0.65 0.65 0.75 rg 60 20 Td (Visio Flow ? Reporte de Seguridad) Tj ET
+BT /F1 8 Tf 0.65 0.65 0.75 rg 495 20 Td (Página 3) Tj ET
+endstream
+endobj
+10 0 obj
+<< /Type /Page /Parent 5 0 R /MediaBox [0 0 595 842] /Contents 9 0 R /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> >>
+endobj
+11 0 obj
+<< /Length 4092 >>
+stream
+0.10 0.10 0.18 rg 0 0 595 842 re f
+0.20 0.60 1.00 rg 0 836 595 6 re f
+0.20 0.60 1.00 rg 0 0 595 6 re f
+0.20 0.60 1.00 rg 0 0 4 842 re f
+BT /F2 14 Tf 0.60 0.80 1.00 rg 40 797 Td (3. HALLAZGOS DETALLADOS \(CRÍTICAS\)) Tj ET
+1 w 0.20 0.60 1.00 RG 40 787 m 555 787 l S
+0.12 0.12 0.22 rg 40 587 515 195 re f
+0.15 0.15 0.28 rg 40 767 515 22 re f
+BT /F2 10 Tf 1 1 1 rg 46 771 Td (VF-001 ? Autenticación basada en header HTTP falsificable) Tj ET
+0.90 0.20 0.20 rg 455 768 90 18 re f
+BT /F2 9 Tf 1 1 1 rg 467 772 Td (CRÍTICA) Tj ET
+BT /F1 8 Tf 0.95 0.55 0.10 rg 50 742 Td (OWASP: API2:2023 ? Broken Authentication) Tj ET
+BT /F1 8 Tf 0.65 0.65 0.75 rg 50 729 Td (Componente: API/app/security/auth.py) Tj ET
+BT /F2 8 Tf 0.90 0.20 0.20 rg 50 714 Td (ANTES \(vulnerable\):) Tj ET
+0.08 0.06 0.06 rg 50 686 495 30 re f
+BT /F1 7.5 Tf 0.95 0.60 0.60 rg 54 706 Td (verify_admin\(x_is_admin: bool = Header\(False, alias='X-Is-Admin'\)\)) Tj ET
+BT /F2 8 Tf 0.20 0.80 0.40 rg 50 674 Td (DESPUÉS \(corregido\):) Tj ET
+0.05 0.10 0.07 rg 50 646 495 30 re f
+BT /F1 7.5 Tf 0.60 0.95 0.70 rg 54 666 Td (get_current_user\(token\) usando JWT Bearer ? python-jose HS256) Tj ET
+BT /F2 8 Tf 0.95 0.55 0.10 rg 50 636 Td (Impacto:) Tj ET
+BT /F1 8 Tf 0.92 0.92 0.95 rg 105 636 Td (Cualquier cliente podía enviar X-Is-Admin: true y obtener acceso admin completo.) Tj ET
+BT /F2 8 Tf 0.20 0.80 0.40 rg 50 622 Td (Fix aplicado:) Tj ET
+BT /F1 8 Tf 0.92 0.92 0.95 rg 118 622 Td (Reemplazado por verificación criptográfica de JWT firmado con HS256.) Tj ET
+0.12 0.12 0.22 rg 40 409 515 195 re f
+0.15 0.15 0.28 rg 40 589 515 22 re f
+BT /F2 10 Tf 1 1 1 rg 46 593 Td (VF-002 ? Login no genera token de sesión seguro \(sin JWT\)) Tj ET
+0.90 0.20 0.20 rg 455 590 90 18 re f
+BT /F2 9 Tf 1 1 1 rg 467 594 Td (CRÍTICA) Tj ET
+BT /F1 8 Tf 0.95 0.55 0.10 rg 50 564 Td (OWASP: API2:2023 ? Broken Authentication) Tj ET
+BT /F1 8 Tf 0.65 0.65 0.75 rg 50 551 Td (Componente: API/app/router/auth.py) Tj ET
+BT /F2 8 Tf 0.90 0.20 0.20 rg 50 536 Td (ANTES \(vulnerable\):) Tj ET
+0.08 0.06 0.06 rg 50 508 495 30 re f
+BT /F1 7.5 Tf 0.95 0.60 0.60 rg 54 528 Td (LoginResponse\(user=UserOut\) ? solo retornaba datos del usuario) Tj ET
+BT /F2 8 Tf 0.20 0.80 0.40 rg 50 496 Td (DESPUÉS \(corregido\):) Tj ET
+0.05 0.10 0.07 rg 50 468 495 30 re f
+BT /F1 7.5 Tf 0.60 0.95 0.70 rg 54 488 Td (TokenOut\(access_token=JWT, token_type='bearer', user=UserOut\)) Tj ET
+BT /F2 8 Tf 0.95 0.55 0.10 rg 50 458 Td (Impacto:) Tj ET
+BT /F1 8 Tf 0.92 0.92 0.95 rg 105 458 Td (Sin token, cualquier endpoint 'protegido' era bypasseable con el header X-Is-Admin.) Tj ET
+BT /F2 8 Tf 0.20 0.80 0.40 rg 50 444 Td (Fix aplicado:) Tj ET
+BT /F1 8 Tf 0.92 0.92 0.95 rg 118 444 Td (Login ahora genera JWT HS256 con subject=user_id, is_admin, exp.) Tj ET
+0.12 0.12 0.22 rg 40 231 515 195 re f
+0.15 0.15 0.28 rg 40 411 515 22 re f
+BT /F2 10 Tf 1 1 1 rg 46 415 Td (VF-003 ? Endpoint POST /events sin autenticación) Tj ET
+0.90 0.20 0.20 rg 455 412 90 18 re f
+BT /F2 9 Tf 1 1 1 rg 467 416 Td (CRÍTICA) Tj ET
+BT /F1 8 Tf 0.95 0.55 0.10 rg 50 386 Td (OWASP: API1:2023 ? Broken Object Level Authorization) Tj ET
+BT /F1 8 Tf 0.65 0.65 0.75 rg 50 373 Td (Componente: API/app/router/events.py) Tj ET
+BT /F2 8 Tf 0.90 0.20 0.20 rg 50 358 Td (ANTES \(vulnerable\):) Tj ET
+0.08 0.06 0.06 rg 50 330 495 30 re f
+BT /F1 7.5 Tf 0.95 0.60 0.60 rg 54 350 Td (def ingest_event\(payload, db\) ? sin dependencia de auth) Tj ET
+BT /F2 8 Tf 0.20 0.80 0.40 rg 50 318 Td (DESPUÉS \(corregido\):) Tj ET
+0.05 0.10 0.07 rg 50 290 495 30 re f
+BT /F1 7.5 Tf 0.60 0.95 0.70 rg 54 310 Td (dependencies=[Depends\(get_current_user\)]) Tj ET
+BT /F2 8 Tf 0.95 0.55 0.10 rg 50 280 Td (Impacto:) Tj ET
+BT /F1 8 Tf 0.92 0.92 0.95 rg 105 280 Td (Cualquier agente externo podía insertar eventos falsos en la base de datos.) Tj ET
+BT /F2 8 Tf 0.20 0.80 0.40 rg 50 266 Td (Fix aplicado:) Tj ET
+BT /F1 8 Tf 0.92 0.92 0.95 rg 118 266 Td (Dependencia JWT get_current_user agregada al endpoint.) Tj ET
+BT /F1 8 Tf 0.65 0.65 0.75 rg 60 20 Td (Visio Flow ? Reporte de Seguridad) Tj ET
+BT /F1 8 Tf 0.65 0.65 0.75 rg 495 20 Td (Página 4) Tj ET
+endstream
+endobj
+12 0 obj
+<< /Type /Page /Parent 5 0 R /MediaBox [0 0 595 842] /Contents 11 0 R /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> >>
+endobj
+13 0 obj
+<< /Length 3947 >>
+stream
+0.10 0.10 0.18 rg 0 0 595 842 re f
+0.20 0.60 1.00 rg 0 836 595 6 re f
+0.20 0.60 1.00 rg 0 0 595 6 re f
+0.20 0.60 1.00 rg 0 0 4 842 re f
+BT /F2 14 Tf 0.60 0.80 1.00 rg 40 797 Td (3. HALLAZGOS DETALLADOS \(CRÍTICAS\)) Tj ET
+1 w 0.20 0.60 1.00 RG 40 787 m 555 787 l S
+0.12 0.12 0.22 rg 40 587 515 195 re f
+0.15 0.15 0.28 rg 40 767 515 22 re f
+BT /F2 10 Tf 1 1 1 rg 46 771 Td (VF-004 ? Endpoints POST/GET /heatmap sin autenticación) Tj ET
+0.90 0.20 0.20 rg 455 768 90 18 re f
+BT /F2 9 Tf 1 1 1 rg 467 772 Td (CRÍTICA) Tj ET
+BT /F1 8 Tf 0.95 0.55 0.10 rg 50 742 Td (OWASP: API1:2023 ? Broken Object Level Authorization) Tj ET
+BT /F1 8 Tf 0.65 0.65 0.75 rg 50 729 Td (Componente: API/app/router/heatmap.py) Tj ET
+BT /F2 8 Tf 0.90 0.20 0.20 rg 50 714 Td (ANTES \(vulnerable\):) Tj ET
+0.08 0.06 0.06 rg 50 686 495 30 re f
+BT /F1 7.5 Tf 0.95 0.60 0.60 rg 54 706 Td (@router.post\(''\) y @router.get\(''\) sin auth) Tj ET
+BT /F2 8 Tf 0.20 0.80 0.40 rg 50 674 Td (DESPUÉS \(corregido\):) Tj ET
+0.05 0.10 0.07 rg 50 646 495 30 re f
+BT /F1 7.5 Tf 0.60 0.95 0.70 rg 54 666 Td (dependencies=[Depends\(get_current_user\)] en ambos endpoints) Tj ET
+BT /F2 8 Tf 0.95 0.55 0.10 rg 50 636 Td (Impacto:) Tj ET
+BT /F1 8 Tf 0.92 0.92 0.95 rg 105 636 Td (Lectura y escritura de datos de heatmap sin restricción.) Tj ET
+BT /F2 8 Tf 0.20 0.80 0.40 rg 50 622 Td (Fix aplicado:) Tj ET
+BT /F1 8 Tf 0.92 0.92 0.95 rg 118 622 Td (Ambos endpoints protegidos con JWT.) Tj ET
+0.12 0.12 0.22 rg 40 409 515 195 re f
+0.15 0.15 0.28 rg 40 589 515 22 re f
+BT /F2 10 Tf 1 1 1 rg 46 593 Td (VF-005 ? Endpoints GET /state sin autenticación) Tj ET
+0.90 0.20 0.20 rg 455 590 90 18 re f
+BT /F2 9 Tf 1 1 1 rg 467 594 Td (CRÍTICA) Tj ET
+BT /F1 8 Tf 0.95 0.55 0.10 rg 50 564 Td (OWASP: API1:2023 ? Broken Object Level Authorization) Tj ET
+BT /F1 8 Tf 0.65 0.65 0.75 rg 50 551 Td (Componente: API/app/router/state.py) Tj ET
+BT /F2 8 Tf 0.90 0.20 0.20 rg 50 536 Td (ANTES \(vulnerable\):) Tj ET
+0.08 0.06 0.06 rg 50 508 495 30 re f
+BT /F1 7.5 Tf 0.95 0.60 0.60 rg 54 528 Td (@router.get\(''\) y @router.get\('/{area_id}'\) sin auth) Tj ET
+BT /F2 8 Tf 0.20 0.80 0.40 rg 50 496 Td (DESPUÉS \(corregido\):) Tj ET
+0.05 0.10 0.07 rg 50 468 495 30 re f
+BT /F1 7.5 Tf 0.60 0.95 0.70 rg 54 488 Td (dependencies=[Depends\(get_current_user\)] en ambos) Tj ET
+BT /F2 8 Tf 0.95 0.55 0.10 rg 50 458 Td (Impacto:) Tj ET
+BT /F1 8 Tf 0.92 0.92 0.95 rg 105 458 Td (Estado en tiempo real de personas por área expuesto públicamente.) Tj ET
+BT /F2 8 Tf 0.20 0.80 0.40 rg 50 444 Td (Fix aplicado:) Tj ET
+BT /F1 8 Tf 0.92 0.92 0.95 rg 118 444 Td (Endpoints protegidos con JWT.) Tj ET
+0.12 0.12 0.22 rg 40 231 515 195 re f
+0.15 0.15 0.28 rg 40 411 515 22 re f
+BT /F2 10 Tf 1 1 1 rg 46 415 Td (VF-006 ? 4 endpoints de dashboard sin autenticación) Tj ET
+0.90 0.20 0.20 rg 455 412 90 18 re f
+BT /F2 9 Tf 1 1 1 rg 467 416 Td (CRÍTICA) Tj ET
+BT /F1 8 Tf 0.95 0.55 0.10 rg 50 386 Td (OWASP: API1:2023 ? Broken Object Level Authorization) Tj ET
+BT /F1 8 Tf 0.65 0.65 0.75 rg 50 373 Td (Componente: API/app/router/dashboard.py) Tj ET
+BT /F2 8 Tf 0.90 0.20 0.20 rg 50 358 Td (ANTES \(vulnerable\):) Tj ET
+0.08 0.06 0.06 rg 50 330 495 30 re f
+BT /F1 7.5 Tf 0.95 0.60 0.60 rg 54 350 Td (/dashboard/summary, /areas, /events, /heatmap ? sin auth) Tj ET
+BT /F2 8 Tf 0.20 0.80 0.40 rg 50 318 Td (DESPUÉS \(corregido\):) Tj ET
+0.05 0.10 0.07 rg 50 290 495 30 re f
+BT /F1 7.5 Tf 0.60 0.95 0.70 rg 54 310 Td (dependencies=[Depends\(get_current_user\)] en los 4 endpoints) Tj ET
+BT /F2 8 Tf 0.95 0.55 0.10 rg 50 280 Td (Impacto:) Tj ET
+BT /F1 8 Tf 0.92 0.92 0.95 rg 105 280 Td (Datos analíticos sensibles accesibles sin credenciales.) Tj ET
+BT /F2 8 Tf 0.20 0.80 0.40 rg 50 266 Td (Fix aplicado:) Tj ET
+BT /F1 8 Tf 0.92 0.92 0.95 rg 118 266 Td (Los 4 endpoints del dashboard protegidos con JWT.) Tj ET
+BT /F1 8 Tf 0.65 0.65 0.75 rg 60 20 Td (Visio Flow ? Reporte de Seguridad) Tj ET
+BT /F1 8 Tf 0.65 0.65 0.75 rg 495 20 Td (Página 5) Tj ET
+endstream
+endobj
+14 0 obj
+<< /Type /Page /Parent 5 0 R /MediaBox [0 0 595 842] /Contents 13 0 R /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> >>
+endobj
+15 0 obj
+<< /Length 4067 >>
+stream
+0.10 0.10 0.18 rg 0 0 595 842 re f
+0.20 0.60 1.00 rg 0 836 595 6 re f
+0.20 0.60 1.00 rg 0 0 595 6 re f
+0.20 0.60 1.00 rg 0 0 4 842 re f
+BT /F2 14 Tf 0.60 0.80 1.00 rg 40 797 Td (3. HALLAZGOS DETALLADOS \(CRÍTICAS\)) Tj ET
+1 w 0.20 0.60 1.00 RG 40 787 m 555 787 l S
+0.12 0.12 0.22 rg 40 587 515 195 re f
+0.15 0.15 0.28 rg 40 767 515 22 re f
+BT /F2 10 Tf 1 1 1 rg 46 771 Td (VF-007 ? Credenciales de DB en texto plano \(password: '123456'\)) Tj ET
+0.90 0.20 0.20 rg 455 768 90 18 re f
+BT /F2 9 Tf 1 1 1 rg 467 772 Td (CRÍTICA) Tj ET
+BT /F1 8 Tf 0.95 0.55 0.10 rg 50 742 Td (OWASP: API8:2023 ? Security Misconfiguration) Tj ET
+BT /F1 8 Tf 0.65 0.65 0.75 rg 50 729 Td (Componente: docker-compose.yml) Tj ET
+BT /F2 8 Tf 0.90 0.20 0.20 rg 50 714 Td (ANTES \(vulnerable\):) Tj ET
+0.08 0.06 0.06 rg 50 686 495 30 re f
+BT /F1 7.5 Tf 0.95 0.60 0.60 rg 54 706 Td (POSTGRES_PASSWORD: '123456' hardcodeada en docker-compose.yml) Tj ET
+BT /F2 8 Tf 0.20 0.80 0.40 rg 50 674 Td (DESPUÉS \(corregido\):) Tj ET
+0.05 0.10 0.07 rg 50 646 495 30 re f
+BT /F1 7.5 Tf 0.60 0.95 0.70 rg 54 666 Td (POSTGRES_PASSWORD: ${POSTGRES_PASSWORD} desde archivo .env) Tj ET
+BT /F2 8 Tf 0.95 0.55 0.10 rg 50 636 Td (Impacto:) Tj ET
+BT /F1 8 Tf 0.92 0.92 0.95 rg 105 636 Td (Credenciales expuestas en control de versiones y a cualquier persona con acceso al archivo.) Tj ET
+BT /F2 8 Tf 0.20 0.80 0.40 rg 50 622 Td (Fix aplicado:) Tj ET
+BT /F1 8 Tf 0.92 0.92 0.95 rg 118 622 Td (Externalizadas a .env con .env.example como plantilla documentada.) Tj ET
+0.12 0.12 0.22 rg 40 409 515 195 re f
+0.15 0.15 0.28 rg 40 589 515 22 re f
+BT /F2 10 Tf 1 1 1 rg 46 593 Td (VF-008 ? Redis sin contraseña y puerto 6379 expuesto al host) Tj ET
+0.90 0.20 0.20 rg 455 590 90 18 re f
+BT /F2 9 Tf 1 1 1 rg 467 594 Td (CRÍTICA) Tj ET
+BT /F1 8 Tf 0.95 0.55 0.10 rg 50 564 Td (OWASP: API8:2023 ? Security Misconfiguration) Tj ET
+BT /F1 8 Tf 0.65 0.65 0.75 rg 50 551 Td (Componente: docker-compose.yml) Tj ET
+BT /F2 8 Tf 0.90 0.20 0.20 rg 50 536 Td (ANTES \(vulnerable\):) Tj ET
+0.08 0.06 0.06 rg 50 508 495 30 re f
+BT /F1 7.5 Tf 0.95 0.60 0.60 rg 54 528 Td (redis: image: redis:alpine, ports: - '6379:6379' \(sin auth\)) Tj ET
+BT /F2 8 Tf 0.20 0.80 0.40 rg 50 496 Td (DESPUÉS \(corregido\):) Tj ET
+0.05 0.10 0.07 rg 50 468 495 30 re f
+BT /F1 7.5 Tf 0.60 0.95 0.70 rg 54 488 Td (command: redis-server --requirepass ${REDIS_PASSWORD}, sin puerto expuesto) Tj ET
+BT /F2 8 Tf 0.95 0.55 0.10 rg 50 458 Td (Impacto:) Tj ET
+BT /F1 8 Tf 0.92 0.92 0.95 rg 105 458 Td (Cualquier proceso en el host podía leer/escribir en Redis \(sesiones, caché\).) Tj ET
+BT /F2 8 Tf 0.20 0.80 0.40 rg 50 444 Td (Fix aplicado:) Tj ET
+BT /F1 8 Tf 0.92 0.92 0.95 rg 118 444 Td (Redis con contraseña y puerto eliminado de la exposición al host.) Tj ET
+0.12 0.12 0.22 rg 40 231 515 195 re f
+0.15 0.15 0.28 rg 40 411 515 22 re f
+BT /F2 10 Tf 1 1 1 rg 46 415 Td (VF-009 ? Endpoint /db-test expuesto públicamente) Tj ET
+0.90 0.20 0.20 rg 455 412 90 18 re f
+BT /F2 9 Tf 1 1 1 rg 467 416 Td (CRÍTICA) Tj ET
+BT /F1 8 Tf 0.95 0.55 0.10 rg 50 386 Td (OWASP: API8:2023 ? Security Misconfiguration) Tj ET
+BT /F1 8 Tf 0.65 0.65 0.75 rg 50 373 Td (Componente: API/app/main.py) Tj ET
+BT /F2 8 Tf 0.90 0.20 0.20 rg 50 358 Td (ANTES \(vulnerable\):) Tj ET
+0.08 0.06 0.06 rg 50 330 495 30 re f
+BT /F1 7.5 Tf 0.95 0.60 0.60 rg 54 350 Td (@app.get\('/db-test'\) retorna estado de la DB sin auth) Tj ET
+BT /F2 8 Tf 0.20 0.80 0.40 rg 50 318 Td (DESPUÉS \(corregido\):) Tj ET
+0.05 0.10 0.07 rg 50 290 495 30 re f
+BT /F1 7.5 Tf 0.60 0.95 0.70 rg 54 310 Td (Endpoint eliminado del código de producción) Tj ET
+BT /F2 8 Tf 0.95 0.55 0.10 rg 50 280 Td (Impacto:) Tj ET
+BT /F1 8 Tf 0.92 0.92 0.95 rg 105 280 Td (Expone confirmación de conectividad y posibles detalles de error de la DB.) Tj ET
+BT /F2 8 Tf 0.20 0.80 0.40 rg 50 266 Td (Fix aplicado:) Tj ET
+BT /F1 8 Tf 0.92 0.92 0.95 rg 118 266 Td (Endpoint /db-test eliminado completamente.) Tj ET
+BT /F1 8 Tf 0.65 0.65 0.75 rg 60 20 Td (Visio Flow ? Reporte de Seguridad) Tj ET
+BT /F1 8 Tf 0.65 0.65 0.75 rg 495 20 Td (Página 6) Tj ET
+endstream
+endobj
+16 0 obj
+<< /Type /Page /Parent 5 0 R /MediaBox [0 0 595 842] /Contents 15 0 R /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> >>
+endobj
+17 0 obj
+<< /Length 4054 >>
+stream
+0.10 0.10 0.18 rg 0 0 595 842 re f
+0.20 0.60 1.00 rg 0 836 595 6 re f
+0.20 0.60 1.00 rg 0 0 595 6 re f
+0.20 0.60 1.00 rg 0 0 4 842 re f
+BT /F2 14 Tf 0.60 0.80 1.00 rg 40 797 Td (3. HALLAZGOS DETALLADOS \(CRÍTICAS\)) Tj ET
+1 w 0.20 0.60 1.00 RG 40 787 m 555 787 l S
+0.12 0.12 0.22 rg 40 587 515 195 re f
+0.15 0.15 0.28 rg 40 767 515 22 re f
+BT /F2 10 Tf 1 1 1 rg 46 771 Td (VF-010 ? Flask secret_key hardcodeada como fallback inseguro) Tj ET
+0.90 0.20 0.20 rg 455 768 90 18 re f
+BT /F2 9 Tf 1 1 1 rg 467 772 Td (CRÍTICA) Tj ET
+BT /F1 8 Tf 0.95 0.55 0.10 rg 50 742 Td (OWASP: API8:2023 ? Security Misconfiguration) Tj ET
+BT /F1 8 Tf 0.65 0.65 0.75 rg 50 729 Td (Componente: contador_personas_flask/app/__init__.py) Tj ET
+BT /F2 8 Tf 0.90 0.20 0.20 rg 50 714 Td (ANTES \(vulnerable\):) Tj ET
+0.08 0.06 0.06 rg 50 686 495 30 re f
+BT /F1 7.5 Tf 0.95 0.60 0.60 rg 54 706 Td (app.secret_key = os.getenv\('FLASK_SECRET_KEY', 'super-secret-key-123'\)) Tj ET
+BT /F2 8 Tf 0.20 0.80 0.40 rg 50 674 Td (DESPUÉS \(corregido\):) Tj ET
+0.05 0.10 0.07 rg 50 646 495 30 re f
+BT /F1 7.5 Tf 0.60 0.95 0.70 rg 54 666 Td (Fuerza FLASK_SECRET_KEY desde env; error fatal si no está definida) Tj ET
+BT /F2 8 Tf 0.95 0.55 0.10 rg 50 636 Td (Impacto:) Tj ET
+BT /F1 8 Tf 0.92 0.92 0.95 rg 105 636 Td (Sesiones podían ser forjadas conociendo el valor 'super-secret-key-123'.) Tj ET
+BT /F2 8 Tf 0.20 0.80 0.40 rg 50 622 Td (Fix aplicado:) Tj ET
+BT /F1 8 Tf 0.92 0.92 0.95 rg 118 622 Td (Secret key sin fallback + SESSION_COOKIE_HTTPONLY + SESSION_COOKIE_SAMESITE=Lax.) Tj ET
+0.12 0.12 0.22 rg 40 409 515 195 re f
+0.15 0.15 0.28 rg 40 589 515 22 re f
+BT /F2 10 Tf 1 1 1 rg 46 593 Td (VF-011 ? Documentación /docs y /redoc expuesta en producción) Tj ET
+0.95 0.55 0.10 rg 455 590 90 18 re f
+BT /F2 9 Tf 1 1 1 rg 467 594 Td (MEDIA) Tj ET
+BT /F1 8 Tf 0.95 0.55 0.10 rg 50 564 Td (OWASP: API8:2023 ? Security Misconfiguration) Tj ET
+BT /F1 8 Tf 0.65 0.65 0.75 rg 50 551 Td (Componente: API/app/main.py) Tj ET
+BT /F2 8 Tf 0.90 0.20 0.20 rg 50 536 Td (ANTES \(vulnerable\):) Tj ET
+0.08 0.06 0.06 rg 50 508 495 30 re f
+BT /F1 7.5 Tf 0.95 0.60 0.60 rg 54 528 Td (FastAPI\(\) sin restricción de docs_url/redoc_url) Tj ET
+BT /F2 8 Tf 0.20 0.80 0.40 rg 50 496 Td (DESPUÉS \(corregido\):) Tj ET
+0.05 0.10 0.07 rg 50 468 495 30 re f
+BT /F1 7.5 Tf 0.60 0.95 0.70 rg 54 488 Td (docs_url='/docs' if IS_DEV else None \(controlado por APP_ENV\)) Tj ET
+BT /F2 8 Tf 0.95 0.55 0.10 rg 50 458 Td (Impacto:) Tj ET
+BT /F1 8 Tf 0.92 0.92 0.95 rg 105 458 Td (Expone el schema completo de la API a atacantes para reconocimiento.) Tj ET
+BT /F2 8 Tf 0.20 0.80 0.40 rg 50 444 Td (Fix aplicado:) Tj ET
+BT /F1 8 Tf 0.92 0.92 0.95 rg 118 444 Td (Docs deshabilitados cuando APP_ENV != 'development'.) Tj ET
+0.12 0.12 0.22 rg 40 231 515 195 re f
+0.15 0.15 0.28 rg 40 411 515 22 re f
+BT /F2 10 Tf 1 1 1 rg 46 415 Td (VF-012 ? Sin rate limiting en ningún endpoint) Tj ET
+0.95 0.55 0.10 rg 455 412 90 18 re f
+BT /F2 9 Tf 1 1 1 rg 467 416 Td (MEDIA) Tj ET
+BT /F1 8 Tf 0.95 0.55 0.10 rg 50 386 Td (OWASP: API4:2023 ? Unrestricted Resource Consumption) Tj ET
+BT /F1 8 Tf 0.65 0.65 0.75 rg 50 373 Td (Componente: API/app/main.py) Tj ET
+BT /F2 8 Tf 0.90 0.20 0.20 rg 50 358 Td (ANTES \(vulnerable\):) Tj ET
+0.08 0.06 0.06 rg 50 330 495 30 re f
+BT /F1 7.5 Tf 0.95 0.60 0.60 rg 54 350 Td (Sin middleware de limitación de peticiones) Tj ET
+BT /F2 8 Tf 0.20 0.80 0.40 rg 50 318 Td (DESPUÉS \(corregido\):) Tj ET
+0.05 0.10 0.07 rg 50 290 495 30 re f
+BT /F1 7.5 Tf 0.60 0.95 0.70 rg 54 310 Td (slowapi Limiter con límite por defecto de 100 req/min por IP) Tj ET
+BT /F2 8 Tf 0.95 0.55 0.10 rg 50 280 Td (Impacto:) Tj ET
+BT /F1 8 Tf 0.92 0.92 0.95 rg 105 280 Td (Vulnerabilidad a ataques de fuerza bruta en /auth/login y DoS.) Tj ET
+BT /F2 8 Tf 0.20 0.80 0.40 rg 50 266 Td (Fix aplicado:) Tj ET
+BT /F1 8 Tf 0.92 0.92 0.95 rg 118 266 Td (Integrado slowapi con get_remote_address como key_func.) Tj ET
+BT /F1 8 Tf 0.65 0.65 0.75 rg 60 20 Td (Visio Flow ? Reporte de Seguridad) Tj ET
+BT /F1 8 Tf 0.65 0.65 0.75 rg 495 20 Td (Página 7) Tj ET
+endstream
+endobj
+18 0 obj
+<< /Type /Page /Parent 5 0 R /MediaBox [0 0 595 842] /Contents 17 0 R /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> >>
+endobj
+19 0 obj
+<< /Length 3986 >>
+stream
+0.10 0.10 0.18 rg 0 0 595 842 re f
+0.20 0.60 1.00 rg 0 836 595 6 re f
+0.20 0.60 1.00 rg 0 0 595 6 re f
+0.20 0.60 1.00 rg 0 0 4 842 re f
+BT /F2 14 Tf 0.60 0.80 1.00 rg 40 797 Td (3. HALLAZGOS DETALLADOS \(MEDIAS\)) Tj ET
+1 w 0.20 0.60 1.00 RG 40 787 m 555 787 l S
+0.12 0.12 0.22 rg 40 587 515 195 re f
+0.15 0.15 0.28 rg 40 767 515 22 re f
+BT /F2 10 Tf 1 1 1 rg 46 771 Td (VF-013 ? Sin configuración de CORS) Tj ET
+0.95 0.55 0.10 rg 455 768 90 18 re f
+BT /F2 9 Tf 1 1 1 rg 467 772 Td (MEDIA) Tj ET
+BT /F1 8 Tf 0.95 0.55 0.10 rg 50 742 Td (OWASP: API8:2023 ? Security Misconfiguration) Tj ET
+BT /F1 8 Tf 0.65 0.65 0.75 rg 50 729 Td (Componente: API/app/main.py) Tj ET
+BT /F2 8 Tf 0.90 0.20 0.20 rg 50 714 Td (ANTES \(vulnerable\):) Tj ET
+0.08 0.06 0.06 rg 50 686 495 30 re f
+BT /F1 7.5 Tf 0.95 0.60 0.60 rg 54 706 Td (Sin CORSMiddleware ? responde a cualquier origen) Tj ET
+BT /F2 8 Tf 0.20 0.80 0.40 rg 50 674 Td (DESPUÉS \(corregido\):) Tj ET
+0.05 0.10 0.07 rg 50 646 495 30 re f
+BT /F1 7.5 Tf 0.60 0.95 0.70 rg 54 666 Td (CORSMiddleware con allow_origins desde CORS_ALLOWED_ORIGINS env var) Tj ET
+BT /F2 8 Tf 0.95 0.55 0.10 rg 50 636 Td (Impacto:) Tj ET
+BT /F1 8 Tf 0.92 0.92 0.95 rg 105 636 Td (Permite que páginas web maliciosas realicen requests a la API.) Tj ET
+BT /F2 8 Tf 0.20 0.80 0.40 rg 50 622 Td (Fix aplicado:) Tj ET
+BT /F1 8 Tf 0.92 0.92 0.95 rg 118 622 Td (CORS configurado con lista explícita de orígenes permitidos.) Tj ET
+0.12 0.12 0.22 rg 40 409 515 195 re f
+0.15 0.15 0.28 rg 40 589 515 22 re f
+BT /F2 10 Tf 1 1 1 rg 46 593 Td (VF-014 ? Contraseñas débiles permitidas \(min_length=1\)) Tj ET
+0.95 0.55 0.10 rg 455 590 90 18 re f
+BT /F2 9 Tf 1 1 1 rg 467 594 Td (MEDIA) Tj ET
+BT /F1 8 Tf 0.95 0.55 0.10 rg 50 564 Td (OWASP: API2:2023 ? Broken Authentication) Tj ET
+BT /F1 8 Tf 0.65 0.65 0.75 rg 50 551 Td (Componente: API/app/schemas/auth.py) Tj ET
+BT /F2 8 Tf 0.90 0.20 0.20 rg 50 536 Td (ANTES \(vulnerable\):) Tj ET
+0.08 0.06 0.06 rg 50 508 495 30 re f
+BT /F1 7.5 Tf 0.95 0.60 0.60 rg 54 528 Td (password: str = Field\(..., min_length=1, max_length=255\)) Tj ET
+BT /F2 8 Tf 0.20 0.80 0.40 rg 50 496 Td (DESPUÉS \(corregido\):) Tj ET
+0.05 0.10 0.07 rg 50 468 495 30 re f
+BT /F1 7.5 Tf 0.60 0.95 0.70 rg 54 488 Td (min_length=8 + validador de letra y número obligatorios) Tj ET
+BT /F2 8 Tf 0.95 0.55 0.10 rg 50 458 Td (Impacto:) Tj ET
+BT /F1 8 Tf 0.92 0.92 0.95 rg 105 458 Td (Usuarios podían registrarse con contraseñas de 1 carácter.) Tj ET
+BT /F2 8 Tf 0.20 0.80 0.40 rg 50 444 Td (Fix aplicado:) Tj ET
+BT /F1 8 Tf 0.92 0.92 0.95 rg 118 444 Td (Validador Pydantic @field_validator con regex para complejidad mínima.) Tj ET
+0.12 0.12 0.22 rg 40 231 515 195 re f
+0.15 0.15 0.28 rg 40 411 515 22 re f
+BT /F2 10 Tf 1 1 1 rg 46 415 Td (VF-015 ? Puerto de PostgreSQL expuesto al host \(0.0.0.0:5435\)) Tj ET
+0.95 0.55 0.10 rg 455 412 90 18 re f
+BT /F2 9 Tf 1 1 1 rg 467 416 Td (MEDIA) Tj ET
+BT /F1 8 Tf 0.95 0.55 0.10 rg 50 386 Td (OWASP: API8:2023 ? Security Misconfiguration) Tj ET
+BT /F1 8 Tf 0.65 0.65 0.75 rg 50 373 Td (Componente: docker-compose.yml) Tj ET
+BT /F2 8 Tf 0.90 0.20 0.20 rg 50 358 Td (ANTES \(vulnerable\):) Tj ET
+0.08 0.06 0.06 rg 50 330 495 30 re f
+BT /F1 7.5 Tf 0.95 0.60 0.60 rg 54 350 Td (ports: - '5435:5432') Tj ET
+BT /F2 8 Tf 0.20 0.80 0.40 rg 50 318 Td (DESPUÉS \(corregido\):) Tj ET
+0.05 0.10 0.07 rg 50 290 495 30 re f
+BT /F1 7.5 Tf 0.60 0.95 0.70 rg 54 310 Td (Puerto eliminado; DB solo accesible dentro de la red Docker) Tj ET
+BT /F2 8 Tf 0.95 0.55 0.10 rg 50 280 Td (Impacto:) Tj ET
+BT /F1 8 Tf 0.92 0.92 0.95 rg 105 280 Td (DB accesible desde cualquier interfaz del host, ampliando superficie de ataque.) Tj ET
+BT /F2 8 Tf 0.20 0.80 0.40 rg 50 266 Td (Fix aplicado:) Tj ET
+BT /F1 8 Tf 0.92 0.92 0.95 rg 118 266 Td (Puerto comentado; se documenta alternativa loopback 127.0.0.1 para desarrollo.) Tj ET
+BT /F1 8 Tf 0.65 0.65 0.75 rg 60 20 Td (Visio Flow ? Reporte de Seguridad) Tj ET
+BT /F1 8 Tf 0.65 0.65 0.75 rg 495 20 Td (Página 8) Tj ET
+endstream
+endobj
+20 0 obj
+<< /Type /Page /Parent 5 0 R /MediaBox [0 0 595 842] /Contents 19 0 R /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> >>
+endobj
+21 0 obj
+<< /Length 2735 >>
+stream
+0.10 0.10 0.18 rg 0 0 595 842 re f
+0.20 0.60 1.00 rg 0 836 595 6 re f
+0.20 0.60 1.00 rg 0 0 595 6 re f
+0.20 0.60 1.00 rg 0 0 4 842 re f
+BT /F2 14 Tf 0.60 0.80 1.00 rg 40 797 Td (3. HALLAZGOS DETALLADOS \(MEDIAS\)) Tj ET
+1 w 0.20 0.60 1.00 RG 40 787 m 555 787 l S
+0.12 0.12 0.22 rg 40 587 515 195 re f
+0.15 0.15 0.28 rg 40 767 515 22 re f
+BT /F2 10 Tf 1 1 1 rg 46 771 Td (VF-016 ? APP_KEY de Laravel hardcodeada en docker-compose.yml) Tj ET
+0.95 0.55 0.10 rg 455 768 90 18 re f
+BT /F2 9 Tf 1 1 1 rg 467 772 Td (MEDIA) Tj ET
+BT /F1 8 Tf 0.95 0.55 0.10 rg 50 742 Td (OWASP: API8:2023 ? Security Misconfiguration) Tj ET
+BT /F1 8 Tf 0.65 0.65 0.75 rg 50 729 Td (Componente: docker-compose.yml) Tj ET
+BT /F2 8 Tf 0.90 0.20 0.20 rg 50 714 Td (ANTES \(vulnerable\):) Tj ET
+0.08 0.06 0.06 rg 50 686 495 30 re f
+BT /F1 7.5 Tf 0.95 0.60 0.60 rg 54 706 Td (APP_KEY=base64:9KM+d724Xbh0... \(fija en el archivo\)) Tj ET
+BT /F2 8 Tf 0.20 0.80 0.40 rg 50 674 Td (DESPUÉS \(corregido\):) Tj ET
+0.05 0.10 0.07 rg 50 646 495 30 re f
+BT /F1 7.5 Tf 0.60 0.95 0.70 rg 54 666 Td (APP_KEY=${APP_KEY} desde .env) Tj ET
+BT /F2 8 Tf 0.95 0.55 0.10 rg 50 636 Td (Impacto:) Tj ET
+BT /F1 8 Tf 0.92 0.92 0.95 rg 105 636 Td (Clave de aplicación expuesta; riesgo de desencriptado de datos Laravel.) Tj ET
+BT /F2 8 Tf 0.20 0.80 0.40 rg 50 622 Td (Fix aplicado:) Tj ET
+BT /F1 8 Tf 0.92 0.92 0.95 rg 118 622 Td (Externalizada a variable de entorno con instrucción de generación en .env.example.) Tj ET
+0.12 0.12 0.22 rg 40 409 515 195 re f
+0.15 0.15 0.28 rg 40 589 515 22 re f
+BT /F2 10 Tf 1 1 1 rg 46 593 Td (VF-017 ? APP_DEBUG=true en producción \(Laravel\)) Tj ET
+0.95 0.55 0.10 rg 455 590 90 18 re f
+BT /F2 9 Tf 1 1 1 rg 467 594 Td (MEDIA) Tj ET
+BT /F1 8 Tf 0.95 0.55 0.10 rg 50 564 Td (OWASP: API8:2023 ? Security Misconfiguration) Tj ET
+BT /F1 8 Tf 0.65 0.65 0.75 rg 50 551 Td (Componente: docker-compose.yml / Flask) Tj ET
+BT /F2 8 Tf 0.90 0.20 0.20 rg 50 536 Td (ANTES \(vulnerable\):) Tj ET
+0.08 0.06 0.06 rg 50 508 495 30 re f
+BT /F1 7.5 Tf 0.95 0.60 0.60 rg 54 528 Td (APP_DEBUG=true en el servicio Laravel) Tj ET
+BT /F2 8 Tf 0.20 0.80 0.40 rg 50 496 Td (DESPUÉS \(corregido\):) Tj ET
+0.05 0.10 0.07 rg 50 468 495 30 re f
+BT /F1 7.5 Tf 0.60 0.95 0.70 rg 54 488 Td (APP_DEBUG=false) Tj ET
+BT /F2 8 Tf 0.95 0.55 0.10 rg 50 458 Td (Impacto:) Tj ET
+BT /F1 8 Tf 0.92 0.92 0.95 rg 105 458 Td (Stack traces y detalles de configuración expuestos en respuestas de error.) Tj ET
+BT /F2 8 Tf 0.20 0.80 0.40 rg 50 444 Td (Fix aplicado:) Tj ET
+BT /F1 8 Tf 0.92 0.92 0.95 rg 118 444 Td (Cambiado a false en el docker-compose.yml.) Tj ET
+BT /F1 8 Tf 0.65 0.65 0.75 rg 60 20 Td (Visio Flow ? Reporte de Seguridad) Tj ET
+BT /F1 8 Tf 0.65 0.65 0.75 rg 495 20 Td (Página 9) Tj ET
+endstream
+endobj
+22 0 obj
+<< /Type /Page /Parent 5 0 R /MediaBox [0 0 595 842] /Contents 21 0 R /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> >>
+endobj
+23 0 obj
+<< /Length 4303 >>
+stream
+0.10 0.10 0.18 rg 0 0 595 842 re f
+0.20 0.60 1.00 rg 0 836 595 6 re f
+0.20 0.60 1.00 rg 0 0 595 6 re f
+0.20 0.60 1.00 rg 0 0 4 842 re f
+BT /F2 14 Tf 0.60 0.80 1.00 rg 40 792 Td (4. ARQUITECTURA DE SEGURIDAD POST-HARDENING) Tj ET
+1 w 0.20 0.60 1.00 RG 40 784 m 555 784 l S
+BT /F2 11 Tf 0.20 0.60 1.00 rg 40 757 Td (Flujo de autenticación JWT implementado:) Tj ET
+BT /F1 8.5 Tf 0.92 0.92 0.95 rg 50 737 Td (  [Cliente / Laravel / Flask]) Tj ET
+BT /F1 8.5 Tf 0.92 0.92 0.95 rg 50 724 Td (         |) Tj ET
+BT /F1 8.5 Tf 0.92 0.92 0.95 rg 50 711 Td (         | POST /auth/login  {username, password}) Tj ET
+BT /F1 8.5 Tf 0.92 0.92 0.95 rg 50 698 Td (         v) Tj ET
+BT /F1 8.5 Tf 0.92 0.92 0.95 rg 50 685 Td (  [FastAPI :8000]) Tj ET
+BT /F1 8.5 Tf 0.92 0.92 0.95 rg 50 672 Td (         |  1. Valida credenciales contra PostgreSQL \(bcrypt\)) Tj ET
+BT /F1 8.5 Tf 0.92 0.92 0.95 rg 50 659 Td (         |  2. Genera JWT HS256 {sub: user_id, is_admin, exp: +60min}) Tj ET
+BT /F1 8.5 Tf 0.92 0.92 0.95 rg 50 646 Td (         |  3. Retorna {access_token, token_type: 'bearer', user}) Tj ET
+BT /F1 8.5 Tf 0.92 0.92 0.95 rg 50 633 Td (         v) Tj ET
+BT /F1 8.5 Tf 0.92 0.92 0.95 rg 50 620 Td (  [Cliente recibe token]) Tj ET
+BT /F1 8.5 Tf 0.92 0.92 0.95 rg 50 607 Td (         |) Tj ET
+BT /F1 8.5 Tf 0.92 0.92 0.95 rg 50 594 Td (         | GET/POST /endpoint  Authorization: Bearer <JWT>) Tj ET
+BT /F1 8.5 Tf 0.92 0.92 0.95 rg 50 581 Td (         v) Tj ET
+BT /F1 8.5 Tf 0.92 0.92 0.95 rg 50 568 Td (  [FastAPI ? get_current_user\(\)]) Tj ET
+BT /F1 8.5 Tf 0.92 0.92 0.95 rg 50 555 Td (         |  1. Extrae token del header Authorization) Tj ET
+BT /F1 8.5 Tf 0.92 0.92 0.95 rg 50 542 Td (         |  2. Verifica firma HS256 con JWT_SECRET_KEY) Tj ET
+BT /F1 8.5 Tf 0.92 0.92 0.95 rg 50 529 Td (         |  3. Verifica expiración \(exp claim\)) Tj ET
+BT /F1 8.5 Tf 0.92 0.92 0.95 rg 50 516 Td (         |  4. Retorna payload {sub, is_admin}) Tj ET
+BT /F1 8.5 Tf 0.92 0.92 0.95 rg 50 503 Td (         v) Tj ET
+BT /F1 8.5 Tf 0.92 0.92 0.95 rg 50 490 Td (  [require_admin\(\)] ? solo para endpoints de gestión) Tj ET
+BT /F1 8.5 Tf 0.92 0.92 0.95 rg 50 477 Td (         |  Verifica is_admin == True en el payload JWT) Tj ET
+BT /F1 8.5 Tf 0.92 0.92 0.95 rg 50 464 Td (         v) Tj ET
+BT /F1 8.5 Tf 0.92 0.92 0.95 rg 50 451 Td (  [Endpoint ejecuta lógica de negocio]) Tj ET
+BT /F2 11 Tf 0.20 0.60 1.00 rg 40 428 Td (Controles implementados por capa:) Tj ET
+0.5 w 0.20 0.20 0.35 RG 40 423 m 555 423 l S
+BT /F2 10 Tf 0.60 0.80 1.00 rg 44 406 Td (? Red / Docker) Tj ET
+BT /F1 8.5 Tf 0.92 0.92 0.95 rg 54 392 Td (? PostgreSQL sin puerto expuesto al host \(solo red Docker interna\)) Tj ET
+BT /F1 8.5 Tf 0.92 0.92 0.95 rg 54 380 Td (? Redis con contraseña --requirepass y sin puerto expuesto al host) Tj ET
+BT /F1 8.5 Tf 0.92 0.92 0.95 rg 54 368 Td (? Todos los servicios en red privada visioflow-net) Tj ET
+BT /F2 10 Tf 0.60 0.80 1.00 rg 44 352 Td (? Aplicación ? FastAPI) Tj ET
+BT /F1 8.5 Tf 0.92 0.92 0.95 rg 54 338 Td (? JWT Bearer tokens \(python-jose, HS256, 60 min TTL\)) Tj ET
+BT /F1 8.5 Tf 0.92 0.92 0.95 rg 54 326 Td (? Rate limiting: 100 req/min por IP \(slowapi\)) Tj ET
+BT /F1 8.5 Tf 0.92 0.92 0.95 rg 54 314 Td (? CORS: lista blanca explícita de orígenes) Tj ET
+BT /F1 8.5 Tf 0.92 0.92 0.95 rg 54 302 Td (? Documentación /docs deshabilitada en producción \(APP_ENV\)) Tj ET
+BT /F1 8.5 Tf 0.92 0.92 0.95 rg 54 290 Td (? Validación de contraseñas: mín. 8 chars, letra + número) Tj ET
+BT /F2 10 Tf 0.60 0.80 1.00 rg 44 274 Td (? Aplicación ? Flask) Tj ET
+BT /F1 8.5 Tf 0.92 0.92 0.95 rg 54 260 Td (? SECRET_KEY obligatoria desde env \(error fatal si no definida\)) Tj ET
+BT /F1 8.5 Tf 0.92 0.92 0.95 rg 54 248 Td (? Cookies de sesión: HttpOnly=True, SameSite=Lax, Secure=True en prod) Tj ET
+BT /F2 10 Tf 0.60 0.80 1.00 rg 44 232 Td (? Secretos / Configuración) Tj ET
+BT /F1 8.5 Tf 0.92 0.92 0.95 rg 54 218 Td (? Todas las credenciales en .env \(no en docker-compose.yml\)) Tj ET
+BT /F1 8.5 Tf 0.92 0.92 0.95 rg 54 206 Td (? .env.example documenta las variables requeridas) Tj ET
+BT /F1 8.5 Tf 0.92 0.92 0.95 rg 54 194 Td (? APP_DEBUG=false en producción \(Laravel\)) Tj ET
+BT /F1 8 Tf 0.65 0.65 0.75 rg 60 20 Td (Visio Flow ? Reporte de Seguridad) Tj ET
+BT /F1 8 Tf 0.65 0.65 0.75 rg 495 20 Td (Página 10) Tj ET
+endstream
+endobj
+24 0 obj
+<< /Type /Page /Parent 5 0 R /MediaBox [0 0 595 842] /Contents 23 0 R /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> >>
+endobj
+25 0 obj
+<< /Length 3874 >>
+stream
+0.10 0.10 0.18 rg 0 0 595 842 re f
+0.20 0.60 1.00 rg 0 836 595 6 re f
+0.20 0.60 1.00 rg 0 0 595 6 re f
+0.20 0.60 1.00 rg 0 0 4 842 re f
+BT /F2 14 Tf 0.60 0.80 1.00 rg 40 792 Td (5. CONCLUSIONES Y RECOMENDACIONES FUTURAS) Tj ET
+1 w 0.20 0.60 1.00 RG 40 784 m 555 784 l S
+BT /F2 12 Tf 0.20 0.60 1.00 rg 40 757 Td (5.1 Estado antes del análisis) Tj ET
+BT /F1 9 Tf 0.92 0.92 0.95 rg 50 739 Td (El sistema Visio Flow en su estado original presentaba 10 vulnerabilidades críticas y 7 medias.) Tj ET
+BT /F1 9 Tf 0.92 0.92 0.95 rg 50 726 Td (La vulnerabilidad más severa era la autenticación basada en un header HTTP \(X-Is-Admin: true\)) Tj ET
+BT /F1 9 Tf 0.92 0.92 0.95 rg 50 713 Td (que cualquier cliente podía falsificar, combinada con la ausencia total de tokens JWT.) Tj ET
+BT /F1 9 Tf 0.92 0.92 0.95 rg 50 700 Td (Esto implicaba que un atacante con acceso a la red podía:) Tj ET
+BT /F1 9 Tf 0.92 0.92 0.95 rg 50 687 Td (  ? Insertar eventos falsos en la base de datos) Tj ET
+BT /F1 9 Tf 0.92 0.92 0.95 rg 50 674 Td (  ? Leer todos los datos de heatmap y dashboard) Tj ET
+BT /F1 9 Tf 0.92 0.92 0.95 rg 50 661 Td (  ? Crear/eliminar áreas y usuarios) Tj ET
+BT /F1 9 Tf 0.92 0.92 0.95 rg 50 648 Td (  ? Acceder a Redis sin autenticación y manipular sesiones) Tj ET
+BT /F1 9 Tf 0.92 0.92 0.95 rg 50 635 Td (  ? Conectarse directamente a PostgreSQL \(puerto 5435 expuesto\) con contraseña '123456') Tj ET
+BT /F2 12 Tf 0.20 0.60 1.00 rg 40 614 Td (5.2 Estado después del análisis) Tj ET
+BT /F1 9 Tf 0.92 0.92 0.95 rg 50 596 Td (Tras las implementaciones, el sistema cuenta con:) Tj ET
+BT /F1 9 Tf 0.20 0.80 0.40 rg 50 583 Td (  ? Autenticación JWT obligatoria en todos los endpoints sensibles) Tj ET
+BT /F1 9 Tf 0.20 0.80 0.40 rg 50 570 Td (  ? Verificación criptográfica de roles \(is_admin en JWT payload\)) Tj ET
+BT /F1 9 Tf 0.20 0.80 0.40 rg 50 557 Td (  ? Rate limiting activo \(100 req/min por IP\)) Tj ET
+BT /F1 9 Tf 0.20 0.80 0.40 rg 50 544 Td (  ? CORS configurado con lista blanca) Tj ET
+BT /F1 9 Tf 0.20 0.80 0.40 rg 50 531 Td (  ? Secretos externalizados en variables de entorno) Tj ET
+BT /F1 9 Tf 0.20 0.80 0.40 rg 50 518 Td (  ? Base de datos y Redis no accesibles desde el exterior) Tj ET
+BT /F1 9 Tf 0.20 0.80 0.40 rg 50 505 Td (  ? Contraseñas con complejidad mínima validada) Tj ET
+BT /F1 9 Tf 0.20 0.80 0.40 rg 50 492 Td (  ? Debug deshabilitado en producción) Tj ET
+BT /F2 12 Tf 0.20 0.60 1.00 rg 40 471 Td (5.3 Recomendaciones futuras \(fuera del alcance actual\)) Tj ET
+BT /F1 9 Tf 0.92 0.92 0.95 rg 50 453 Td (? Implementar refresh tokens para renovación sin re-login) Tj ET
+BT /F1 9 Tf 0.92 0.92 0.95 rg 50 440 Td (? Agregar rate limiting específico más estricto en /auth/login \(ej. 5 req/min\)) Tj ET
+BT /F1 9 Tf 0.92 0.92 0.95 rg 50 427 Td (? Implementar HTTPS/TLS con certificados \(nginx reverse proxy\)) Tj ET
+BT /F1 9 Tf 0.92 0.92 0.95 rg 50 414 Td (? Agregar logging de auditoría para intentos de login fallidos) Tj ET
+BT /F1 9 Tf 0.92 0.92 0.95 rg 50 401 Td (? Implementar Content Security Policy \(CSP\) en el dashboard Laravel) Tj ET
+BT /F1 9 Tf 0.92 0.92 0.95 rg 50 388 Td (? Realizar análisis de dependencias \(OWASP Dependency Check\)) Tj ET
+BT /F1 9 Tf 0.92 0.92 0.95 rg 50 375 Td (? Considerar secrets management dedicado \(HashiCorp Vault o similar\)) Tj ET
+BT /F1 9 Tf 0.92 0.92 0.95 rg 50 362 Td (? Agregar pruebas de seguridad automatizadas al pipeline CI/CD) Tj ET
+0.08 0.15 0.08 rg 40 274 515 70 re f
+1 w 0.20 0.80 0.40 RG 40 339 m 555 339 l S
+BT /F2 12 Tf 0.20 0.80 0.40 rg 50 324 Td (RESULTADO FINAL) Tj ET
+BT /F1 10 Tf 1 1 1 rg 50 306 Td (17 vulnerabilidades identificadas ? 17 corregidas) Tj ET
+BT /F1 10 Tf 0.92 0.92 0.95 rg 50 290 Td (Reducción de superficie de ataque: SIGNIFICATIVA) Tj ET
+BT /F1 8 Tf 0.65 0.65 0.75 rg 60 20 Td (Visio Flow ? Reporte de Seguridad) Tj ET
+BT /F1 8 Tf 0.65 0.65 0.75 rg 495 20 Td (Página 11) Tj ET
+endstream
+endobj
+26 0 obj
+<< /Type /Page /Parent 5 0 R /MediaBox [0 0 595 842] /Contents 25 0 R /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> >>
+endobj
+27 0 obj
+<< /Type /Pages /Kids [6 0 R 8 0 R 10 0 R 12 0 R 14 0 R 16 0 R 18 0 R 20 0 R 22 0 R 24 0 R 26 0 R] /Count 11 >>
+endobj
+xref
+0 28
+0000000000 65535 f 
+0000000015 00000 n 
+0000000065 00000 n 
+0000000250 00000 n 
+0000000347 00000 n 
+0000000449 00000 n 
+0000003178 00000 n 
+0000003314 00000 n 
+0000006372 00000 n 
+0000006508 00000 n 
+0000012311 00000 n 
+0000012448 00000 n 
+0000016593 00000 n 
+0000016731 00000 n 
+0000020731 00000 n 
+0000020869 00000 n 
+0000024989 00000 n 
+0000025127 00000 n 
+0000029234 00000 n 
+0000029372 00000 n 
+0000033411 00000 n 
+0000033549 00000 n 
+0000036337 00000 n 
+0000036475 00000 n 
+0000040831 00000 n 
+0000040969 00000 n 
+0000044896 00000 n 
+0000045034 00000 n 
+trailer
+<< /Size 28 /Root 1 0 R /Info 2 0 R >>
+startxref
+45162
+%%EOF

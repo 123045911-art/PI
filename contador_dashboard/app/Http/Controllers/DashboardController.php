@@ -20,10 +20,11 @@ class DashboardController extends Controller
     public function index()
     {
         try {
+            $headers = $this->apiAuthHeaders();
             $responses = Http::pool(fn (Pool $pool) => [
-                $pool->as('summary')->timeout(10)->get($this->apiUrl . '/dashboard/summary'),
-                $pool->as('areas')->timeout(10)->get($this->apiUrl . '/dashboard/areas'),
-                $pool->as('events')->timeout(10)->get($this->apiUrl . '/dashboard/events', ['limit' => 10])
+                $pool->as('summary')->timeout(10)->withHeaders($headers)->get($this->apiUrl . '/dashboard/summary'),
+                $pool->as('areas')->timeout(10)->withHeaders($headers)->get($this->apiUrl . '/dashboard/areas'),
+                $pool->as('events')->timeout(10)->withHeaders($headers)->get($this->apiUrl . '/dashboard/events', ['limit' => 10])
             ]);
             
             if ($responses['summary']->successful() && $responses['areas']->successful() && $responses['events']->successful()) {
@@ -75,10 +76,11 @@ class DashboardController extends Controller
     public function dataApi()
     {
         try {
+            $headers = $this->apiAuthHeaders();
             $responses = Http::pool(fn (Pool $pool) => [
-                $pool->as('summary')->timeout(10)->get($this->apiUrl . '/dashboard/summary'),
-                $pool->as('areas')->timeout(10)->get($this->apiUrl . '/dashboard/areas'),
-                $pool->as('events')->timeout(10)->get($this->apiUrl . '/dashboard/events', ['limit' => 10])
+                $pool->as('summary')->timeout(10)->withHeaders($headers)->get($this->apiUrl . '/dashboard/summary'),
+                $pool->as('areas')->timeout(10)->withHeaders($headers)->get($this->apiUrl . '/dashboard/areas'),
+                $pool->as('events')->timeout(10)->withHeaders($headers)->get($this->apiUrl . '/dashboard/events', ['limit' => 10])
             ]);
             
             if ($responses['summary']->successful() && $responses['areas']->successful() && $responses['events']->successful()) {

@@ -18,7 +18,8 @@ class AreaController extends Controller
     public function index()
     {
         try {
-            $response = Http::get($this->apiUrl . '/areas');
+            $response = Http::withHeaders($this->apiAuthHeaders())
+                ->get($this->apiUrl . '/areas');
             
             if ($response->successful()) {
                 $areas = collect($response->json())->map(function($area) {
@@ -44,7 +45,8 @@ class AreaController extends Controller
     public function edit($id)
     {
         try {
-            $response = Http::get($this->apiUrl . '/areas/' . $id);
+            $response = Http::withHeaders($this->apiAuthHeaders())
+                ->get($this->apiUrl . '/areas/' . $id);
             if ($response->successful()) {
                 $area = (object)$response->json();
                 return view('areas.edit', compact('area'));
@@ -62,9 +64,8 @@ class AreaController extends Controller
         ]);
 
         try {
-            $response = Http::withHeaders([
-                'X-Is-Admin' => session('is_admin', false)
-            ])->patch($this->apiUrl . '/areas/' . $id, [
+            $response = Http::withHeaders($this->apiAuthHeaders())
+                ->patch($this->apiUrl . '/areas/' . $id, [
                 'name' => $request->input('name')
             ]);
 
@@ -82,9 +83,8 @@ class AreaController extends Controller
     public function destroy($id)
     {
         try {
-            $response = Http::withHeaders([
-                'X-Is-Admin' => session('is_admin', false)
-            ])->delete($this->apiUrl . '/areas/' . $id);
+            $response = Http::withHeaders($this->apiAuthHeaders())
+                ->delete($this->apiUrl . '/areas/' . $id);
             if ($response->successful()) {
                 return redirect()->route('areas.index')
                     ->with('success', 'El área y sus datos asociados han sido eliminados.');

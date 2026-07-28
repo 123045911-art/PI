@@ -33,7 +33,7 @@ class LoginController extends Controller
         ]);
 
         try {
-            $response = Http::post($this->apiUrl . '/auth/login', [
+            $response = Http::asForm()->post($this->apiUrl . '/auth/login', [
                 'username' => $request->username,
                 'password' => $request->password,
             ]);
@@ -42,6 +42,7 @@ class LoginController extends Controller
                 $data = $response->json();
                 Session::put('user', $data['user']);
                 Session::put('is_admin', $data['user']['is_admin'] ?? false);
+                Session::put('access_token', $data['access_token'] ?? null);
                 
                 return redirect()->route('dashboard')->with('success', '¡Bienvenido de nuevo!');
             }
@@ -56,6 +57,7 @@ class LoginController extends Controller
     {
         Session::forget('user');
         Session::forget('is_admin');
+        Session::forget('access_token');
         return redirect()->route('login')->with('info', 'Has cerrado sesión.');
     }
 }

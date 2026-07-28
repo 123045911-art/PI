@@ -12,7 +12,7 @@ class EventController extends Controller
 
     public function __construct()
     {
-        $this->apiUrl = config('services.api.url', 'http://fastapi:8000/api/v1');
+        $this->apiUrl = config('services.api.url', 'http://api:8000');
     }
 
     public function index(Request $request)
@@ -20,17 +20,18 @@ class EventController extends Controller
         try {
             $page = (int) $request->get('page', 1);
             $limit = 50;
-            $offset = ($page - 1) * $limit;
+            $skip = ($page - 1) * $limit;
 
-            $response = Http::get($this->apiUrl . '/events', [
-                'limit' => $limit,
-                'offset' => $offset
-            ]);
+            $response = Http::withHeaders($this->apiAuthHeaders())
+                ->get($this->apiUrl . '/dashboard/events', [
+                    'limit' => $limit,
+                    'skip' => $skip,
+                ]);
 
             if ($response->successful()) {
                 $data = $response->json();
-                
-                $eventos = collect($data['data'])->map(function($ev) {
+
+                $eventos = collect($data['items'] ?? [])->map(function ($ev) {
                     return (object)[
                         'id' => $ev['id'],
                         'timestamp' => $ev['timestamp'],

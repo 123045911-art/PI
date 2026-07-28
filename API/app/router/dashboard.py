@@ -10,22 +10,23 @@ from app.schemas.dashboard import (
     DashboardHeatmapOut,
     DashboardSummary,
 )
+from app.security.auth import get_current_user
 from app.services import dashboard_service
 
 router = APIRouter(prefix="/dashboard", tags=["dashboard"])
 
 
-@router.get("/summary", response_model=DashboardSummary)
+@router.get("/summary", response_model=DashboardSummary, dependencies=[Depends(get_current_user)])
 def dashboard_summary(db: Session = Depends(get_db)):
     return dashboard_service.get_summary(db)
 
 
-@router.get("/areas", response_model=DashboardAreasOut)
+@router.get("/areas", response_model=DashboardAreasOut, dependencies=[Depends(get_current_user)])
 def dashboard_areas(db: Session = Depends(get_db)):
     return dashboard_service.get_areas_dashboard(db)
 
 
-@router.get("/events", response_model=DashboardEventsOut)
+@router.get("/events", response_model=DashboardEventsOut, dependencies=[Depends(get_current_user)])
 def dashboard_events(
     db: Session = Depends(get_db),
     area_id: int | None = Query(None),
@@ -37,7 +38,7 @@ def dashboard_events(
     )
 
 
-@router.get("/heatmap", response_model=DashboardHeatmapOut)
+@router.get("/heatmap", response_model=DashboardHeatmapOut, dependencies=[Depends(get_current_user)])
 def dashboard_heatmap(
     db: Session = Depends(get_db),
     area_id: int | None = Query(None),
@@ -52,3 +53,4 @@ def dashboard_heatmap(
         date_to=date_to,
         limit=limit,
     )
+
