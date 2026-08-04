@@ -1,0 +1,45 @@
+{
+  "cameraId": "dell-wb7022",
+  "areas": [
+    {
+      "id": 7,
+      "api_id": null,
+      "external_id": "area-local-7",
+      "name": "area total",
+      "x1": 121,
+      "y1": 58,
+      "x2": 338,
+      "y2": 426
+    },
+    {
+      "id": 8,
+      "api_id": null,
+      "external_id": "zona-cercana",
+      "name": "Zona cercana",
+      "x1": 245,
+      "y1": 585,
+      "x2": 735,
+      "y2": 719
+    },
+    {
+      "id": 9,
+      "api_id": null,
+      "external_id": "zona-media",
+      "name": "Zona media",
+      "x1": 285,
+      "y1": 505,
+      "x2": 575,
+      "y2": 584
+    },
+    {
+      "id": 10,
+      "api_id": null,
+      "external_id": "zona-lejana",
+      "name": "Zona lejana",
+      "x1": 325,
+      "y1": 415,
+      "x2": 485,
+      "y2": 504
+    }
+  ]
+}

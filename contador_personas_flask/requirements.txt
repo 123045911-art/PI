@@ -1,5 +1,5 @@
-Flask
-opencv-python
+Flask>=3.0,<4
+opencv-contrib-python-headless>=4.8,<5
 ultralytics
 deep-sort-realtime
 numpy

@@ -22,6 +22,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
+# Ultralytics declara opencv-python. Reinstalar la variante contrib garantiza
+# cv2.aruco/ChArUco y evita mezclar dos distribuciones que escriben el mismo cv2.
+RUN pip uninstall -y opencv-python opencv-python-headless opencv-contrib-python || true && \
+    pip install --no-cache-dir "opencv-contrib-python-headless>=4.8,<5"
 
 COPY . .
 

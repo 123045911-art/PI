@@ -1,0 +1,1542 @@
+{
+  "cameraId": "dell-wb7022",
+  "coordinateSystem": {
+    "name": "world_ground",
+    "unit": "meter",
+    "origin": "camera_floor_projection",
+    "xAxis": "right",
+    "yAxis": "forward",
+    "zAxis": "up"
+  },
+  "calibrationVersion": 1,
+  "fieldOfViewPolygon": [
+    [
+      -0.514446,
+      -0.142859
+    ],
+    [
+      1.047993,
+      -0.142859
+    ],
+    [
+      -1.326005,
+      -1.693325
+    ],
+    [
+      0.631993,
+      -1.693325
+    ]
+  ],
+  "objects": [
+    {
+      "name": "Tablas blancas fijas",
+      "type": "wall",
+      "footprint": [
+        [
+          1.579622,
+          4.337457
+        ],
+        [
+          1.474397,
+          3.290208
+        ],
+        [
+          0.91414,
+          0.022011
+        ],
+        [
+          0.807347,
+          0.022011
+        ]
+      ],
+      "heightMeters": null,
+      "depthMethod": "ground_plane",
+      "approximate": true,
+      "confidence": 1.0,
+      "id": "obj-wall-62c09ab8",
+      "center": {
+        "x": 1.1938765,
+        "y": 1.9179217499999999,
+        "z": 0.0
+      },
+      "widthMeters": 0.772275,
+      "depthMeters": 4.315446
+    }
+  ],
+  "operationalAreas": [],
+  "fixedPointMatrix": [
+    {
+      "x": -1.326005,
+      "y": -1.693325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -1.226005,
+      "y": -1.693325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -1.126005,
+      "y": -1.693325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -1.126005,
+      "y": -1.593325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -1.026005,
+      "y": -1.693325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -1.026005,
+      "y": -1.593325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.926005,
+      "y": -1.693325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.926005,
+      "y": -1.593325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.926005,
+      "y": -1.493325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.826005,
+      "y": -1.693325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.826005,
+      "y": -1.593325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.826005,
+      "y": -1.493325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.826005,
+      "y": -1.393325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.726005,
+      "y": -1.693325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.726005,
+      "y": -1.593325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.726005,
+      "y": -1.493325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.726005,
+      "y": -1.393325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.626005,
+      "y": -1.693325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.626005,
+      "y": -1.593325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.626005,
+      "y": -1.493325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.626005,
+      "y": -1.393325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.626005,
+      "y": -1.293325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.526005,
+      "y": -1.693325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.526005,
+      "y": -1.593325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.526005,
+      "y": -1.493325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.526005,
+      "y": -1.393325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.526005,
+      "y": -1.293325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.526005,
+      "y": -1.193325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.426005,
+      "y": -1.693325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.426005,
+      "y": -1.593325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.426005,
+      "y": -1.493325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.426005,
+      "y": -1.393325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.426005,
+      "y": -1.293325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.426005,
+      "y": -1.193325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.426005,
+      "y": -0.193325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.326005,
+      "y": -1.693325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.326005,
+      "y": -1.593325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.326005,
+      "y": -1.493325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.326005,
+      "y": -1.393325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.326005,
+      "y": -1.293325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.326005,
+      "y": -1.193325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.326005,
+      "y": -1.093325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.326005,
+      "y": -0.393325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.326005,
+      "y": -0.293325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.326005,
+      "y": -0.193325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.226005,
+      "y": -1.693325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.226005,
+      "y": -1.593325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.226005,
+      "y": -1.493325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.226005,
+      "y": -1.393325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.226005,
+      "y": -1.293325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.226005,
+      "y": -1.193325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.226005,
+      "y": -1.093325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.226005,
+      "y": -0.993325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.226005,
+      "y": -0.493325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.226005,
+      "y": -0.393325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.226005,
+      "y": -0.293325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.226005,
+      "y": -0.193325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.126005,
+      "y": -1.693325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.126005,
+      "y": -1.593325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.126005,
+      "y": -1.493325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.126005,
+      "y": -1.393325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.126005,
+      "y": -1.293325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.126005,
+      "y": -1.193325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.126005,
+      "y": -1.093325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.126005,
+      "y": -0.993325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.126005,
+      "y": -0.593325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.126005,
+      "y": -0.493325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.126005,
+      "y": -0.393325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.126005,
+      "y": -0.293325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.126005,
+      "y": -0.193325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.026005,
+      "y": -1.693325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.026005,
+      "y": -1.593325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.026005,
+      "y": -1.493325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.026005,
+      "y": -1.393325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.026005,
+      "y": -1.293325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.026005,
+      "y": -1.193325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.026005,
+      "y": -1.093325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.026005,
+      "y": -0.993325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.026005,
+      "y": -0.893325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.026005,
+      "y": -0.793325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.026005,
+      "y": -0.693325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.026005,
+      "y": -0.593325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.026005,
+      "y": -0.493325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.026005,
+      "y": -0.393325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.026005,
+      "y": -0.293325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": -0.026005,
+      "y": -0.193325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": 0.073995,
+      "y": -1.693325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": 0.073995,
+      "y": -1.593325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": 0.073995,
+      "y": -1.493325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": 0.073995,
+      "y": -1.393325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": 0.073995,
+      "y": -1.293325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": 0.073995,
+      "y": -1.193325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": 0.073995,
+      "y": -1.093325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": 0.073995,
+      "y": -0.993325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": 0.073995,
+      "y": -0.693325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": 0.073995,
+      "y": -0.593325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": 0.073995,
+      "y": -0.493325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": 0.073995,
+      "y": -0.393325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": 0.073995,
+      "y": -0.293325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": 0.073995,
+      "y": -0.193325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": 0.173995,
+      "y": -1.693325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": 0.173995,
+      "y": -1.593325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": 0.173995,
+      "y": -1.493325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": 0.173995,
+      "y": -1.393325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": 0.173995,
+      "y": -1.293325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": 0.173995,
+      "y": -1.193325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": 0.173995,
+      "y": -1.093325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": 0.173995,
+      "y": -0.693325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": 0.173995,
+      "y": -0.593325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": 0.173995,
+      "y": -0.493325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": 0.173995,
+      "y": -0.393325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": 0.173995,
+      "y": -0.293325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": 0.173995,
+      "y": -0.193325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": 0.273995,
+      "y": -1.693325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": 0.273995,
+      "y": -1.593325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": 0.273995,
+      "y": -1.493325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": 0.273995,
+      "y": -1.393325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": 0.273995,
+      "y": -1.293325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": 0.273995,
+      "y": -0.593325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": 0.273995,
+      "y": -0.493325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": 0.273995,
+      "y": -0.393325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": 0.273995,
+      "y": -0.293325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": 0.273995,
+      "y": -0.193325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": 0.373995,
+      "y": -1.693325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": 0.373995,
+      "y": -1.593325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": 0.373995,
+      "y": -1.493325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": 0.373995,
+      "y": -1.393325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": 0.373995,
+      "y": -0.493325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": 0.373995,
+      "y": -0.393325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": 0.373995,
+      "y": -0.293325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": 0.373995,
+      "y": -0.193325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": 0.473995,
+      "y": -1.693325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": 0.473995,
+      "y": -1.593325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": 0.473995,
+      "y": -1.493325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": 0.473995,
+      "y": -0.493325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": 0.473995,
+      "y": -0.393325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": 0.473995,
+      "y": -0.293325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": 0.473995,
+      "y": -0.193325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": 0.573995,
+      "y": -1.693325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": 0.573995,
+      "y": -0.393325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": 0.573995,
+      "y": -0.293325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": 0.573995,
+      "y": -0.193325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": 0.673995,
+      "y": -0.293325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": 0.673995,
+      "y": -0.193325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": 0.773995,
+      "y": -0.293325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": 0.773995,
+      "y": -0.193325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    },
+    {
+      "x": 0.873995,
+      "y": -0.193325,
+      "z": 0.0,
+      "coordinateSystem": "world_ground",
+      "occupied": false,
+      "objectId": null,
+      "objectType": null,
+      "confidence": 1.0
+    }
+  ],
+  "version": 1,
+  "createdAt": "2026-08-03T20:37:03Z",
+  "fixedPointMatrixResolutionMeters": 0.1
+}

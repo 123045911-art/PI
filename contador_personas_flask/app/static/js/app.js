@@ -20,6 +20,7 @@ let drawingMode = false;
 let dragActive = false;
 let startDisp = { x: 0, y: 0 };
 let ctx = null;
+let editingAreaId = null;
 
 function setFormMessage(message, type = "success") {
   formMessage.textContent = message;
@@ -198,6 +199,17 @@ window.addEventListener("resize", () => {
 
 videoImg.addEventListener("load", () => {
   syncOverlaySize();
+  videoImg.classList.remove("stream-reconnecting");
+});
+
+let streamRetryTimer = null;
+videoImg.addEventListener("error", () => {
+  videoImg.classList.add("stream-reconnecting");
+  videoImg.alt = "Streaming de video limitado a uno por usuario";
+  if (streamRetryTimer) clearTimeout(streamRetryTimer);
+  streamRetryTimer = setTimeout(() => {
+    videoImg.src = `/video_feed?retry=${Date.now()}`;
+  }, 1500);
 });
 
 if (typeof ResizeObserver !== "undefined" && videoWrapper) {
@@ -226,6 +238,21 @@ async function addArea(payload) {
   return response.json();
 }
 
+async function mutateArea(areaId, method, payload) {
+  const response = await fetch(`/areas/${areaId}`, {
+    method,
+    headers: { "Content-Type": "application/json" },
+    body: payload ? JSON.stringify(payload) : undefined,
+  });
+  return response.json();
+}
+
+function escapeHtml(value) {
+  return String(value).replace(/[&<>"']/g, (char) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;",
+  })[char]);
+}
+
 function renderStats(areas) {
   if (!areas.length) {
     statsContainer.innerHTML = `<p class="empty">No hay areas creadas todavia.</p>`;
@@ -236,24 +263,61 @@ function renderStats(areas) {
     .map(
       (area) => `
       <article class="stat-card">
-        <p class="stat-title">${area.name}</p>
+        <p class="stat-title">${escapeHtml(area.name)}</p>
         <p class="stat-line">Actuales: ${area.current_count}</p>
         <p class="stat-line">Entradas: ${area.total_entries}</p>
         <p class="stat-line">Salidas: ${area.total_exits}</p>
         <p class="stat-line">Permanencia total: ${area.total_dwell_seconds.toFixed(2)} s</p>
         <p class="stat-line">Permanencia promedio: ${area.avg_dwell_seconds.toFixed(2)} s</p>
         <p class="stat-line">Rect: [${area.rect.join(", ")}]</p>
+        <div class="form-actions">
+          <button type="button" class="btn-secondary area-edit" data-area-id="${area.id}">Editar</button>
+          <button type="button" class="btn-ghost area-delete" data-area-id="${area.id}">Eliminar</button>
+        </div>
       </article>
     `
     )
     .join("");
 }
 
+statsContainer.addEventListener("click", async (event) => {
+  const button = event.target.closest("button[data-area-id]");
+  if (!button) return;
+  const areaId = Number(button.dataset.areaId);
+  const response = await fetch("/stats");
+  const data = await response.json();
+  const area = (data.areas || []).find((item) => item.id === areaId);
+  if (!area) return;
+  if (button.classList.contains("area-delete")) {
+    if (!window.confirm(`¿Eliminar el área "${area.name}"?`)) return;
+    const result = await mutateArea(areaId, "DELETE");
+    if (!result.ok) window.alert(result.error || "No se pudo eliminar el área.");
+    if (editingAreaId === areaId) {
+      editingAreaId = null;
+      areaForm.reset();
+      btnSave.textContent = "Guardar area";
+      btnSave.disabled = true;
+    }
+    await fetchStats();
+    return;
+  }
+  const [x1, y1, x2, y2] = area.rect;
+  editingAreaId = areaId;
+  document.getElementById("name").value = area.name;
+  inputs.x1.value = String(x1); inputs.y1.value = String(y1);
+  inputs.x2.value = String(x2); inputs.y2.value = String(y2);
+  btnSave.disabled = false;
+  btnSave.textContent = "Guardar cambios";
+  setFormMessage("Edita el nombre o vuelve a dibujar el rectángulo y guarda los cambios.", "success");
+  areaForm.scrollIntoView({ behavior: "smooth", block: "start" });
+});
+
 async function fetchStats() {
   try {
     const response = await fetch("/stats");
     const data = await response.json();
     renderStats(data.areas || []);
+    refreshAlertAreaOptions(data.areas || []);
   } catch (err) {
     console.error("Error al obtener stats:", err);
   }
@@ -281,19 +345,23 @@ areaForm.addEventListener("submit", async (event) => {
   }
 
   try {
-    const result = await addArea(payload);
+    const result = editingAreaId
+      ? await mutateArea(editingAreaId, "PATCH", payload)
+      : await addArea(payload);
     if (!result.ok) {
       setFormMessage(result.error || "No se pudo guardar el area.", "error");
       return;
     }
 
-    setFormMessage(`Area "${result.area.name}" creada correctamente.`, "success");
+    setFormMessage(`Area "${result.area.name}" ${editingAreaId ? "actualizada" : "creada"} correctamente.`, "success");
+    editingAreaId = null;
     areaForm.reset();
     inputs.x1.value = "";
     inputs.y1.value = "";
     inputs.x2.value = "";
     inputs.y2.value = "";
     btnSave.disabled = true;
+    btnSave.textContent = "Guardar area";
     drawCanvas.classList.remove("preview-locked");
     clearOverlay();
     fetchStats();
@@ -307,3 +375,106 @@ fetchStats();
 setInterval(fetchStats, 2000);
 
 requestAnimationFrame(() => syncOverlaySize());
+
+const alertForm = document.getElementById("alert-form");
+const alertArea = document.getElementById("alert-area");
+const alertType = document.getElementById("alert-type");
+const alertThreshold = document.getElementById("alert-threshold");
+const alertMessage = document.getElementById("alert-message");
+const alertSave = document.getElementById("alert-save");
+const alertCancel = document.getElementById("alert-cancel");
+const alertsContainer = document.getElementById("alerts-container");
+let editingAlertId = null;
+let latestAlerts = [];
+
+function refreshAlertAreaOptions(areas) {
+  const selected = alertArea.value;
+  alertArea.innerHTML = areas.map((area) =>
+    `<option value="${escapeHtml(area.external_id || `area-local-${area.id}`)}">${escapeHtml(area.name)}</option>`
+  ).join("");
+  if ([...alertArea.options].some((option) => option.value === selected)) alertArea.value = selected;
+}
+
+function renderAlerts(alerts) {
+  latestAlerts = alerts;
+  if (!alerts.length) {
+    alertsContainer.innerHTML = '<p class="empty">No hay alertas configuradas.</p>';
+    return;
+  }
+  alertsContainer.innerHTML = alerts.map((alert) => `
+    <article class="stat-card">
+      <p class="stat-title">${escapeHtml(alert.type === "crowding" ? "Alta afluencia" : "Baja afluencia")} · ${escapeHtml(alert.areaName)}</p>
+      <p class="stat-line">${escapeHtml(alert.reason)}</p>
+      <p class="stat-line">Conteo actual: ${Number(alert.peopleCountSnapshot || 0)}</p>
+      <p class="stat-line">Estado: <strong>${alert.status === "triggered" ? "ACTIVA" : "EN ESPERA"}</strong></p>
+      <div class="form-actions">
+        <button type="button" class="btn-secondary alert-edit" data-alert-id="${escapeHtml(alert.id)}">Editar</button>
+        <button type="button" class="btn-ghost alert-delete" data-alert-id="${escapeHtml(alert.id)}">Eliminar</button>
+      </div>
+    </article>`).join("");
+}
+
+async function fetchAlerts() {
+  try {
+    const response = await fetch("/api/v1/sites/pasillo-real/alerts");
+    const data = await response.json();
+    renderAlerts(data.items || []);
+  } catch (error) {
+    alertMessage.textContent = "No se pudieron actualizar las alertas.";
+  }
+}
+
+function resetAlertForm() {
+  editingAlertId = null;
+  alertForm.reset();
+  alertThreshold.value = "1";
+  alertSave.textContent = "Crear alerta";
+  alertCancel.classList.add("hidden");
+}
+
+alertForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const areaName = alertArea.options[alertArea.selectedIndex]?.text || "Area";
+  const thresholdPeople = Number(alertThreshold.value);
+  const payload = {
+    areaId: alertArea.value, areaName, type: alertType.value,
+    thresholdPeople, scheduleMode: "all_days", createdBy: "flask",
+    reason: alertType.value === "crowding"
+      ? `Avisar cuando haya ${thresholdPeople} personas o mas.`
+      : `Avisar cuando haya ${thresholdPeople} personas o menos.`,
+  };
+  const path = editingAlertId
+    ? `/api/v1/sites/pasillo-real/alerts/${encodeURIComponent(editingAlertId)}`
+    : "/api/v1/sites/pasillo-real/alerts";
+  const response = await fetch(path, {
+    method: editingAlertId ? "PATCH" : "POST",
+    headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload),
+  });
+  const data = await response.json();
+  alertMessage.textContent = response.ok ? "Alerta guardada correctamente." : (data.error || "No se pudo guardar.");
+  if (response.ok) { resetAlertForm(); await fetchAlerts(); }
+});
+
+alertsContainer.addEventListener("click", async (event) => {
+  const button = event.target.closest("button[data-alert-id]");
+  if (!button) return;
+  const alert = latestAlerts.find((item) => item.id === button.dataset.alertId);
+  if (!alert) return;
+  if (button.classList.contains("alert-delete")) {
+    if (!window.confirm(`¿Eliminar la alerta de "${alert.areaName}"?`)) return;
+    await fetch(`/api/v1/sites/pasillo-real/alerts/${encodeURIComponent(alert.id)}`, { method: "DELETE" });
+    await fetchAlerts();
+    return;
+  }
+  editingAlertId = alert.id;
+  alertArea.value = alert.areaId;
+  alertType.value = alert.type;
+  alertThreshold.value = String(alert.thresholdPeople);
+  alertSave.textContent = "Guardar cambios";
+  alertCancel.classList.remove("hidden");
+  alertForm.scrollIntoView({ behavior: "smooth", block: "center" });
+});
+
+alertCancel.addEventListener("click", resetAlertForm);
+fetchAlerts();
+setInterval(fetchAlerts, 2000);

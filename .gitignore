@@ -60,3 +60,22 @@ bootstrap/cache/
 # ==========================================
 contador_dashboard/public/storage
 fastapi-app/
+
+# Estado privado generado durante la ejecucion.
+contador_personas_flask/data/users.json
+contador_personas_flask/data/alerts.json
+
+# Por defecto las calibraciones pertenecen a cada instalacion. El preset de
+# demostracion de la Dell se versiona para que el pasillo arranque preparado.
+contador_personas_flask/data/calibration/*
+!contador_personas_flask/data/calibration/dell-wb7022/
+!contador_personas_flask/data/calibration/dell-wb7022/*.json
+contador_personas_flask/data/scenes/*
+!contador_personas_flask/data/scenes/dell-wb7022/
+!contador_personas_flask/data/scenes/dell-wb7022/*.json
+
+# Artefactos locales de presentacion e inferencia.
+contador_personas_flask/kernel.errors.txt
+contador_personas_flask/output/
+contador_personas_flask/tmp/
+contador_personas_flask/yolov8n_openvino_model/

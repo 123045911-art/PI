@@ -1,0 +1,45 @@
+{
+  "imageWidth": 640,
+  "imageHeight": 480,
+  "cameraMatrix": [
+    [
+      551.7043082184102,
+      0.0,
+      331.85330203822934
+    ],
+    [
+      0.0,
+      552.4203038270759,
+      249.4470555180917
+    ],
+    [
+      0.0,
+      0.0,
+      1.0
+    ]
+  ],
+  "distortionCoefficients": [
+    0.12331001199774574,
+    -0.34450946126485543,
+    0.006400952881018542,
+    0.00035791052188772777,
+    0.45507387399006904
+  ],
+  "reprojectionErrorPx": 0.6247490157908877,
+  "coordinateSystem": {
+    "name": "image",
+    "unit": "pixel",
+    "uAxis": "right",
+    "vAxis": "down"
+  },
+  "board": {
+    "dictionary": "DICT_5X5_100",
+    "squaresX": 7,
+    "squaresY": 5,
+    "squareLengthMeters": 0.035,
+    "markerLengthMeters": 0.0175
+  },
+  "cameraId": "dell-wb7022",
+  "version": 1,
+  "createdAt": "2026-08-03T20:16:16Z"
+}

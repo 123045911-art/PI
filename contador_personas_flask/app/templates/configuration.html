@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VISIOFLOW - Calibracion y escena</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  </head>
+  <body>
+    <nav class="top-nav">
+      <div class="nav-brand">VISIOFLOW</div>
+      <div class="nav-links">
+        <a href="{{ url_for('main.index') }}" class="nav-link">Conteo y areas</a>
+        <span class="user-info">{{ session.user.username }}</span>
+        <a href="{{ url_for('auth.logout') }}" class="nav-link logout">Cerrar sesion</a>
+      </div>
+    </nav>
+
+    <main class="config-layout">
+      <section class="panel config-video-panel">
+        <div class="panel-header compact">
+          <div>
+            <h1>Asistente de calibracion y escena</h1>
+            <p class="subtitle">
+              Camara {{ vision_config.cameraId }} · sensor {{ vision_config.sensorMode }}
+            </p>
+          </div>
+          <span id="scan-state" class="status-pill">idle</span>
+        </div>
+        <div class="video-wrapper" id="config-video-wrapper">
+          <img id="config-video" src="{{ url_for('vision_api.live_stream') }}" alt="Frame de referencia" />
+          <canvas id="scene-overlay" class="draw-overlay active" aria-label="Editor de escena"></canvas>
+        </div>
+        <div class="coordinate-readout">
+          <span>Imagen: <strong id="image-coordinate">u=—, v=—</strong></span>
+          <span>Mundo: <strong id="world-coordinate">X=—m, Y=—m</strong></span>
+        </div>
+        <p class="subtitle small">
+          Azul: campo de vision · naranja: objetos fisicos · verde: cuadricula metrica.
+          Las areas operativas de conteo se mantienen en la vista principal.
+        </p>
+      </section>
+
+      <section class="config-sidebar">
+        <article class="panel config-card">
+          <h2>Que debes hacer</h2>
+          <p class="subtitle small">Si la camara no se movio, la calibracion guardada sigue activa y no necesitas repetirla.</p>
+          <ol class="subtitle small">
+            <li>Revisa que el video se mueva y pulsa <strong>Actualizar estado</strong>.</li>
+            <li>Solo si cambiaste la camara: captura el tablero desde varias posiciones y resuelve.</li>
+            <li>Solo si cambiaste altura o angulo: vuelve a calcular el piso.</li>
+            <li>Agrega o ajusta objetos; las areas de conteo se editan en la pantalla principal.</li>
+          </ol>
+        </article>
+
+        <article class="panel config-card">
+          <h2>1. Comprobar configuracion guardada</h2>
+          <div id="calibration-status" class="status-list"></div>
+          <button id="refresh-status" class="btn-secondary">Actualizar estado</button>
+        </article>
+
+        <article class="panel config-card">
+          <h2>2. Calibrar la lente con el tablero</h2>
+          <p class="subtitle small">Muestra el tablero completo, inclinado y en distintas zonas de la imagen. Cada captura aceptada suma una vista.</p>
+          <p class="subtitle small">
+            {{ vision_config.charuco.dictionary }}, {{ vision_config.charuco.squaresX }}×{{ vision_config.charuco.squaresY }},
+            cuadro {{ vision_config.charuco.squareLengthMeters }}m, marcador {{ vision_config.charuco.markerLengthMeters }}m.
+          </p>
+          <div class="button-row">
+            <button id="capture-charuco">Capturar vista</button>
+            <button id="solve-charuco" class="btn-secondary">Resolver</button>
+          </div>
+          <p id="charuco-message" class="form-message"></p>
+        </article>
+
+        <article class="panel config-card">
+          <h2>3. Relacionar la imagen con el piso</h2>
+          <p class="subtitle small">Paso avanzado: usa cuatro puntos visibles del piso y sus medidas reales. No lo cambies si la calibracion del pasillo ya esta lista.</p>
+          <details>
+          <summary>Mostrar datos tecnicos del plano</summary>
+          <textarea id="world-payload" rows="9" spellcheck="false">{
+  "cameraHeightMeters": 2.8,
+  "originDefinition": "camera_floor_projection",
+  "imagePoints": [[100,700],[1100,700],[900,350],[300,350]],
+  "worldPoints": [[-3,1],[3,1],[2,8],[-2,8]]
+}</textarea>
+          </details>
+          <button id="solve-world">Resolver pose y homografias</button>
+          <p id="world-message" class="form-message"></p>
+        </article>
+
+        <article class="panel config-card">
+          <h2>4. Detectar objetos fijos</h2>
+          <p class="subtitle small">Inicia el escaneo con el pasillo vacio, espera a que termine y acepta las propuestas estables.</p>
+          <div class="button-row">
+            <button id="start-scan">Iniciar</button>
+            <button id="stop-scan" class="btn-secondary">Detener</button>
+          </div>
+          <button id="accept-proposals" class="btn-ghost">Aceptar propuestas estables</button>
+          <div id="proposal-list" class="object-list"></div>
+          <pre id="scan-details" class="json-status"></pre>
+        </article>
+
+        <article class="panel config-card">
+          <h2>5. Agregar un objeto manualmente</h2>
+          <p class="subtitle small">Pulsa los vertices alrededor de la base del objeto, en el punto donde toca el suelo.</p>
+          <label>Nombre<input id="object-name" value="Objeto 01" /></label>
+          <label>Clase
+            <select id="object-type">
+              {% for item in vision_config.objectTypes %}<option value="{{ item }}">{{ item }}</option>{% endfor %}
+            </select>
+          </label>
+          <label>Altura conocida (m, opcional)<input id="object-height" type="number" min="0" step="0.01" /></label>
+          <div class="button-row">
+            <button id="begin-polygon">Dibujar poligono</button>
+            <button id="undo-vertex" class="btn-secondary">Deshacer punto</button>
+          </div>
+          <button id="save-object" disabled>Guardar objeto</button>
+          <p id="object-message" class="form-message"></p>
+          <div id="object-list" class="object-list"></div>
+        </article>
+      </section>
+    </main>
+    <script src="{{ url_for('static', filename='js/configuration.js') }}"></script>
+  </body>
+</html>

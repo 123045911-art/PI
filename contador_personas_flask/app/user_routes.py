@@ -1,9 +1,17 @@
+import os
+
 from flask import Blueprint, render_template, request, redirect, url_for, session, current_app, flash, abort
 
 user_bp = Blueprint("users", __name__, url_prefix="/users")
 
 def get_api_client():
     return current_app.extensions["api_client"]
+
+def local_users_enabled():
+    return os.getenv("APP_ENV", "production").lower() == "local" and os.getenv("LOCAL_DEMO_AUTH", "0") == "1"
+
+def get_local_store():
+    return current_app.extensions["local_user_store"]
 
 def admin_required(f):
     from functools import wraps
@@ -19,8 +27,11 @@ def admin_required(f):
 @admin_required
 def index():
     name_filter = request.args.get("name")
-    client = get_api_client()
-    users = client.list_users(name_filter=name_filter, is_admin=session.get("is_admin", False))
+    users = (
+        get_local_store().list(name_filter)
+        if local_users_enabled()
+        else get_api_client().list_users(name_filter=name_filter, is_admin=session.get("is_admin", False))
+    )
     return render_template("users/index.html", users=users)
 
 @user_bp.route("/create", methods=["GET", "POST"])
@@ -31,12 +42,15 @@ def create():
         password = request.form.get("password")
         is_admin = request.form.get("is_admin") == "on"
         
-        client = get_api_client()
-        result = client.register_user(
-            username=username, 
-            password=password, 
-            is_admin_val=is_admin,
-            current_user_is_admin=session.get("is_admin", False)
+        result = (
+            get_local_store().create(username, password, is_admin)
+            if local_users_enabled()
+            else get_api_client().register_user(
+                username=username,
+                password=password,
+                is_admin_val=is_admin,
+                current_user_is_admin=session.get("is_admin", False),
+            )
         )
         if result:
             flash(f"Usuario {username} creado exitosamente.", "success")
@@ -49,7 +63,11 @@ def create():
 @admin_required
 def edit(user_id):
     client = get_api_client()
-    user = client.get_user(user_id, current_user_is_admin=session.get("is_admin", False))
+    user = (
+        get_local_store().get(user_id)
+        if local_users_enabled()
+        else client.get_user(user_id, current_user_is_admin=session.get("is_admin", False))
+    )
     if not user:
         abort(404)
         
@@ -58,12 +76,16 @@ def edit(user_id):
         password = request.form.get("password") or None
         is_admin = request.form.get("is_admin") == "on"
         
-        success = client.update_user(
-            user_id=user_id, 
-            username=username, 
-            password=password, 
-            is_admin_val=is_admin,
-            current_user_is_admin=session.get("is_admin", False)
+        success = (
+            get_local_store().update(user_id, username, password, is_admin)
+            if local_users_enabled()
+            else client.update_user(
+                user_id=user_id,
+                username=username,
+                password=password,
+                is_admin_val=is_admin,
+                current_user_is_admin=session.get("is_admin", False),
+            )
         )
         if success:
             flash(f"Usuario {username} actualizado.", "success")
@@ -75,8 +97,12 @@ def edit(user_id):
 @user_bp.route("/delete/<int:user_id>", methods=["POST"])
 @admin_required
 def delete(user_id):
-    client = get_api_client()
-    if client.delete_user(user_id, current_user_is_admin=session.get("is_admin", False)):
+    deleted = (
+        get_local_store().delete(user_id)
+        if local_users_enabled()
+        else get_api_client().delete_user(user_id, current_user_is_admin=session.get("is_admin", False))
+    )
+    if deleted:
         flash("Usuario eliminado.", "success")
     else:
         flash("Error al eliminar el usuario.", "danger")

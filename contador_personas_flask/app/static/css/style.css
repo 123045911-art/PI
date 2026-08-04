@@ -162,6 +162,24 @@ input {
   color: var(--text);
 }
 
+select,
+textarea {
+  width: 100%;
+  margin-top: 0.35rem;
+  margin-bottom: 0.7rem;
+  padding: 0.6rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--panel-alt);
+  color: var(--text);
+}
+
+textarea {
+  resize: vertical;
+  font-family: Consolas, monospace;
+  font-size: 0.78rem;
+}
+
 input:focus {
   outline: 1px solid var(--accent);
   border-color: var(--accent);
@@ -409,4 +427,147 @@ td {
 .checkbox-group input {
   width: auto;
   margin: 0;
+}
+
+.config-layout {
+  width: min(1600px, 97vw);
+  margin: 1.25rem auto;
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(340px, 1fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+.config-video-panel,
+.config-card {
+  padding: 1rem;
+}
+
+.config-video-panel {
+  position: sticky;
+  top: 5rem;
+}
+
+.config-sidebar {
+  display: grid;
+  gap: 1rem;
+}
+
+.panel-header.compact {
+  margin-bottom: 0.75rem;
+}
+
+#config-video {
+  width: 100%;
+  display: block;
+}
+
+.coordinate-readout,
+.button-row {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.coordinate-readout {
+  justify-content: space-between;
+  margin-top: 0.65rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.coordinate-readout strong {
+  color: var(--text);
+}
+
+.button-row > * {
+  flex: 1;
+}
+
+.small {
+  font-size: 0.8rem;
+}
+
+.status-pill {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.35rem 0.7rem;
+  color: var(--accent);
+  font-size: 0.78rem;
+}
+
+.status-list {
+  display: grid;
+  gap: 0.4rem;
+  margin-bottom: 0.75rem;
+}
+
+.status-list > div,
+.object-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px dashed var(--border);
+  padding: 0.45rem 0;
+}
+
+.status-list span,
+.object-row small {
+  color: var(--muted);
+}
+
+.object-row span,
+.object-row small {
+  display: block;
+}
+
+.object-list {
+  margin-top: 0.75rem;
+}
+
+.proposal-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0;
+  border-bottom: 1px dashed var(--border);
+}
+
+.proposal-row input {
+  width: auto;
+  margin: 0;
+}
+
+.proposal-row small {
+  display: block;
+  color: var(--muted);
+}
+
+.inline-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.button-link {
+  width: auto;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.json-status {
+  max-height: 180px;
+  overflow: auto;
+  white-space: pre-wrap;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+@media (max-width: 1050px) {
+  .config-layout {
+    grid-template-columns: 1fr;
+  }
+  .config-video-panel {
+    position: static;
+  }
 }
