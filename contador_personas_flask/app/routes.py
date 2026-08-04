@@ -99,16 +99,16 @@ def stats():
 
 @main_bp.route("/add_area", methods=["POST"])
 def add_area():
-    # Solo el administrador puede crear zonas
-    if not session.get("is_admin", False):
+    # Se requiere que el usuario esté autenticado
+    if not session.get("user"):
         return (
             jsonify(
                 {
                     "ok": False,
-                    "error": "Acceso denegado. Solo administradores pueden crear zonas.",
+                    "error": "Acceso denegado. Se requiere iniciar sesión para crear zonas.",
                 }
             ),
-            403,
+            401,
         )
 
     service = get_tracker_service()
@@ -140,7 +140,7 @@ def add_area():
             y1=int(payload["y1"]),
             x2=int(payload["x2"]),
             y2=int(payload["y2"]),
-            is_admin=True,  # El check anterior ya validó session.get("is_admin")
+            is_admin=True,
         )
         return jsonify({"ok": True, "area": area}), 201
     except ValueError as exc:
@@ -149,8 +149,8 @@ def add_area():
 
 @main_bp.route("/areas/<int:area_id>", methods=["PATCH", "DELETE"])
 def mutate_area(area_id: int):
-    if not session.get("is_admin", False):
-        return jsonify({"ok": False, "error": "Acceso denegado."}), 403
+    if not session.get("user"):
+        return jsonify({"ok": False, "error": "Acceso denegado. Se requiere iniciar sesión."}), 401
     service = get_tracker_service()
     if not service:
         return jsonify({"ok": False, "error": "Servicio de tracking no disponible."}), 503

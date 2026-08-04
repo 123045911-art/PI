@@ -129,8 +129,10 @@ def create_app(
         global_limit=int(os.getenv("MAX_MJPEG_STREAMS", "4")),
         per_client=int(os.getenv("MAX_MJPEG_STREAMS_PER_USER", "1")),
     )
-    if vision_config.camera_id == "dell-wb7022":
-        seed_corridor_areas(tracker_service)
+    # Si la lista de áreas está vacía, no forzar áreas semilla automáticamente
+    # para permitir probar el flujo desde 0 áreas delimitadas en Flask hacia Móvil.
+    # if vision_config.camera_id == "dell-wb7022":
+    #     seed_corridor_areas(tracker_service)
 
     segmentation_provider = create_segmentation_provider(vision_config)
     app.extensions["segmentation_provider"] = segmentation_provider
@@ -199,7 +201,7 @@ def create_app(
     def allow_demo_frontend(response):
         if hasattr(g, "api_rate_limit_remaining"):
             response.headers["X-RateLimit-Remaining"] = str(g.api_rate_limit_remaining)
-        if request.path.startswith("/api/v1/sites"):
+        if request.path.startswith("/api/") or request.path.startswith("/video"):
             response.headers["Access-Control-Allow-Origin"] = "*"
             response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
             response.headers["Access-Control-Allow-Methods"] = "GET, POST, PATCH, DELETE, OPTIONS"

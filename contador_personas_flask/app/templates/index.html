@@ -10,8 +10,10 @@
     <nav class="top-nav">
       <div class="nav-brand">VISIOFLOW</div>
       <div class="nav-links">
-        {% if session.is_admin %}
+        {% if session.user %}
         <a href="{{ url_for('vision_api.configuration_view') }}" class="nav-link">Configurar escena</a>
+        {% endif %}
+        {% if session.is_admin %}
         <a href="{{ url_for('users.index') }}" class="nav-link">Gestionar Usuarios</a>
         {% endif %}
         <span class="user-info">Hola, {{ session.user.username }}</span>
@@ -30,7 +32,7 @@
       </section>
 
       <aside class="panel side-panel">
-        <div {% if not session.get('is_admin') %}class="hidden"{% endif %}>
+        <div {% if not session.get('user') %}class="hidden"{% endif %}>
         <h2>Agregar area</h2>
         <form id="area-form">
           <label>

@@ -1,0 +1,98 @@
+===============================================================================
+REPORTE DE REVISIÓN Y PRUEBAS - DOCKER COMPOSE
+Proyecto: Visio Flow - Sistema de Conteo de Personas y Visión Computacional
+Ubicación: /home/ali/Documentos/GitHub/PI/docker-compose.yml
+Fecha de prueba: 2026-08-04
+===============================================================================
+
+1. RESUMEN EJECUTIVO DE LA PRUEBA
+-------------------------------------------------------------------------------
+Se realizó una inspección técnica, validación sintáctica de archivos de definición,
+evaluación de dependencias y pruebas de configuración del archivo docker-compose.yml.
+
+Estado global de la sintaxis: ÉXITO (PASÓ VALIDACIÓN DOCKER COMPOSE CONFIG)
+Servicios definidos: 5 (db, api, flask_service, laravel, redis)
+Redes privadas: 1 (visioflow-net / pi_visioflow-net)
+Volúmenes persistentes: 1 (postgres_data / pi_postgres_data)
+
+
+2. RESULTADOS DE LA PRUEBA DE CONFIGURACIÓN (docker compose config)
+-------------------------------------------------------------------------------
+El comando `docker compose config` parseó e interpoló correctamente todas las 
+variables de entorno declaradas en el archivo .env del proyecto.
+
+Resumen del esquema compilado:
+- Servicio PostgreSQL (db): Imagen postgres:15 | Usuario: visio_user | DB: visio_flow
+- Servicio FastAPI (api): Contexto ./API | Puerto: 8000:8000 | Healthcheck HTTP activo
+- Servicio Flask (flask_service): Contexto ./contador_personas_flask | Puerto: 5000:5000 | Passthrough cámara /dev/video0
+- Servicio Laravel (laravel): Contexto ./contador_dashboard | Puerto: 8085:8000 | Servidor Octane Swoole + Redis
+- Servicio Redis (redis): Imagen redis:alpine | Autenticación con contraseña activa | Sin exposición de puerto al host
+
+
+3. LO QUE SALE BIEN DE LA PRUEBA (PUNTOS POSITIVOS)
+-------------------------------------------------------------------------------
+[OK] 1. Aislamiento de Base de Datos y Redis:
+     Ni el puerto de PostgreSQL (5432) ni el de Redis (6379) están expuestos a la interfaz
+     pública (0.0.0.0) del host. Se comunican exclusivamente dentro de la red privada 
+     bridge 'visioflow-net'.
+
+[OK] 2. Control de Dependencias y Healthchecks:
+     - El servicio 'api' (FastAPI) utiliza `depends_on` condicionado a `db: condition: service_healthy`.
+     - El servicio 'laravel' espera a que 'api' esté en estado 'healthy' y 'redis' iniciado.
+     - El servicio 'flask_service' espera a que 'api' esté en estado 'healthy'.
+
+[OK] 3. Healthcheck de PostgreSQL Eficiente:
+     PostgreSQL implementa una prueba de salud con `pg_isready -U visio_user -d visio_flow`
+     con intervalo de 5 segundos, garantizando un arranque ordenado sin errores de conexión inicial.
+
+[OK] 4. Seguridad de Redis:
+     Redis se ejecuta con la bandera `--requirepass`, requiriendo autenticación por contraseña 
+     para todas las operaciones de sesión y caché de Laravel.
+
+[OK] 5. Configuración de Red del Host en Flask:
+     Se configuró `extra_hosts: ["host.docker.internal:host-gateway"]`, permitiendo a Flask
+     conectarse al sistema host o a transmisiones MJPEG de Windows cuando sea necesario.
+
+
+4. ERRORES Y ADVERTENCIAS DETECTADOS (AVISOS Y RIESGOS)
+-------------------------------------------------------------------------------
+[AVISO 1 - RIESGO DE FALLO DE ARRANQUE EN ENTORNOS SIN CÁMARA]
+- Ubicación: Servicio `flask_service` -> `devices: - "${CAMERA_DEVICE:-/dev/video0}:/dev/video0"`
+- Detalle: Si se ejecuta `docker compose up` en un servidor VPS/Cloud, WSL2, o en una PC
+  sin una cámara web USB conectada en `/dev/video0`, Docker fallará inmediatamente al levantar
+  el contenedor con el siguiente error:
+  "error gathering device information: unable to stat /dev/video0: no such file or directory"
+- Solución recomendada: Para entornos sin webcam física, comentar la sección `devices:` o utilizar
+  un contenedor dummy / fuente de stream por red.
+
+[AVISO 2 - ESTADO DEL DEMONIO DE DOCKER EN EL ANFITRIÓN]
+- Ubicación: Entorno local / Sistema operativo
+- Detalle: Al ejecutar `docker compose ps` o `docker info`, se detectó que el servicio
+  de Docker (`docker.service`) no estaba activo en el sistema anfitrión:
+  "Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?"
+- Solución recomendada: Iniciar el servicio con `sudo systemctl start docker`.
+
+[AVISO 3 - INCONSISTENCIA DE CONFIGURACIÓN DE URL API INTERNA]
+- Ubicación: Servicio `laravel` -> `INTERNAL_API_URL=http://api:8000` vs `contador_dashboard/config/services.php`
+- Detalle: En docker-compose.yml la variable apunta a `http://api:8000`, pero en el archivo
+  `config/services.php` el valor por defecto incluye el sufijo `/api/v1` (`http://fastapi:8000/api/v1`).
+  Si en algún archivo de controlador se concatena `/api/v1` nuevamente, las peticiones hacia
+  FastAPI devolverán HTTP 404 o 500.
+
+[AVISO 4 - VOLUMEN ANÓNIMO EN LARAVEL VENDOR]
+- Ubicación: Servicio `laravel` -> `volumes: - /var/www/html/vendor`
+- Detalle: El volumen anónimo preserva la carpeta vendor del contenedor, pero si se realizan
+  cambios en `composer.json` en el host, la carpeta `vendor` interna no se actualizará automáticamente
+  a menos que se ejecute `composer install` dentro del contenedor o se regenere el volumen.
+
+
+5. RECOMENDACIONES DE MEJORA
+-------------------------------------------------------------------------------
+1. En entornos de producción o servidores sin cámara web, hacer que la sección `devices` en
+   `flask_service` sea condicional o asignarle un flag en `.env` para evitar errores de montaje.
+2. Asegurar que las variables de contraseña en `.env` sean cambiadas antes de desplegar en producción.
+3. Asegurar que el servicio Docker esté iniciado con `sudo systemctl start docker` antes de ejecutar `docker compose up --build`.
+
+===============================================================================
+FIN DEL REPORTE
+===============================================================================

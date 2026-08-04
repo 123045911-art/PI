@@ -1,7 +1,7 @@
 # VisioFlow
 
 VisioFlow combina un contador de personas Flask (OpenCV, YOLOv8 y DeepSORT),
-una API FastAPI, PostgreSQL y un dashboard Laravel. El modulo Flask tambien
+una API FastAPI, PostgreSQL y una aplicación móvil interactiva (Expo Go / React Native). El modulo Flask tambien
 ofrece calibracion metrica, escaneo previo de una escena fija y posiciones en
 vivo sobre el plano del suelo.
 

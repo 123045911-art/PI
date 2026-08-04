@@ -68,17 +68,19 @@ def _runtime_corridor_areas() -> list[dict[str, Any]]:
     with tracker.lock:
         runtime_areas = [dict(area) for area in tracker.areas.values()]
     if not runtime_areas:
-        return [dict(area) for area in CORRIDOR_AREAS]
+        return []
     for area in runtime_areas:
         external_id = str(area.get("external_id") or f"area-local-{area['id']}")
         if external_id in fixed:
             result.append(dict(fixed[external_id]))
             continue
         x1, y1, x2, y2 = (int(area[key]) for key in ("x1", "y1", "x2", "y2"))
-        world_x1 = max(0.0, min(1.75, x1 / 960.0 * 1.75))
-        world_x2 = max(0.0, min(1.75, x2 / 960.0 * 1.75))
-        world_y1 = max(0.0, min(4.5, (720 - y2) / 305.0 * 4.5))
-        world_y2 = max(0.0, min(4.5, (720 - y1) / 305.0 * 4.5))
+        img_w = float(area.get("frame_width") or 640.0)
+        img_h = float(area.get("frame_height") or 480.0)
+        world_x1 = round(max(0.0, min(1.75, (x1 / img_w) * 1.75)), 3)
+        world_x2 = round(max(0.0, min(1.75, (x2 / img_w) * 1.75)), 3)
+        world_y1 = round(max(0.0, min(4.5, ((img_h - y2) / img_h) * 4.5)), 3)
+        world_y2 = round(max(0.0, min(4.5, ((img_h - y1) / img_h) * 4.5)), 3)
         result.append(
             {
                 "areaId": external_id,
@@ -89,9 +91,10 @@ def _runtime_corridor_areas() -> list[dict[str, Any]]:
                     [world_x2, world_y2], [world_x1, world_y2],
                 ],
                 "bounds": {
-                    "x": world_x1, "y": world_y1,
-                    "width": max(0.01, world_x2 - world_x1),
-                    "height": max(0.01, world_y2 - world_y1),
+                    "x": min(world_x1, world_x2),
+                    "y": min(world_y1, world_y2),
+                    "width": max(0.01, abs(world_x2 - world_x1)),
+                    "height": max(0.01, abs(world_y2 - world_y1)),
                 },
                 "imageRect": [x1, y1, x2, y2],
             }
@@ -300,3 +303,39 @@ def site_alert(site_id: str, alert_id: str):
     if not item:
         return jsonify({"ok": False, "error": "Alerta no encontrada."}), 404
     return jsonify({"item": item})
+
+
+@demo_api_bp.route("/api/v1/auth/login", methods=["POST", "OPTIONS"])
+def api_login():
+    if request.method == "OPTIONS":
+        return "", 204
+    payload = request.get_json(silent=True) or {}
+    username = str(payload.get("username", "")).strip()
+    password = str(payload.get("password", ""))
+
+    if not username or not password:
+        return jsonify({"ok": False, "error": "Credenciales incompletas."}), 400
+
+    if (username.lower() == "admin" and password in ("admin", "123456", "root")) or (username.lower() == "operador" and password == "visioflow"):
+        return jsonify({
+            "ok": True,
+            "user": {
+                "id": 1 if username.lower() == "admin" else 2,
+                "username": username,
+                "is_admin": username.lower() == "admin",
+            },
+            "access_token": "demo-token-" + username,
+        })
+
+    local_store = current_app.extensions.get("local_user_store")
+    if local_store:
+        user = local_store.authenticate(username, password)
+        if user:
+            return jsonify({
+                "ok": True,
+                "user": user,
+                "access_token": f"user-token-{user['id']}",
+            })
+
+    return jsonify({"ok": False, "error": "Usuario o contraseña incorrectos."}), 401
+

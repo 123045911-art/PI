@@ -27,12 +27,18 @@ def admin_required(f):
 @admin_required
 def index():
     name_filter = request.args.get("name")
-    users = (
-        get_local_store().list(name_filter)
-        if local_users_enabled()
-        else get_api_client().list_users(name_filter=name_filter, is_admin=session.get("is_admin", False))
-    )
-    return render_template("users/index.html", users=users)
+    api_users = get_api_client().list_users(name_filter=name_filter, is_admin=session.get("is_admin", False))
+    local_users = get_local_store().list(name_filter)
+
+    seen = set()
+    combined = []
+    for u in (api_users or []) + (local_users or []):
+        uid = str(u.get("id") or u.get("username"))
+        if uid not in seen:
+            seen.add(uid)
+            combined.append(u)
+
+    return render_template("users/index.html", users=combined)
 
 @user_bp.route("/create", methods=["GET", "POST"])
 @admin_required
@@ -42,16 +48,15 @@ def create():
         password = request.form.get("password")
         is_admin = request.form.get("is_admin") == "on"
         
-        result = (
-            get_local_store().create(username, password, is_admin)
-            if local_users_enabled()
-            else get_api_client().register_user(
-                username=username,
-                password=password,
-                is_admin_val=is_admin,
-                current_user_is_admin=session.get("is_admin", False),
-            )
+        result = get_api_client().register_user(
+            username=username,
+            password=password,
+            is_admin_val=is_admin,
+            current_user_is_admin=session.get("is_admin", False),
         )
+        if not result:
+            result = get_local_store().create(username, password, is_admin)
+
         if result:
             flash(f"Usuario {username} creado exitosamente.", "success")
             return redirect(url_for("users.index"))
@@ -63,11 +68,7 @@ def create():
 @admin_required
 def edit(user_id):
     client = get_api_client()
-    user = (
-        get_local_store().get(user_id)
-        if local_users_enabled()
-        else client.get_user(user_id, current_user_is_admin=session.get("is_admin", False))
-    )
+    user = client.get_user(user_id, current_user_is_admin=session.get("is_admin", False)) or get_local_store().get(user_id)
     if not user:
         abort(404)
         
@@ -76,17 +77,16 @@ def edit(user_id):
         password = request.form.get("password") or None
         is_admin = request.form.get("is_admin") == "on"
         
-        success = (
-            get_local_store().update(user_id, username, password, is_admin)
-            if local_users_enabled()
-            else client.update_user(
-                user_id=user_id,
-                username=username,
-                password=password,
-                is_admin_val=is_admin,
-                current_user_is_admin=session.get("is_admin", False),
-            )
+        success = client.update_user(
+            user_id=user_id,
+            username=username,
+            password=password,
+            is_admin_val=is_admin,
+            current_user_is_admin=session.get("is_admin", False),
         )
+        if not success:
+            success = get_local_store().update(user_id, username, password, is_admin)
+
         if success:
             flash(f"Usuario {username} actualizado.", "success")
             return redirect(url_for("users.index"))
@@ -97,11 +97,10 @@ def edit(user_id):
 @user_bp.route("/delete/<int:user_id>", methods=["POST"])
 @admin_required
 def delete(user_id):
-    deleted = (
-        get_local_store().delete(user_id)
-        if local_users_enabled()
-        else get_api_client().delete_user(user_id, current_user_is_admin=session.get("is_admin", False))
-    )
+    deleted = get_api_client().delete_user(user_id, current_user_is_admin=session.get("is_admin", False))
+    if not deleted:
+        deleted = get_local_store().delete(user_id)
+
     if deleted:
         flash("Usuario eliminado.", "success")
     else:

@@ -21,13 +21,13 @@ limiter = Limiter(key_func=get_remote_address, default_limits=["100/minute"])
 # En producción, listar explícitamente los orígenes permitidos.
 ALLOWED_ORIGINS: list[str] = os.getenv(
     "CORS_ALLOWED_ORIGINS",
-    "http://localhost:8085,http://localhost:5000",
+    "http://localhost:8081,http://localhost:5000,http://localhost:19006",
 ).split(",")
 
 # ── Instancia FastAPI ──────────────────────────────────────────────────────────
 app = FastAPI(
     title="Visio Flow API",
-    description="API central: PostgreSQL, eventos desde Flask, consumo desde Laravel.",
+    description="API central: PostgreSQL, eventos desde Flask, consumo desde cliente móvil/web.",
     version="1.0.0",
     # Deshabilitar documentación interactiva en producción
     docs_url="/docs" if IS_DEV else None,

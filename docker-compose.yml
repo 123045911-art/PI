@@ -5,18 +5,15 @@ services:
     container_name: PostgreSqlVisioflow
     restart: always
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER:-visio_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-visio_password_123456}
+      POSTGRES_DB: ${POSTGRES_DB:-visioflow}
     # SEGURIDAD: Puerto de DB NO expuesto al host — solo accesible dentro de la red Docker.
-    # Si necesitas acceso externo temporal para desarrollo, descomenta la línea siguiente:
-    # ports:
-    #   - "127.0.0.1:5435:5432"   # Solo loopback, nunca 0.0.0.0
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-visio_user} -d ${POSTGRES_DB:-visioflow}"]
       interval: 5s
       retries: 5
       timeout: 5s
@@ -36,13 +33,13 @@ services:
     environment:
       DB_HOST: db
       DB_PORT: "5432"
-      DB_USER: ${POSTGRES_USER}
-      DB_PASSWORD: ${POSTGRES_PASSWORD}
-      DB_NAME: ${POSTGRES_DB}
-      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
-      JWT_EXPIRE_MINUTES: ${JWT_EXPIRE_MINUTES:-60}
-      APP_ENV: ${APP_ENV:-production}
-      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:8085,http://localhost:5000}
+      DB_USER: ${POSTGRES_USER:-visio_user}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-visio_password_123456}
+      DB_NAME: ${POSTGRES_DB:-visioflow}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-e83a73df016ba34185bc029707e4d8fb4be0cda803bb4c5409a63be3d4d420a8}
+      JWT_EXPIRE_MINUTES: ${JWT_EXPIRE_MINUTES:-30}
+      APP_ENV: ${APP_ENV:-development}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:8081,http://localhost:5000,http://localhost:19006}
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')"]
       interval: 10s
@@ -70,57 +67,26 @@ services:
       FLASK_HOST: "0.0.0.0"
       FLASK_PORT: "5000"
       FLASK_DEBUG: "0"
-      FLASK_SECRET_KEY: ${FLASK_SECRET_KEY}
-      API_SERVICE_USERNAME: ${API_SERVICE_USERNAME:-}
-      API_SERVICE_PASSWORD: ${API_SERVICE_PASSWORD:-}
+      FLASK_SECRET_KEY: ${FLASK_SECRET_KEY:-b912389d7fa02353a23a8e9d22ff0678d91c13bc20d77be60c85c39178f0d8a5}
+      API_SERVICE_USERNAME: ${API_SERVICE_USERNAME:-admin}
+      API_SERVICE_PASSWORD: ${API_SERVICE_PASSWORD:-123456}
       PYTHONUNBUFFERED: "1"
+      OMP_NUM_THREADS: "4"
+      OPENBLAS_NUM_THREADS: "4"
+      MKL_NUM_THREADS: "4"
       CAMERA_SOURCE: "${CAMERA_SOURCE:-0}"
     devices:
-      - "${CAMERA_DEVICE:-/dev/video0}:/dev/video0"
+      - "${CAMERA_DEVICE:-/dev/null}:/dev/video0"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
     networks:
       - visioflow-net
-
-  # --- SERVICIO LARAVEL DASHBOARD ---
-  laravel:
-    build: ./contador_dashboard
-    container_name: LaravelVisioflow
-    ports:
-      - "8085:8000"
     volumes:
-      - ./contador_dashboard:/var/www/html
-      - /var/www/html/vendor
-    depends_on:
-      api:
-        condition: service_healthy
-      redis:
-        condition: service_started
-    environment:
-      - INTERNAL_API_URL=http://api:8000
-      - APP_ENV=${APP_ENV:-local}
-      - APP_DEBUG=false
-      - APP_KEY=${APP_KEY}
-      - DB_CONNECTION=null
-      - DATABASE_URL=null
-      - SESSION_DRIVER=redis
-      - CACHE_STORE=redis
-      - REDIS_HOST=redis
-      - REDIS_PASSWORD=${REDIS_PASSWORD}
-      - QUEUE_CONNECTION=sync
-      - LOG_CHANNEL=stack
-      - OCTANE_SERVER=swoole
-    networks:
-      - visioflow-net
-
-  # --- REDIS PARA CACHÉ Y SESIONES ---
-  redis:
-    image: redis:alpine
-    container_name: RedisVisioflow
-    # SEGURIDAD: Redis protegido con contraseña y puerto NO expuesto al host.
-    command: redis-server --requirepass ${REDIS_PASSWORD} --bind 0.0.0.0
-    # ports:                    # Puerto Redis NO expuesto al host en producción.
-    #   - "127.0.0.1:6379:6379" # Descomenta solo para debug local.
-    networks:
-      - visioflow-net
+      - ./contador_personas_flask/app:/app/app
 
 volumes:
   postgres_data:

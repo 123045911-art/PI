@@ -183,9 +183,10 @@ class TrackerService:
 
         # 3. CPU Fallback Óptima
         print("VISIOFLOW Engine: Detectado y utilizando [Inferencia en CPU Optimizada (Multi-threading)]")
-        # Forzar threads a OMP y backend torch
-        torch.set_num_threads(psutil.cpu_count(logical=False) or 4)
-        cv2.setNumThreads(psutil.cpu_count(logical=False) or 4)
+        # Limitar hilos a máximo 4 para evitar sobrecarga en procesadores multinúcleo
+        max_threads = min(4, psutil.cpu_count(logical=False) or 4)
+        torch.set_num_threads(max_threads)
+        cv2.setNumThreads(max_threads)
         model = YOLO(model_path, task="detect")
         model.to("cpu")
         tracker = DeepSort(max_age=40, n_init=3, max_iou_distance=0.6)
@@ -618,7 +619,7 @@ class TrackerService:
                     ok, encoded = cv2.imencode(".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), 80])
                     if ok:
                         self.latest_encoded_frame = encoded.tobytes()
-                time.sleep(0.01)
+                time.sleep(0.06)  # ~15 FPS; suficiente para rastreo y libera >50% de CPU
             except Exception as e:
                 logger.error(f"Error en loop de procesamiento: {e}")
                 time.sleep(1.0)

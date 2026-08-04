@@ -1,3 +1,299 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #!/bin/bash
 
 echo "==================================================="
@@ -5,7 +301,7 @@ echo "       VISIOFLOW - INICIO DEL SISTEMA (LINUX)      "
 echo "==================================================="
 echo
 
-echo "[1/2] Detectando cámara..."
+echo "[1/3] Detectando cámara..."
 
 # Default fallback (suele ser la integrada si no hay otra)
 CAMERA_DEVICE="/dev/video0" 
@@ -43,7 +339,13 @@ if [ -d "/sys/class/video4linux" ]; then
 fi
 
 if [[ "$camera_found" == false ]]; then
-    echo "-> No se detectó cámara externa por nombre, usando por defecto: $CAMERA_DEVICE"
+    if [ -c "$CAMERA_DEVICE" ]; then
+        echo "-> No se detectó cámara por nombre, usando por defecto: $CAMERA_DEVICE"
+    else
+        echo "-> ADVERTENCIA: No se encontró ningún dispositivo físico de cámara (/dev/video0)."
+        echo "-> Usando /dev/null como fallback seguro para Docker."
+        CAMERA_DEVICE="/dev/null"
+    fi
 else
     echo "-> Seleccionada para VisioFlow: $CAMERA_DEVICE"
 fi
@@ -52,25 +354,64 @@ export CAMERA_DEVICE
 export CAMERA_SOURCE=0  # Dentro de Docker siempre estará en /dev/video0 por el mapeo en el compose
 
 echo
-echo "[2/2] Verificando estado de la infraestructura de Docker..."
+echo "[2/3] Verificando estado de la infraestructura de Docker..."
+
+# Verificar si el demonio de Docker está corriendo
+if ! docker info >/dev/null 2>&1; then
+    echo
+    echo "[ERROR] El servicio de Docker no está iniciado."
+    echo "Ejecuta el siguiente comando para iniciar Docker:"
+    echo "    sudo systemctl start docker"
+    echo
+    exit 1
+fi
 
 if docker ps -a --format '{{.Names}}' | grep -Eq "^FlaskVisioflow$"; then
     echo "[OK] Contenedores detectados. Despertando sistema rápidamente..."
-    # Recrear el contenedor flask_service si la cámara ha cambiado
-    # Hacemos up -d para asegurar que el mapeo de devices tome el nuevo CAMERA_DEVICE si cambió
-    docker compose up -d
+    docker compose up -d || { echo "[ERROR] Falló el arranque de Docker Compose."; exit 1; }
 else
     echo "[INFO] Primera instalación detectada o contenedores no existen. Construyendo desde cero..."
-    docker compose up --build -d
+    docker compose up --build -d || { echo "[ERROR] Falló la construcción de Docker Compose."; exit 1; }
 fi
 
 echo
+echo "[3/3] Verificando y preparando la aplicación móvil (Expo Go)..."
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+MOBILE_DIR="$SCRIPT_DIR/visioflow"
+
+if [ -d "$MOBILE_DIR" ]; then
+    if [ ! -d "$MOBILE_DIR/node_modules" ]; then
+        echo "[INFO] Primera clonación detectada para la app móvil. Instalando dependencias en visioflow..."
+        (cd "$MOBILE_DIR" && npm install) || { echo "[ERROR] Falló la instalación de dependencias npm."; exit 1; }
+    fi
+else
+    echo "[ERROR] No se encontró el directorio de la aplicación móvil en $MOBILE_DIR"
+    exit 1
+fi
+
+# Detectar IP LAN para Expo
+LAN_IP=$(hostname -I 2>/dev/null | awk '{print $1}')
+if [ -z "$LAN_IP" ]; then
+    LAN_IP=$(ip route get 1.1.1.1 2>/dev/null | awk '{for(i=1;i<=NF;i++) if($i=="src") print $(i+1)}')
+fi
+[ -z "$LAN_IP" ] && LAN_IP="127.0.0.1"
+
+export REACT_NATIVE_PACKAGER_HOSTNAME="$LAN_IP"
+export EXPO_PUBLIC_API_BASE_URL="http://$LAN_IP:5000"
+
+echo
 echo "==================================================="
-echo "[EXITO] ¡Sistema en línea!"
+echo "[ÉXITO] ¡Infraestructura Backend y API en línea!"
 echo
 echo "- Cámara activa apuntando a: $CAMERA_DEVICE"
-echo "- Dashboard VISIOFLOW (Laravel) activo en: http://localhost:8085"
-echo "- Stream VISIOFLOW (Flask) activo en: http://localhost:5000/video"
+echo "- Stream VISIOFLOW (Flask) activo en: http://localhost:5000/video_feed"
 echo "- API FastAPI activo en: http://localhost:8000"
+echo "- Servidor API Móvil asignado a: $EXPO_PUBLIC_API_BASE_URL"
 echo "==================================================="
 echo
+echo "Iniciando servidor de desarrollo Expo Go..."
+echo "Escanea el código QR mostrado a continuación con la app Expo Go:"
+echo
+
+cd "$MOBILE_DIR"
+exec npx expo start --lan --go

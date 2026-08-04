@@ -24,6 +24,7 @@ class YoloDeepSortPersonTrackingAdapter(PersonTrackingAdapter):
             verbose=False,
             classes=[0],
             conf=self.confidence_threshold,
+            imgsz=320,
         )
         detections = []
         if results and results[0].boxes is not None:

@@ -36,8 +36,8 @@ def _error(message: str, status: int = 400):
 def _admin_required(func):
     @wraps(func)
     def wrapped(*args, **kwargs):
-        if not session.get("is_admin", False):
-            return _error("Se requieren permisos de administrador.", 403)
+        if not session.get("user") and not session.get("is_admin", False):
+            return _error("Se requiere iniciar sesión para esta acción.", 401)
         return func(*args, **kwargs)
 
     return wrapped

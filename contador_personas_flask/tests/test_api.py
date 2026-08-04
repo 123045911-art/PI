@@ -36,13 +36,24 @@ def test_existing_and_new_endpoints_are_compatible(vision_config):
     assert client.get("/configuration").status_code == 200
 
 
-def test_scene_mutations_require_admin(vision_config):
+def test_scene_mutations_allow_regular_authenticated_user(vision_config):
     app = create_app(start_background=False, vision_config=vision_config)
     app.config.update(TESTING=True)
     client = app.test_client()
+    
+    # Sin sesión debe rebotar con 401
+    assert client.post("/api/scene/objects", json={}).status_code == 401
+    assert client.get("/users/").status_code == 302
+
+    # Con sesión de usuario regular (no admin), debe poder acceder a la escena pero no a usuarios
     _login(client, admin=False)
     response = client.post("/api/scene/objects", json={})
-    assert response.status_code == 403
+    assert response.status_code != 401
+    assert response.status_code != 403  # Ya no es 403 para usuarios autenticados
+    
+    # Pero el módulo de usuarios sigue bloqueado para no administradores
+    user_mgmt = client.get("/users/")
+    assert user_mgmt.status_code == 302  # Redirige con flash por falta de rol admin
 
 
 def test_demo_sites_expose_corridor_contract_without_login(vision_config):
