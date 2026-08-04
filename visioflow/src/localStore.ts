@@ -87,14 +87,6 @@ const LEGACY_DEMO_ALERT_IDS = new Set([
   'demo-history-crowding-service',
 ]);
 
-// TODO SECURITY / BACKEND:
-// Estas credenciales existen solo para la demostración sin API solicitada.
-// Antes de producción deben eliminarse del cliente. La contraseña se debe
-// almacenar en el backend únicamente como hash Argon2id (con salt), nunca en
-// texto plano. La sesión local debe reemplazarse por access/refresh tokens
-// seguros y las alertas deben validarse y persistirse mediante la API.
-export const DEMO_LOGIN = { username: 'admin', password: '123456' };
-
 export async function saveLocalSession(session: LocalSession) {
   await AsyncStorage.setItem(SESSION_KEY, JSON.stringify(session));
   return session;

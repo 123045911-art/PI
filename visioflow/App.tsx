@@ -22,7 +22,7 @@ import { LoginScreen } from './src/components/LoginScreen';
 import { apiAreaToZone, ApiAreaState, ApiBootstrap, ApiTrackPoint, createTrackPointAdapter, createWorldProjection } from './src/apiContract';
 import { activateMapScene, FLOOR, restoreSimulatedMapScene, SIMULATED_TRACKS, trackPointsForDay } from './src/data';
 import { DAY_NAMES, getZoneDayProfile } from './src/history';
-import { API_BASE_URL, ApiSiteOption, createAlert, deleteAlert, listSites, loadAlerts, loadAreaState, loadBootstrap, loadTrackPoints, updateAlert } from './src/liveApi';
+import { API_BASE_URL, ApiSiteOption, createAlert, deleteAlert, listSites, loadAlerts, loadAreaState, loadBootstrap, loadTrackPoints, updateAlert, validateSessionApi } from './src/liveApi';
 import { alertScheduleApplies, clearLocalSession, getAlertScheduleLabel, getAlertStatusLabel, getAlertTypeLabel, loadLocalAlerts, loadLocalSession, LocalAlert, LocalSession, saveLocalAlerts } from './src/localStore';
 import { HeatScaleMode, MapPerspective, Metric, StaticObject, TrackPoint, ViewMode } from './src/types';
 
@@ -227,9 +227,12 @@ export default function App() {
   useEffect(() => {
     let mounted = true;
     Promise.all([loadLocalSession(), loadLocalAlerts()])
-      .then(([storedSession, storedAlerts]) => {
+      .then(async ([storedSession, storedAlerts]) => {
         if (!mounted) return;
-        setSession(storedSession);
+        const sessionIsValid = storedSession ? await validateSessionApi() : false;
+        if (!mounted) return;
+        if (storedSession && !sessionIsValid) await clearLocalSession();
+        setSession(sessionIsValid ? storedSession : null);
         setAlerts(storedAlerts);
       })
       .finally(() => {

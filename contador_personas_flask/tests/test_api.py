@@ -210,37 +210,50 @@ def test_local_areas_survive_application_restart(vision_config):
     )
 
 
-def test_local_demo_admin_login_requires_explicit_flag(vision_config, monkeypatch):
+def test_login_always_uses_central_api_even_with_demo_flag(vision_config, monkeypatch):
+    monkeypatch.setenv("LOCAL_DEMO_AUTH", "1")
     app = create_app(start_background=False, vision_config=vision_config)
     app.config.update(TESTING=True)
-    app.extensions["api_client"].login = lambda *_: None
+    attempts = []
+
+    def central_login(username, password):
+        attempts.append((username, password))
+        if (username, password) != ("admin", "visioflow123"):
+            return None
+        return {
+            "user": {"id": 1, "username": "admin", "is_admin": True},
+            "access_token": "central-token",
+        }
+
+    app.extensions["api_client"].login = central_login
     client = app.test_client()
 
-    monkeypatch.delenv("LOCAL_DEMO_AUTH", raising=False)
     denied = client.post("/login", data={"username": "admin", "password": "root"})
     assert denied.status_code == 200
     with client.session_transaction() as local_session:
         assert "user" not in local_session
 
-    monkeypatch.setenv("LOCAL_DEMO_AUTH", "1")
-    accepted = client.post("/login", data={"username": "admin", "password": "root"})
+    accepted = client.post("/login", data={"username": "admin", "password": "visioflow123"})
     assert accepted.status_code == 302
     assert accepted.headers["Location"].endswith("/")
+    assert attempts == [("admin", "root"), ("admin", "visioflow123")]
     with client.session_transaction() as local_session:
         assert local_session["user"]["username"] == "admin"
         assert local_session["is_admin"] is True
+        assert local_session["access_token"] == "central-token"
 
 
-def test_demo_login_stays_disabled_outside_local_environment(vision_config, monkeypatch):
-    monkeypatch.setenv("LOCAL_DEMO_AUTH", "1")
-    monkeypatch.setenv("APP_ENV", "production")
+def test_login_shows_central_connection_error(vision_config):
     app = create_app(start_background=False, vision_config=vision_config)
     app.config.update(TESTING=True)
-    app.extensions["api_client"].login = lambda *_: None
+    api = app.extensions["api_client"]
+    api.login = lambda *_: None
+    api.last_error = "No fue posible conectar con el servidor de autenticación."
     client = app.test_client()
 
-    response = client.post("/login", data={"username": "admin", "password": "root"})
+    response = client.post("/login", data={"username": "admin", "password": "visioflow123"})
     assert response.status_code == 200
+    assert b"servidor de autenticaci" in response.data
     with client.session_transaction() as local_session:
         assert "user" not in local_session
 
@@ -298,10 +311,32 @@ def test_deleting_area_removes_area_and_related_alerts(vision_config):
     assert all(a["areaId"] != created_area["external_id"] for a in alerts)
 
 
-def test_local_user_crud_and_login_work_without_central_server(vision_config, monkeypatch):
-    monkeypatch.setenv("LOCAL_DEMO_AUTH", "1")
+def test_user_crud_in_flask_uses_central_api(vision_config):
     app = create_app(start_background=False, vision_config=vision_config)
     app.config.update(TESTING=True)
+    api = app.extensions["api_client"]
+    users = []
+
+    def register_user(**payload):
+        user = {
+            "id": 7,
+            "username": payload["username"],
+            "is_admin": payload["is_admin_val"],
+        }
+        users.append(user)
+        return user
+
+    api.register_user = register_user
+    api.list_users = lambda **_: list(users)
+    api.get_user = lambda user_id, **_: next((u for u in users if u["id"] == user_id), None)
+    api.update_user = lambda **payload: users[0].update(
+        username=payload["username"], is_admin=payload["is_admin_val"]
+    ) is None
+    api.delete_user = lambda user_id, **_: bool(users.pop(0)) if users and users[0]["id"] == user_id else False
+    api.login = lambda username, password: {
+        "user": {**users[0]}, "access_token": "operator-token"
+    } if users and username == users[0]["username"] and password == "Nuevo123" else None
+
     client = app.test_client()
     _login(client)
 
@@ -310,9 +345,9 @@ def test_local_user_crud_and_login_work_without_central_server(vision_config, mo
         data={"username": "operador2", "password": "Secreto1", "is_admin": "on"},
     )
     assert created.status_code == 302
-    user = app.extensions["local_user_store"].list()[0]
+    assert users[0]["username"] == "operador2"
     updated = client.post(
-        f"/users/edit/{user['id']}",
+        "/users/edit/7",
         data={"username": "operador-editado", "password": "Nuevo123", "is_admin": "on"},
     )
     assert updated.status_code == 302
@@ -323,5 +358,5 @@ def test_local_user_crud_and_login_work_without_central_server(vision_config, mo
     assert login.status_code == 302
     with client.session_transaction() as local_session:
         assert local_session["user"]["username"] == "operador-editado"
-    assert client.post(f"/users/delete/{user['id']}").status_code == 302
-    assert app.extensions["local_user_store"].list() == []
+    assert client.post("/users/delete/7").status_code == 302
+    assert users == []

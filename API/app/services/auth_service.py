@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import HTTPException, status
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -5,6 +7,8 @@ from sqlalchemy.orm import Session
 from app.models.user import User
 from app.schemas.auth import UserLogin, UserRegister
 from app.security.hash import hash_password, verify_password
+
+logger = logging.getLogger("visioflow.auth")
 
 
 def register_user(db: Session, data: UserRegister) -> User:
@@ -27,8 +31,14 @@ def register_user(db: Session, data: UserRegister) -> User:
 
 
 def login_user(db: Session, data: UserLogin) -> User:
-    user = db.query(User).filter(User.username == data.username.strip()).first()
+    username = data.username.strip()
+    user = db.query(User).filter(User.username == username).first()
     if not user or not verify_password(data.password, user.password):
+        logger.warning(
+            "Login rechazado: usuario=%r longitud_password=%d",
+            username,
+            len(data.password),
+        )
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Credenciales inválidas.",

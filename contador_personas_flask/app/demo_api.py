@@ -315,26 +315,9 @@ def api_login():
     if not username or not password:
         return jsonify({"ok": False, "error": "Credenciales incompletas."}), 400
 
-    if (username.lower() == "admin" and password in ("admin", "123456", "root")) or (username.lower() == "operador" and password == "visioflow"):
-        return jsonify({
-            "ok": True,
-            "user": {
-                "id": 1 if username.lower() == "admin" else 2,
-                "username": username,
-                "is_admin": username.lower() == "admin",
-            },
-            "access_token": "demo-token-" + username,
-        })
-
-    local_store = current_app.extensions.get("local_user_store")
-    if local_store:
-        user = local_store.authenticate(username, password)
-        if user:
-            return jsonify({
-                "ok": True,
-                "user": user,
-                "access_token": f"user-token-{user['id']}",
-            })
+    result = current_app.extensions["api_client"].login(username, password)
+    if result:
+        return jsonify({"ok": True, **result})
 
     return jsonify({"ok": False, "error": "Usuario o contraseña incorrectos."}), 401
 

@@ -108,7 +108,7 @@ La fuente canónica conserva UTC y coordenadas `world_ground` en metros. Los pí
 ## Acceso y alertas de demostración
 
 - Usuario: `operador`
-- Contraseña: `visioflow`
+- Contraseña inicial: `visioflow123`
 - El inicio de sesión y las alertas se guardan temporalmente como JSON local mediante AsyncStorage.
 - El formulario valida área, tipo y motivo y conserva una captura del conteo visible.
 - Las reglas de afluencia permiten elegir **alta** o **baja afluencia** y definir de 1 a 120 personas con un control deslizante naranja. La app indica si el último registro cumple la condición o si la regla permanece en espera.

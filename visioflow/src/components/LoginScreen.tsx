@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { Image, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
-import { DEMO_LOGIN, LocalSession } from '../localStore';
+import { LocalSession } from '../localStore';
 import { loginApi } from '../liveApi';
 
 export function LoginScreen({ onAuthenticated }: { onAuthenticated: (session: LocalSession) => void }) {
-  const [username, setUsername] = useState<string>(DEMO_LOGIN.username);
-  const [password, setPassword] = useState<string>(DEMO_LOGIN.password);
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -46,11 +46,14 @@ export function LoginScreen({ onAuthenticated }: { onAuthenticated: (session: Lo
         />
         <Text style={styles.label}>CONTRASEÑA</Text>
         <TextInput
+          autoCapitalize="none"
+          autoCorrect={false}
           onChangeText={setPassword}
           onSubmitEditing={submit}
           placeholder="Contraseña"
           placeholderTextColor="#6f8389"
           secureTextEntry
+          spellCheck={false}
           style={styles.input}
           value={password}
         />
@@ -58,11 +61,6 @@ export function LoginScreen({ onAuthenticated }: { onAuthenticated: (session: Lo
         <Pressable disabled={busy} onPress={submit} style={[styles.button, busy && styles.buttonDisabled]}>
           <Text style={styles.buttonText}>{busy ? 'Validando…' : 'Entrar'}</Text>
         </Pressable>
-
-        <View style={styles.demoCard}>
-          <Text style={styles.demoTitle}>ACCESO DE PRESENTACIÓN</Text>
-          <Text style={styles.demoText}>Usuario: {DEMO_LOGIN.username} · Contraseña: {DEMO_LOGIN.password}</Text>
-        </View>
       </View>
     </KeyboardAvoidingView>
   );
@@ -81,8 +79,4 @@ const styles = StyleSheet.create({
   button: { minHeight: 48, marginTop: 18, alignItems: 'center', justifyContent: 'center', borderRadius: 13, backgroundColor: '#ff5a2a' },
   buttonDisabled: { opacity: 0.55 },
   buttonText: { color: '#ffffff', fontSize: 11, fontWeight: '900' },
-  demoCard: { marginTop: 17, padding: 12, borderRadius: 13, backgroundColor: '#10262d', borderWidth: 1, borderColor: '#1f3941' },
-  demoTitle: { color: '#f0b09b', fontSize: 7.5, fontWeight: '900', letterSpacing: 0.65 },
-  demoText: { marginTop: 5, color: '#e5edef', fontSize: 9, fontWeight: '800' },
-  demoWarning: { marginTop: 5, color: '#7f969c', fontSize: 8, lineHeight: 12 },
 });

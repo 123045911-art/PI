@@ -3,12 +3,20 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
 from app.data.db import get_db
+from app.models.user import User
 from app.schemas.auth import LoginResponse, TokenOut, UserOut, UserRegister
-from app.security.auth import require_admin
+from app.security.auth import get_current_user, require_admin
 from app.security.jwt_handler import create_access_token
 from app.services import auth_service
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+
+
+@router.get("/me", response_model=UserOut, summary="Usuario de la sesión actual")
+def current_session_user(
+    user: User = Depends(get_current_user),
+):
+    return UserOut.model_validate(user)
 
 
 @router.post("/register", response_model=UserOut, status_code=201,

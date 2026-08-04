@@ -65,14 +65,19 @@ type LoginResponse = {
 
 export async function loginApi(username: string, password: string): Promise<LocalSession> {
   const form = new URLSearchParams({ username: username.trim(), password });
-  const response = await fetch(`${API_BASE_URL}/auth/login`, {
-    method: 'POST',
-    headers: { Accept: 'application/json', 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: form.toString(),
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE_URL}/auth/login`, {
+      method: 'POST',
+      headers: { Accept: 'application/json', 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: form.toString(),
+    });
+  } catch {
+    throw new Error('No fue posible conectar con el servidor. Revisa la API y la red.');
+  }
   if (!response.ok) {
     throw new Error(response.status === 401
-      ? 'Credenciales incorrectas.'
+      ? 'Contraseña inválida.'
       : await apiError(response, `API ${response.status}`));
   }
   const data = await response.json() as LoginResponse;
@@ -85,6 +90,15 @@ export async function loginApi(username: string, password: string): Promise<Loca
     isAdmin: data.user.is_admin,
     signedInAt: new Date().toISOString(),
   });
+}
+
+export async function validateSessionApi(): Promise<boolean> {
+  try {
+    await getJson<LoginResponse['user']>('/auth/me');
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export async function listSites() {

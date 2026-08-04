@@ -23,7 +23,7 @@ limiter = Limiter(key_func=get_remote_address, default_limits=["100/minute"])
 # En producción, listar explícitamente los orígenes permitidos.
 ALLOWED_ORIGINS: list[str] = os.getenv(
     "CORS_ALLOWED_ORIGINS",
-    "http://localhost:8081,http://localhost:5000,http://localhost:19006",
+    "http://localhost:8081,http://127.0.0.1:8081,http://localhost:5000,http://127.0.0.1:5000,http://localhost:19006,http://127.0.0.1:19006",
 ).split(",")
 
 # ── Instancia FastAPI ──────────────────────────────────────────────────────────

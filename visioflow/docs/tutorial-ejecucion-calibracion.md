@@ -74,7 +74,7 @@ El frontend de demostración usa:
 
 ```text
 Usuario: operador
-Contraseña: visioflow
+Contraseña inicial: visioflow123
 ```
 
 Actualmente sus recorridos y estadísticas salen del conjunto determinístico de

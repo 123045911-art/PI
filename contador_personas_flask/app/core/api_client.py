@@ -57,7 +57,7 @@ class VisioFlowApiClient:
     def _get_service_token(self) -> str | None:
         if not self._service_token:
             service_user = os.getenv("API_SERVICE_USERNAME", "admin")
-            service_pass = os.getenv("API_SERVICE_PASSWORD", "123456")
+            service_pass = os.getenv("API_SERVICE_PASSWORD", "visioflow123")
             self._service_token = self.authenticate(service_user, service_pass)
         return self._service_token
 
@@ -73,25 +73,27 @@ class VisioFlowApiClient:
     def authenticate(self, username: str, password: str) -> str | None:
         """POST /auth/login con form-urlencoded. Devuelve el access_token o None."""
         url = f"{self.base_url}/auth/login"
-        candidates = [password, "123456", "admin"]
-        seen_cand = set()
-        for pass_candidate in candidates:
-            if not pass_candidate or pass_candidate in seen_cand:
-                continue
-            seen_cand.add(pass_candidate)
-            try:
-                response = requests.post(
-                    url,
-                    data={"username": username, "password": pass_candidate},
-                    timeout=self.timeout,
-                )
-                if response.status_code == 200:
-                    token = response.json().get("access_token")
-                    if token:
-                        return token
-            except requests.RequestException:
-                pass
-        logger.warning("Autenticación fallida para '%s' con todas las credenciales.", username)
+        try:
+            response = requests.post(
+                url,
+                data={"username": username, "password": password},
+                timeout=self.timeout,
+            )
+            if response.status_code == 200:
+                token = response.json().get("access_token")
+                if token:
+                    return token
+            logger.warning(
+                "Autenticación rechazada para '%s': HTTP %s.",
+                username,
+                response.status_code,
+            )
+        except requests.RequestException as exc:
+            logger.warning(
+                "No fue posible conectar con la API para autenticar '%s': %s",
+                username,
+                exc,
+            )
         return None
 
     def create_area(
@@ -314,6 +316,7 @@ class VisioFlowApiClient:
     def login(self, username: str, password: str) -> dict[str, Any] | None:
         """POST /auth/login. Devuelve el JSON de TokenOut o None."""
         url = f"{self.base_url}/auth/login"
+        self.last_error = None
         try:
             response = requests.post(
                 url,
@@ -322,8 +325,14 @@ class VisioFlowApiClient:
             )
             if response.status_code == 200:
                 return response.json()
+            self.last_error = (
+                "Contraseña inválida."
+                if response.status_code == 401
+                else self._response_error(response)
+            )
             return None
         except requests.RequestException:
+            self.last_error = "No fue posible conectar con el servidor de autenticación."
             return None
 
     def list_users(
