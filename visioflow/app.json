@@ -1,0 +1,23 @@
+{
+  "expo": {
+    "name": "VisioFlow",
+    "slug": "visioflow",
+    "version": "1.0.0",
+    "orientation": "default",
+    "icon": "./assets/visioflow-icon.png",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#000000",
+        "foregroundImage": "./assets/visioflow-icon.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/visioflow-icon.png"
+    }
+  }
+}

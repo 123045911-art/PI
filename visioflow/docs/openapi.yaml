@@ -1,0 +1,879 @@
+openapi: 3.1.0
+info:
+  title: VisioFlow Backend API
+  version: 1.0.0
+  description: Contract shared by the vision producer, PostgreSQL backend, and VisioFlow frontend.
+  license:
+    name: Proprietary
+    url: https://github.com/mrMain371/visioflow/blob/main/LICENSE
+servers:
+  - url: https://{host}/api/v1
+    variables:
+      host:
+        default: api.visioflow.invalid
+        description: Backend host for each environment.
+security:
+  - bearerAuth: []
+tags:
+  - name: Configuration
+    description: Camera, calibration, and scene synchronization.
+  - name: Ingestion
+    description: Idempotent service-to-service uploads from vision.
+  - name: Frontend
+    description: Operational data consumed by the VisioFlow client.
+  - name: Analytics
+    description: Period and hourly aggregates derived by the server.
+  - name: Alerts
+    description: Scheduled alert rules and alert occurrences.
+paths:
+  /sites:
+    get:
+      tags: [Frontend]
+      summary: List the sites available to the current user
+      operationId: listSites
+      responses:
+        '200':
+          description: Sites selectable by the frontend.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SiteList' }
+  /sites/{siteId}/cameras/{cameraId}:
+    put:
+      tags: [Configuration]
+      summary: Register or update a camera
+      operationId: upsertCamera
+      parameters:
+        - $ref: '#/components/parameters/SiteId'
+        - $ref: '#/components/parameters/CameraId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CameraUpsert'
+      responses:
+        '200':
+          description: Camera registered or updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Camera'
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /sites/{siteId}/cameras/{cameraId}/calibrations/{version}:
+    put:
+      tags: [Configuration]
+      summary: Store an immutable calibration version
+      operationId: upsertCalibration
+      parameters:
+        - $ref: '#/components/parameters/SiteId'
+        - $ref: '#/components/parameters/CameraId'
+        - $ref: '#/components/parameters/Version'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Calibration'
+      responses:
+        '200':
+          description: Immutable calibration version stored; an identical retry is accepted.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/VersionAck' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /sites/{siteId}/cameras/{cameraId}/scenes/{version}:
+    put:
+      tags: [Configuration]
+      summary: Store an immutable approved scene version
+      operationId: upsertScene
+      parameters:
+        - $ref: '#/components/parameters/SiteId'
+        - $ref: '#/components/parameters/CameraId'
+        - $ref: '#/components/parameters/Version'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Scene' }
+      responses:
+        '200':
+          description: Immutable scene version stored; an identical retry is accepted.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/VersionAck' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /ingest/sessions:
+    post:
+      tags: [Ingestion]
+      summary: Open a tracking session
+      operationId: openTrackingSession
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/TrackingSessionCreate' }
+      responses:
+        '201':
+          description: Tracking session created.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TrackingSession' }
+        '200':
+          description: Idempotent retry of an existing identical session.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TrackingSession' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /ingest/sessions/{sessionId}:
+    patch:
+      tags: [Ingestion]
+      summary: Close a tracking session
+      operationId: closeTrackingSession
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [endedAt]
+              properties:
+                endedAt: { type: string, format: date-time }
+      responses:
+        '200':
+          description: Session closed.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TrackingSession' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /ingest/track-points:batch:
+    post:
+      tags: [Ingestion]
+      summary: Upload an idempotent batch of track points
+      operationId: ingestTrackPointBatch
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/TrackPointBatch' }
+      responses:
+        '202':
+          description: Batch accepted or replayed idempotently.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/BatchAck' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /ingest/area-events:batch:
+    post:
+      tags: [Ingestion]
+      summary: Upload an idempotent batch of area events
+      operationId: ingestAreaEventBatch
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AreaEventBatch' }
+      responses:
+        '202':
+          description: Batch accepted or replayed idempotently.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/BatchAck' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /sites/{siteId}/bootstrap:
+    get:
+      tags: [Frontend]
+      summary: Load the current site configuration
+      operationId: getSiteBootstrap
+      parameters:
+        - $ref: '#/components/parameters/SiteId'
+      responses:
+        '200':
+          description: Current site, cameras, scene, areas, and static objects.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Bootstrap' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /sites/{siteId}/track-points:
+    get:
+      tags: [Frontend]
+      summary: List metric track points for a period
+      operationId: listTrackPoints
+      parameters:
+        - $ref: '#/components/parameters/SiteId'
+        - $ref: '#/components/parameters/From'
+        - $ref: '#/components/parameters/To'
+        - $ref: '#/components/parameters/CameraFilter'
+        - $ref: '#/components/parameters/AreaFilter'
+        - $ref: '#/components/parameters/SampleSeconds'
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Valid metric world-ground observations.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/CursorPage'
+                  - type: object
+                    required: [items]
+                    properties:
+                      items:
+                        type: array
+                        items: { $ref: '#/components/schemas/FrontendTrackPoint' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /sites/{siteId}/area-state:
+    get:
+      tags: [Frontend]
+      summary: Read server-derived current area counts
+      operationId: getAreaState
+      parameters:
+        - $ref: '#/components/parameters/SiteId'
+        - $ref: '#/components/parameters/CameraFilter'
+      responses:
+        '200':
+          description: Server-derived current counts.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [observedAt, items]
+                properties:
+                  observedAt: { type: string, format: date-time }
+                  items:
+                    type: array
+                    items: { $ref: '#/components/schemas/AreaState' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /sites/{siteId}/area-events:
+    get:
+      tags: [Frontend]
+      summary: List area entry and exit events
+      operationId: listAreaEvents
+      parameters:
+        - $ref: '#/components/parameters/SiteId'
+        - $ref: '#/components/parameters/From'
+        - $ref: '#/components/parameters/To'
+        - $ref: '#/components/parameters/AreaFilter'
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Area transition events.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/CursorPage'
+                  - type: object
+                    required: [items]
+                    properties:
+                      items:
+                        type: array
+                        items: { $ref: '#/components/schemas/FrontendAreaEvent' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /sites/{siteId}/analytics/area-hours:
+    get:
+      tags: [Analytics]
+      summary: List hourly area metrics
+      operationId: listAreaHourMetrics
+      parameters:
+        - $ref: '#/components/parameters/SiteId'
+        - $ref: '#/components/parameters/From'
+        - $ref: '#/components/parameters/To'
+        - $ref: '#/components/parameters/AreaFilter'
+      responses:
+        '200':
+          description: Hourly metrics in the site's timezone, with UTC bucket instants.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: '#/components/schemas/AreaHourMetric' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /sites/{siteId}/analytics/summary:
+    get:
+      tags: [Analytics]
+      summary: Read the analytics summary for a period
+      operationId: getAnalyticsSummary
+      parameters:
+        - $ref: '#/components/parameters/SiteId'
+        - $ref: '#/components/parameters/From'
+        - $ref: '#/components/parameters/To'
+      responses:
+        '200':
+          description: Period summary.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AnalyticsSummary' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /sites/{siteId}/alerts:
+    get:
+      tags: [Alerts]
+      summary: List alerts with breakdowns by type and status
+      operationId: listAlerts
+      parameters:
+        - $ref: '#/components/parameters/SiteId'
+        - $ref: '#/components/parameters/AreaFilter'
+        - name: type
+          in: query
+          schema: { $ref: '#/components/schemas/AlertType' }
+        - name: status
+          in: query
+          schema: { $ref: '#/components/schemas/AlertStatus' }
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Alerts and aggregate counts for the complete filtered result.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AlertListResponse' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    post:
+      tags: [Alerts]
+      summary: Create an automatic flow rule or a manual report
+      operationId: createAlert
+      parameters:
+        - $ref: '#/components/parameters/SiteId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AlertCreate' }
+            examples:
+              automaticRule:
+                summary: Regla automática de alta afluencia
+                value:
+                  areaId: central
+                  type: crowding
+                  reason: Avisar cuando haya 20 personas o más.
+                  thresholdPeople: 20
+                  scheduleMode: weekly
+                  scheduleDay: 3
+              manualReport:
+                summary: Reporte manual de acceso bloqueado
+                value:
+                  areaId: access
+                  type: blocked_access
+                  reason: El acceso principal está obstruido por mercancía.
+                  scheduleMode: immediate
+      responses:
+        '201':
+          description: Alert created. Server-generated fields match LocalAlert.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Alert' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /sites/{siteId}/alerts/{id}:
+    patch:
+      tags: [Alerts]
+      summary: Update an alert status
+      operationId: updateAlertStatus
+      parameters:
+        - $ref: '#/components/parameters/SiteId'
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [status]
+              properties:
+                status: { $ref: '#/components/schemas/AlertStatus' }
+      responses:
+        '200':
+          description: Alert status updated.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Alert' }
+        '404': { $ref: '#/components/responses/NotFound' }
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    SiteId:
+      name: siteId
+      in: path
+      required: true
+      schema: { $ref: '#/components/schemas/ExternalId' }
+    CameraId:
+      name: cameraId
+      in: path
+      required: true
+      schema: { $ref: '#/components/schemas/ExternalId' }
+    SessionId:
+      name: sessionId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    Version:
+      name: version
+      in: path
+      required: true
+      schema: { type: integer, minimum: 1 }
+    From:
+      name: from
+      in: query
+      required: true
+      schema: { type: string, format: date-time }
+    To:
+      name: to
+      in: query
+      required: true
+      schema: { type: string, format: date-time }
+    CameraFilter:
+      name: cameraId
+      in: query
+      schema: { $ref: '#/components/schemas/ExternalId' }
+    AreaFilter:
+      name: areaId
+      in: query
+      schema: { $ref: '#/components/schemas/ExternalId' }
+    Cursor:
+      name: cursor
+      in: query
+      schema: { type: string }
+    Limit:
+      name: limit
+      in: query
+      schema: { type: integer, minimum: 1, maximum: 5000, default: 1000 }
+    SampleSeconds:
+      name: sampleSeconds
+      in: query
+      description: Uniform per-tracker sampling interval returned to the frontend; raw ingestion is preserved.
+      schema: { type: number, minimum: 0.25, maximum: 60, default: 4 }
+  responses:
+    NotFound:
+      description: Resource not found.
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+    Conflict:
+      description: An immutable version or idempotency key was reused with different content.
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+    ValidationError:
+      description: Request validation failed.
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+  schemas:
+    ExternalId:
+      type: string
+      pattern: '^[a-z0-9][a-z0-9_-]{0,79}$'
+      examples: [cam-03]
+    SensorMode:
+      type: string
+      enum: [rgbd, stereo, monocular]
+    CoordinateSystem:
+      type: object
+      required: [name, unit, origin, xAxis, yAxis, zAxis]
+      properties:
+        name: { const: world_ground }
+        unit: { const: meter }
+        origin: { type: string }
+        xAxis: { const: right }
+        yAxis: { const: forward }
+        zAxis: { const: up }
+    ImagePoint:
+      type: object
+      required: [u, v]
+      properties:
+        u: { type: number }
+        v: { type: number }
+    WorldPoint:
+      type: object
+      required: [x, y, z]
+      properties:
+        x: { type: number }
+        y: { type: number }
+        z: { type: number }
+    Polygon2D:
+      type: array
+      minItems: 3
+      items:
+        type: array
+        prefixItems:
+          - { type: number }
+          - { type: number }
+        minItems: 2
+        maxItems: 2
+    CameraUpsert:
+      type: object
+      required: [name, sensorMode]
+      properties:
+        name: { type: string, minLength: 1, maxLength: 120 }
+        sensorMode: { $ref: '#/components/schemas/SensorMode' }
+        active: { type: boolean, default: true }
+    Camera:
+      allOf:
+        - $ref: '#/components/schemas/CameraUpsert'
+        - type: object
+          required: [siteId, cameraId]
+          properties:
+            siteId: { $ref: '#/components/schemas/ExternalId' }
+            cameraId: { $ref: '#/components/schemas/ExternalId' }
+    Calibration:
+      type: object
+      required: [cameraId, imageWidth, imageHeight, cameraMatrix, distortionCoefficients, reprojectionErrorPx, createdAt, version]
+      properties:
+        cameraId: { $ref: '#/components/schemas/ExternalId' }
+        imageWidth: { type: integer, minimum: 1 }
+        imageHeight: { type: integer, minimum: 1 }
+        cameraMatrix: { type: array, minItems: 3, maxItems: 3, items: { type: array, minItems: 3, maxItems: 3, items: { type: number } } }
+        distortionCoefficients: { type: array, items: { type: number } }
+        rotationMatrix: { type: array }
+        translationVectorMeters: { type: array, items: { type: number } }
+        imageToGroundHomography: { type: array }
+        groundToImageHomography: { type: array }
+        cameraHeightMeters: { type: number, exclusiveMinimum: 0 }
+        reprojectionErrorPx: { type: number, minimum: 0 }
+        validationErrorMeters: { type: number, minimum: 0 }
+        valid: { type: boolean, default: true }
+        createdAt: { type: string, format: date-time }
+        version: { type: integer, minimum: 1 }
+    Area:
+      type: object
+      required: [areaId, name, kind, polygon, bounds]
+      properties:
+        areaId: { $ref: '#/components/schemas/ExternalId' }
+        name: { type: string, minLength: 1, maxLength: 120 }
+        kind: { type: string, enum: [access, interaction, transit, service] }
+        polygon: { $ref: '#/components/schemas/Polygon2D' }
+        bounds:
+          type: object
+          required: [x, y, width, height]
+          properties:
+            x: { type: number }
+            y: { type: number }
+            width: { type: number, exclusiveMinimum: 0 }
+            height: { type: number, exclusiveMinimum: 0 }
+    StaticObject:
+      type: object
+      required: [objectId, name, type, footprint, depthMethod, approximate]
+      properties:
+        objectId: { type: string, minLength: 1, maxLength: 100 }
+        name: { type: string, minLength: 1, maxLength: 120 }
+        type: { type: string, enum: [wall, table, shelf, rack, display, checkout, bench, column, other] }
+        footprint: { $ref: '#/components/schemas/Polygon2D' }
+        center: { $ref: '#/components/schemas/WorldPoint' }
+        widthMeters: { type: number, minimum: 0 }
+        depthMeters: { type: number, minimum: 0 }
+        heightMeters: { type: number, minimum: 0 }
+        depthMethod: { type: string, enum: [rgbd, stereo, ground_plane, manual] }
+        approximate: { type: boolean }
+        confidence: { type: number, minimum: 0, maximum: 1 }
+        metadata: { type: object, additionalProperties: true }
+    Scene:
+      type: object
+      required: [cameraId, coordinateSystem, calibrationVersion, fieldOfViewPolygon, objects, operationalAreas, createdAt, version]
+      properties:
+        cameraId: { $ref: '#/components/schemas/ExternalId' }
+        coordinateSystem: { $ref: '#/components/schemas/CoordinateSystem' }
+        calibrationVersion: { type: integer, minimum: 1 }
+        fieldOfViewPolygon: { $ref: '#/components/schemas/Polygon2D' }
+        objects: { type: array, items: { $ref: '#/components/schemas/StaticObject' } }
+        operationalAreas: { type: array, items: { $ref: '#/components/schemas/Area' } }
+        fixedPointMatrixResolutionMeters: { type: number, exclusiveMinimum: 0 }
+        createdAt: { type: string, format: date-time }
+        version: { type: integer, minimum: 1 }
+    VersionAck:
+      type: object
+      required: [cameraId, version, accepted]
+      properties:
+        cameraId: { $ref: '#/components/schemas/ExternalId' }
+        version: { type: integer, minimum: 1 }
+        accepted: { type: boolean }
+    TrackingSessionCreate:
+      type: object
+      required: [siteId, cameraId, sessionId, startedAt]
+      properties:
+        siteId: { $ref: '#/components/schemas/ExternalId' }
+        cameraId: { $ref: '#/components/schemas/ExternalId' }
+        sessionId: { type: string, format: uuid }
+        startedAt: { type: string, format: date-time }
+        detector: { type: string, maxLength: 80 }
+        tracker: { type: string, maxLength: 80 }
+        metadata: { type: object, additionalProperties: true }
+    TrackingSession:
+      allOf:
+        - $ref: '#/components/schemas/TrackingSessionCreate'
+        - type: object
+          properties:
+            endedAt: { type: [string, 'null'], format: date-time }
+    IngestTrackPoint:
+      type: object
+      required: [frameId, trackerId, capturedAt, confidence, positionValid]
+      properties:
+        frameId: { type: integer, minimum: 0 }
+        trackerId: { type: string, pattern: '^trk-[0-9]+$' }
+        capturedAt: { type: string, format: date-time }
+        imagePoint: { $ref: '#/components/schemas/ImagePoint' }
+        worldPoint:
+          oneOf:
+            - $ref: '#/components/schemas/WorldPoint'
+            - { type: 'null' }
+        confidence: { type: number, minimum: 0, maximum: 1 }
+        positionValid: { type: boolean }
+        areaId:
+          oneOf:
+            - $ref: '#/components/schemas/ExternalId'
+            - { type: 'null' }
+    TrackPointBatch:
+      type: object
+      required: [batchId, siteId, cameraId, sessionId, calibrationVersion, sceneVersion, coordinateSystem, points]
+      properties:
+        batchId: { type: string, format: uuid }
+        siteId: { $ref: '#/components/schemas/ExternalId' }
+        cameraId: { $ref: '#/components/schemas/ExternalId' }
+        sessionId: { type: string, format: uuid }
+        calibrationVersion: { type: integer, minimum: 0 }
+        sceneVersion: { type: integer, minimum: 0 }
+        coordinateSystem: { const: world_ground }
+        points: { type: array, minItems: 1, maxItems: 5000, items: { $ref: '#/components/schemas/IngestTrackPoint' } }
+    IngestAreaEvent:
+      type: object
+      required: [eventId, trackerId, areaId, eventType, capturedAt, dwellSeconds]
+      properties:
+        eventId: { type: string, format: uuid }
+        trackerId: { type: string, pattern: '^trk-[0-9]+$' }
+        areaId: { $ref: '#/components/schemas/ExternalId' }
+        eventType: { type: string, enum: [enter, exit] }
+        capturedAt: { type: string, format: date-time }
+        dwellSeconds: { type: number, minimum: 0 }
+    AreaEventBatch:
+      type: object
+      required: [batchId, siteId, cameraId, sessionId, calibrationVersion, sceneVersion, events]
+      properties:
+        batchId: { type: string, format: uuid }
+        siteId: { $ref: '#/components/schemas/ExternalId' }
+        cameraId: { $ref: '#/components/schemas/ExternalId' }
+        sessionId: { type: string, format: uuid }
+        calibrationVersion: { type: integer, minimum: 1 }
+        sceneVersion: { type: integer, minimum: 1 }
+        events: { type: array, minItems: 1, maxItems: 5000, items: { $ref: '#/components/schemas/IngestAreaEvent' } }
+    BatchError:
+      type: object
+      required: [index, code, message]
+      properties:
+        index: { type: integer, minimum: 0 }
+        code: { type: string }
+        message: { type: string }
+    BatchAck:
+      type: object
+      required: [batchId, accepted, rejected, replayed, errors]
+      properties:
+        batchId: { type: string, format: uuid }
+        accepted: { type: integer, minimum: 0 }
+        rejected: { type: integer, minimum: 0 }
+        replayed: { type: boolean }
+        errors: { type: array, maxItems: 100, items: { $ref: '#/components/schemas/BatchError' } }
+    Bootstrap:
+      type: object
+      required: [siteId, timezone, cameras, areas, scenes]
+      properties:
+        siteId: { $ref: '#/components/schemas/ExternalId' }
+        name: { type: string }
+        timezone: { type: string }
+        cameras: { type: array, items: { $ref: '#/components/schemas/Camera' } }
+        areas: { type: array, items: { $ref: '#/components/schemas/Area' } }
+        scenes: { type: array, items: { $ref: '#/components/schemas/Scene' } }
+    SiteSummary:
+      type: object
+      required: [siteId, name, mode]
+      properties:
+        siteId: { $ref: '#/components/schemas/ExternalId' }
+        name: { type: string }
+        mode: { type: string, enum: [live, simulated] }
+    SiteList:
+      type: object
+      required: [items]
+      properties:
+        items: { type: array, items: { $ref: '#/components/schemas/SiteSummary' } }
+    FrontendTrackPoint:
+      type: object
+      required: [cameraId, sessionId, frameId, trackerId, capturedAt, x, y, z, confidence]
+      properties:
+        cameraId: { $ref: '#/components/schemas/ExternalId' }
+        sessionId: { type: string, format: uuid }
+        frameId: { type: integer, minimum: 0 }
+        trackerId: { type: string, pattern: '^trk-[0-9]+$' }
+        capturedAt: { type: string, format: date-time }
+        imagePoint:
+          oneOf:
+            - $ref: '#/components/schemas/ImagePoint'
+            - { type: 'null' }
+        x: { type: number }
+        y: { type: number }
+        z: { type: number }
+        areaId:
+          oneOf:
+            - $ref: '#/components/schemas/ExternalId'
+            - { type: 'null' }
+        confidence: { type: number, minimum: 0, maximum: 1 }
+    FrontendAreaEvent:
+      type: object
+      required: [eventId, cameraId, sessionId, trackerId, areaId, eventType, capturedAt, dwellSeconds]
+      properties:
+        eventId: { type: string, format: uuid }
+        cameraId: { $ref: '#/components/schemas/ExternalId' }
+        sessionId: { type: string, format: uuid }
+        trackerId: { type: string, pattern: '^trk-[0-9]+$' }
+        areaId: { $ref: '#/components/schemas/ExternalId' }
+        eventType: { type: string, enum: [enter, exit] }
+        capturedAt: { type: string, format: date-time }
+        dwellSeconds: { type: number, minimum: 0 }
+    AreaState:
+      type: object
+      required: [cameraId, areaId, peopleCount, observedAt]
+      properties:
+        cameraId: { $ref: '#/components/schemas/ExternalId' }
+        areaId: { $ref: '#/components/schemas/ExternalId' }
+        peopleCount: { type: integer, minimum: 0 }
+        observedAt: { type: string, format: date-time }
+    AreaHourMetric:
+      type: object
+      required: [areaId, bucketStart, uniqueTracks, visits, medianDwellSeconds, stoppedVisits, medianStoppedSeconds, peakConcurrent]
+      properties:
+        areaId: { $ref: '#/components/schemas/ExternalId' }
+        bucketStart: { type: string, format: date-time }
+        uniqueTracks: { type: integer, minimum: 0 }
+        visits: { type: integer, minimum: 0 }
+        medianDwellSeconds: { type: number, minimum: 0 }
+        stoppedVisits: { type: integer, minimum: 0 }
+        medianStoppedSeconds: { type: number, minimum: 0 }
+        peakConcurrent: { type: integer, minimum: 0 }
+    AnalyticsSummary:
+      type: object
+      required: [from, to, uniqueTracks, activeNow, medianDwellSeconds, medianStoppedSeconds, peakConcurrent, areas]
+      properties:
+        from: { type: string, format: date-time }
+        to: { type: string, format: date-time }
+        uniqueTracks: { type: integer, minimum: 0 }
+        activeNow: { type: integer, minimum: 0 }
+        medianDwellSeconds: { type: number, minimum: 0 }
+        medianStoppedSeconds: { type: number, minimum: 0 }
+        peakConcurrent: { type: integer, minimum: 0 }
+        areas: { type: array, items: { $ref: '#/components/schemas/AreaHourMetric' } }
+    AlertType:
+      type: string
+      enum: [crowding, low_flow, unusual_dwell, blocked_access, manual]
+    AlertStatus:
+      type: string
+      enum: [new, watching, triggered, acknowledged, resolved]
+    AlertScheduleMode:
+      type: string
+      enum: [immediate, all_days, weekly, date]
+    AlertCreate:
+      type: object
+      additionalProperties: false
+      required: [areaId, type, reason, scheduleMode]
+      properties:
+        areaId: { $ref: '#/components/schemas/ExternalId' }
+        type: { $ref: '#/components/schemas/AlertType' }
+        reason: { type: string, minLength: 10, maxLength: 300 }
+        thresholdPeople: { type: integer, minimum: 1, maximum: 120 }
+        scheduleMode: { $ref: '#/components/schemas/AlertScheduleMode' }
+        scheduleDay: { type: integer, minimum: 0, maximum: 6 }
+        scheduleDate: { type: string, format: date }
+      description: >-
+        crowding and low_flow require thresholdPeople plus all_days, weekly, or date.
+        weekly requires scheduleDay (0=Monday, 6=Sunday); date requires scheduleDate.
+        unusual_dwell, blocked_access, and manual require immediate and no threshold.
+    Alert:
+      type: object
+      additionalProperties: false
+      required: [id, areaId, areaName, type, reason, status, scheduleMode, peopleCountSnapshot, createdBy, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        areaId: { $ref: '#/components/schemas/ExternalId' }
+        areaName: { type: string }
+        type: { $ref: '#/components/schemas/AlertType' }
+        reason: { type: string, minLength: 10, maxLength: 300 }
+        status: { $ref: '#/components/schemas/AlertStatus' }
+        thresholdPeople: { type: integer, minimum: 1, maximum: 120 }
+        scheduleMode: { $ref: '#/components/schemas/AlertScheduleMode' }
+        scheduleDay: { type: integer, minimum: 0, maximum: 6 }
+        scheduleDate: { type: string, format: date }
+        peopleCountSnapshot: { type: integer, minimum: 0 }
+        createdBy: { type: string }
+        createdAt: { type: string, format: date-time }
+    AlertTypeBreakdown:
+      type: object
+      additionalProperties: false
+      required: [crowding, low_flow, unusual_dwell, blocked_access, manual]
+      properties:
+        crowding: { type: integer, minimum: 0 }
+        low_flow: { type: integer, minimum: 0 }
+        unusual_dwell: { type: integer, minimum: 0 }
+        blocked_access: { type: integer, minimum: 0 }
+        manual: { type: integer, minimum: 0 }
+    AlertStatusBreakdown:
+      type: object
+      additionalProperties: false
+      required: [new, watching, triggered, acknowledged, resolved]
+      properties:
+        new: { type: integer, minimum: 0 }
+        watching: { type: integer, minimum: 0 }
+        triggered: { type: integer, minimum: 0 }
+        acknowledged: { type: integer, minimum: 0 }
+        resolved: { type: integer, minimum: 0 }
+    AlertSummary:
+      type: object
+      additionalProperties: false
+      required: [total, byType, byStatus]
+      properties:
+        total: { type: integer, minimum: 0 }
+        byType: { $ref: '#/components/schemas/AlertTypeBreakdown' }
+        byStatus: { $ref: '#/components/schemas/AlertStatusBreakdown' }
+    AlertListResponse:
+      type: object
+      additionalProperties: false
+      required: [items, summary, nextCursor]
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/Alert' }
+        summary: { $ref: '#/components/schemas/AlertSummary' }
+        nextCursor: { type: [string, 'null'] }
+    CursorPage:
+      type: object
+      required: [nextCursor]
+      properties:
+        nextCursor: { type: [string, 'null'] }
+    Problem:
+      type: object
+      required: [type, title, status, detail]
+      properties:
+        type: { type: string, format: uri-reference }
+        title: { type: string }
+        status: { type: integer, minimum: 400, maximum: 599 }
+        detail: { type: string }
+        instance: { type: string, format: uri-reference }
+        errors:
+          type: array
+          items:
+            type: object
+            required: [path, message]
+            properties:
+              path: { type: string }
+              message: { type: string }

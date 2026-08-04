@@ -55,6 +55,10 @@ if not defined LAN_IP (
 set "REACT_NATIVE_PACKAGER_HOSTNAME=%LAN_IP%"
 set "EXPO_PUBLIC_API_BASE_URL=http://%LAN_IP%:5000"
 
+:: Crear/actualizar archivo .env en visioflow
+echo EXPO_PUBLIC_API_BASE_URL=http://%LAN_IP%:5000 > "%~dp0visioflow\.env"
+echo REACT_NATIVE_PACKAGER_HOSTNAME=%LAN_IP% >> "%~dp0visioflow\.env"
+
 echo.
 echo ===================================================
 echo [EXITO] ¡Sistema en linea!
