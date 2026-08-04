@@ -22,7 +22,7 @@ import { LoginScreen } from './src/components/LoginScreen';
 import { apiAreaToZone, ApiAreaState, ApiBootstrap, ApiTrackPoint, createTrackPointAdapter, createWorldProjection } from './src/apiContract';
 import { activateMapScene, FLOOR, restoreSimulatedMapScene, SIMULATED_TRACKS, trackPointsForDay } from './src/data';
 import { DAY_NAMES, getZoneDayProfile } from './src/history';
-import { API_BASE_URL, ApiSiteOption, createAlert, deleteAlert, getVideoFeedUrl, listSites, loadAlerts, loadAreaState, loadBootstrap, loadTrackPoints, updateAlert } from './src/liveApi';
+import { API_BASE_URL, ApiSiteOption, createAlert, deleteAlert, listSites, loadAlerts, loadAreaState, loadBootstrap, loadTrackPoints, updateAlert } from './src/liveApi';
 import { alertScheduleApplies, clearLocalSession, getAlertScheduleLabel, getAlertStatusLabel, getAlertTypeLabel, loadLocalAlerts, loadLocalSession, LocalAlert, LocalSession, saveLocalAlerts } from './src/localStore';
 import { HeatScaleMode, MapPerspective, Metric, StaticObject, TrackPoint, ViewMode } from './src/types';
 
@@ -30,6 +30,12 @@ const ORANGE = '#ff5a2a';
 const TEAL = '#3ba5bb';
 const GREEN = '#20ad50';
 const DARK = '#07171c';
+
+const SIMULATED_SITE_OPTION: ApiSiteOption = {
+  siteId: 'sitio-simulado',
+  name: 'Cámara simulada',
+  mode: 'simulated',
+};
 
 const PERIODS = [
   { label: '15 min', seconds: 900 },
@@ -198,9 +204,8 @@ export default function App() {
   const [activeSiteId, setActiveSiteId] = useState('sitio-simulado');
   const activeSite = activeSiteId === 'sitio-simulado' ? 'simulated' : 'corridor';
   const [cameraSelectorOpen, setCameraSelectorOpen] = useState(false);
-  const [videoStreamOpen, setVideoStreamOpen] = useState(false);
   const [siteOptions, setSiteOptions] = useState<ApiSiteOption[]>([
-    { siteId: 'sitio-simulado', name: 'Cámara simulada', mode: 'simulated' },
+    SIMULATED_SITE_OPTION,
     { siteId: 'pasillo-real', name: 'Dell Webcam WB7022', mode: 'live' },
   ]);
   const [liveBootstrap, setLiveBootstrap] = useState<ApiBootstrap | null>(null);
@@ -213,6 +218,7 @@ export default function App() {
   const pulse = useRef(new Animated.Value(0)).current;
   const alertToastProgress = useRef(new Animated.Value(0)).current;
   const alertToastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const alertMutationInFlight = useRef(false);
   const analysisTranslateY = useRef(new Animated.Value(1000)).current;
   const analysisBackdropOpacity = useRef(new Animated.Value(0)).current;
   const sheetDragStart = useRef(0);
@@ -235,11 +241,14 @@ export default function App() {
   useEffect(() => {
     if (!sessionReady || activeSite !== 'corridor') return;
     let mounted = true;
-    const refreshAlerts = () => loadAlerts(activeSiteId)
+    const refreshAlerts = () => {
+      if (alertMutationInFlight.current) return Promise.resolve();
+      return loadAlerts(activeSiteId)
       .then((items) => { if (mounted) setAlerts(items); })
       .catch(() => undefined);
+    };
     void refreshAlerts();
-    const timer = setInterval(refreshAlerts, 2000);
+    const timer = setInterval(refreshAlerts, 3000);
     return () => { mounted = false; clearInterval(timer); };
   }, [activeSite, activeSiteId, sessionReady]);
 
@@ -333,7 +342,12 @@ export default function App() {
       };
 
   useEffect(() => {
-    const refreshSites = () => listSites().then(setSiteOptions).catch(() => undefined);
+    const refreshSites = () => listSites()
+      .then((remoteSites) => setSiteOptions([
+        SIMULATED_SITE_OPTION,
+        ...remoteSites.filter((site) => site.siteId !== SIMULATED_SITE_OPTION.siteId),
+      ]))
+      .catch(() => undefined);
     void refreshSites();
     const timer = setInterval(refreshSites, 5000);
     return () => clearInterval(timer);
@@ -369,12 +383,12 @@ export default function App() {
   };
 
   useEffect(() => {
-    if (activeSite !== 'corridor') return;
+    if (activeSite !== 'corridor' || !liveProjection || !liveZones.length) return;
     activateMapScene({ width: 100, height: 68, duration: 3600 }, liveZones, liveObjects);
     setSelectedZone(null);
     setComparisonHours(null);
     return restoreSimulatedMapScene;
-  }, [activeSite, liveObjects, liveZones]);
+  }, [activeSite, liveObjects, liveProjection, liveZones]);
 
   useEffect(() => {
     if (activeSite !== 'corridor' || !liveProjection) return;
@@ -542,19 +556,50 @@ export default function App() {
     if (newlyTriggered) showAlertToast(newlyTriggered);
   }, [alertAreas, alerts, sessionReady, showAlertToast]);
 
-  const handleAlertCreated = useCallback((created: LocalAlert) => {
-    setAlerts((current) => [created, ...current]);
-    if (activeSite === 'corridor') void createAlert(activeSiteId, created);
-    if (created.status === 'triggered') showAlertToast(created);
+  const handleAlertCreated = useCallback(async (created: LocalAlert) => {
+    alertMutationInFlight.current = true;
+    try {
+      const persisted = activeSite === 'corridor'
+        ? await createAlert(activeSiteId, created)
+        : created;
+      setAlerts((current) => {
+        const next = [persisted, ...current.filter((alert) => alert.id !== persisted.id)];
+        if (activeSite !== 'corridor') void saveLocalAlerts(next);
+        return next;
+      });
+      if (persisted.status === 'triggered') showAlertToast(persisted);
+    } finally {
+      alertMutationInFlight.current = false;
+    }
   }, [activeSite, activeSiteId, showAlertToast]);
-  const handleAlertUpdated = useCallback((updated: LocalAlert) => {
-    setAlerts((current) => current.map((alert) => alert.id === updated.id ? updated : alert));
-    if (activeSite === 'corridor') void updateAlert(activeSiteId, updated);
+  const handleAlertUpdated = useCallback(async (updated: LocalAlert) => {
+    alertMutationInFlight.current = true;
+    try {
+      const persisted = activeSite === 'corridor'
+        ? await updateAlert(activeSiteId, updated)
+        : updated;
+      setAlerts((current) => {
+        const next = current.map((alert) => alert.id === persisted.id ? persisted : alert);
+        if (activeSite !== 'corridor') void saveLocalAlerts(next);
+        return next;
+      });
+    } finally {
+      alertMutationInFlight.current = false;
+    }
   }, [activeSite, activeSiteId]);
-  const handleAlertDeleted = useCallback((alertId: string) => {
-    setAlerts((current) => current.filter((alert) => alert.id !== alertId));
-    setAlertToast((current) => current?.id === alertId ? null : current);
-    if (activeSite === 'corridor') void deleteAlert(activeSiteId, alertId);
+  const handleAlertDeleted = useCallback(async (alertId: string) => {
+    alertMutationInFlight.current = true;
+    try {
+      if (activeSite === 'corridor') await deleteAlert(activeSiteId, alertId);
+      setAlerts((current) => {
+        const next = current.filter((alert) => alert.id !== alertId);
+        if (activeSite !== 'corridor') void saveLocalAlerts(next);
+        return next;
+      });
+      setAlertToast((current) => current?.id === alertId ? null : current);
+    } finally {
+      alertMutationInFlight.current = false;
+    }
   }, [activeSite, activeSiteId]);
   const filteredAlerts = useMemo(
     () => alertAreaFilter === 'all' ? alerts : alerts.filter((alert) => alert.areaId === alertAreaFilter),
@@ -688,7 +733,10 @@ export default function App() {
 
   const handleSelectZone = (zoneId: string | null) => {
     setSelectedZone(zoneId);
-    if (zoneId) setPlaying(false);
+    if (zoneId) {
+      setPlaying(false);
+      if (!isWide && analysisOpen) setAnalysisSheet(false);
+    }
   };
 
   const handleSelectDay = (dayIndex: number) => {
@@ -789,11 +837,6 @@ export default function App() {
           <Pressable onPress={() => setCameraSelectorOpen(true)} style={styles.alertButton}>
             <Text style={styles.alertButtonText}>Cámaras disponibles · {siteOptions.length}</Text>
           </Pressable>
-          {activeSite === 'corridor' && (
-            <Pressable onPress={() => setVideoStreamOpen(true)} style={[styles.contextButton, darkMode && styles.contextButtonDark]}>
-              <Text style={[styles.contextButtonText, darkMode && styles.contextButtonTextDark]}>📹 Ver Streaming</Text>
-            </Pressable>
-          )}
           <Pressable onPress={() => setHeatmapHelpOpen(true)} style={[styles.contextButton, darkMode && styles.contextButtonDark]}>
             <Text style={[styles.contextButtonText, darkMode && styles.contextButtonTextDark]}>¿Cómo leer el mapa?</Text>
           </Pressable>
@@ -981,7 +1024,7 @@ export default function App() {
               ))}
             </View>
 
-            <View style={styles.mapWrap}>
+            <View style={[styles.mapWrap, compact && styles.mapWrapCompact]}>
               <FlowMap
                 points={visiblePoints}
                 currentTime={currentTime}
@@ -996,8 +1039,6 @@ export default function App() {
                 showObjects={showObjects}
                 showTrackers={showTrackers}
                 showTrails={showTrails}
-                zones={activeSite !== 'simulated' ? liveZones : undefined}
-                objects={activeSite !== 'simulated' ? liveObjects : undefined}
                 comparison={comparisonData}
               />
               {selectedStats && (
@@ -1093,7 +1134,7 @@ export default function App() {
         </View>
       </ScrollView>
 
-      {!isWide && !analysisOpen && (
+      {!isWide && !analysisOpen && !selectedZone && (
         <View style={styles.analysisLauncher} {...(Platform.OS === 'web' ? {} : analysisPanResponder.panHandlers)}>
           <View style={styles.analysisGrabber} />
           <Pressable onPress={() => setAnalysisSheet(true)} style={styles.analysisSheetTitleRow}>
@@ -1143,7 +1184,7 @@ export default function App() {
           <Pressable style={StyleSheet.absoluteFill} onPress={() => setCameraSelectorOpen(false)} />
           <View style={styles.cameraModalCard}>
             <View style={styles.cameraModalHeader}>
-              <View style={{ flex: 1 }}><Text style={styles.cameraModalEyebrow}>FUENTE DE DATOS (API)</Text><Text style={styles.cameraModalTitle}>Cámaras disponibles</Text></View>
+              <View style={{ flex: 1 }}><Text style={styles.cameraModalEyebrow}>FUENTE DE DATOS</Text><Text style={styles.cameraModalTitle}>Cámaras disponibles</Text></View>
               <Pressable onPress={() => setCameraSelectorOpen(false)}><Text style={styles.cameraModalClose}>×</Text></Pressable>
             </View>
             {siteOptions.map((option) => {
@@ -1153,38 +1194,11 @@ export default function App() {
               return (
                 <Pressable key={option.siteId} onPress={() => selectSite(option)} style={[styles.cameraOption, selected && styles.cameraOptionSelected]}>
                   <View style={[styles.cameraStatusDot, option.mode === 'live' && styles.cameraStatusLive]} />
-                  <View style={{ flex: 1 }}><Text style={styles.cameraOptionName}>{name}</Text><Text style={styles.cameraOptionMeta}>{option.mode === 'live' ? 'En vivo · API' : 'Datos simulados'}</Text></View>
+                  <View style={{ flex: 1 }}><Text style={styles.cameraOptionName}>{name}</Text><Text style={styles.cameraOptionMeta}>{option.mode === 'live' ? 'En vivo' : 'Datos simulados'}</Text></View>
                   <Text style={styles.cameraOptionAction}>{selected ? 'ACTIVA' : 'ABRIR'}</Text>
                 </Pressable>
               );
             })}
-          </View>
-        </View>
-      </AppModal>
-
-      <AppModal visible={videoStreamOpen} transparent animationType="fade" onRequestClose={() => setVideoStreamOpen(false)}>
-        <View style={styles.cameraModalOverlay}>
-          <Pressable style={StyleSheet.absoluteFill} onPress={() => setVideoStreamOpen(false)} />
-          <View style={styles.cameraModalCard}>
-            <View style={styles.cameraModalHeader}>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.cameraModalEyebrow}>STREAMING CÁMARA EN VIVO (API)</Text>
-                <Text style={styles.cameraModalTitle}>{liveBootstrap?.cameras[0]?.name ?? 'Dell Webcam WB7022'}</Text>
-              </View>
-              <Pressable onPress={() => setVideoStreamOpen(false)}>
-                <Text style={styles.cameraModalClose}>×</Text>
-              </Pressable>
-            </View>
-            <View style={styles.videoStreamContainer}>
-              <Image
-                source={{ uri: `${getVideoFeedUrl()}?t=${Date.now()}` }}
-                style={styles.videoStreamImage}
-                resizeMode="contain"
-              />
-            </View>
-            <Text style={styles.videoStreamMeta}>
-              Fuente API: {getVideoFeedUrl()} · {liveError ? 'Sin conexión' : 'Transmisión activa'}
-            </Text>
           </View>
         </View>
       </AppModal>
@@ -1227,9 +1241,6 @@ const styles = StyleSheet.create({
   cameraOptionName: { color: '#f4f8f9', fontSize: 10, fontWeight: '900' },
   cameraOptionMeta: { marginTop: 3, color: '#82979d', fontSize: 7.5 },
   cameraOptionAction: { color: ORANGE, fontSize: 7, fontWeight: '900' },
-  videoStreamContainer: { width: '100%', height: 260, backgroundColor: '#000000', borderRadius: 14, overflow: 'hidden', justifyContent: 'center', alignItems: 'center' },
-  videoStreamImage: { width: '100%', height: '100%' },
-  videoStreamMeta: { marginTop: 10, color: '#82979d', fontSize: 8, textAlign: 'center' },
   loadingRoot: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#07171c' },
   loadingText: { color: '#d6e2e5', fontSize: 11, fontWeight: '800' },
   page: { paddingTop: Platform.OS === 'android' ? 52 : 56, paddingHorizontal: 14, paddingBottom: 112, backgroundColor: '#eef3f4' },
@@ -1392,8 +1403,9 @@ const styles = StyleSheet.create({
   editComparisonButton: { paddingHorizontal: 13, paddingVertical: 9, borderRadius: 9, backgroundColor: DARK },
   editComparisonText: { color: '#ffffff', fontSize: 8, fontWeight: '900' },
   mapWrap: { flex: 1, minHeight: 270, paddingHorizontal: 6, position: 'relative' },
+  mapWrapCompact: { overflow: 'hidden' },
   zonePopover: { position: 'absolute', top: 18, right: 15, width: 320, padding: 12, borderRadius: 15, backgroundColor: DARK, shadowColor: '#000', shadowOpacity: 0.22, shadowRadius: 14, shadowOffset: { width: 0, height: 6 }, elevation: 6 },
-  zonePopoverCompact: { left: 7, right: 7, width: 'auto', maxHeight: 340 },
+  zonePopoverCompact: { top: 7, bottom: 7, left: 7, right: 7, width: 'auto' },
   zonePopoverTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   zonePopoverEyebrow: { color: '#79bdc9', fontSize: 8, fontWeight: '900', letterSpacing: 0.7 },
   zoneClose: { color: '#c4d1d5', fontSize: 20, lineHeight: 20 },

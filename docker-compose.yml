@@ -1,19 +1,20 @@
+name: alipi
+
 services:
   # --- BASE DE DATOS ---
   db:
     image: postgres:15
-    container_name: PostgreSqlVisioflow
     restart: always
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-visio_user}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-visio_password_123456}
+      POSTGRES_USER: ${POSTGRES_USER:-visioflow}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-visioflow_demo_2026}
       POSTGRES_DB: ${POSTGRES_DB:-visioflow}
     # SEGURIDAD: Puerto de DB NO expuesto al host — solo accesible dentro de la red Docker.
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data_v1:/var/lib/postgresql/data
       - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-visio_user} -d ${POSTGRES_DB:-visioflow}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-visioflow} -d ${POSTGRES_DB:-visioflow}"]
       interval: 5s
       retries: 5
       timeout: 5s
@@ -23,7 +24,6 @@ services:
   # --- SERVIDOR FASTAPI ---
   api:
     build: ./API
-    container_name: FastAPIVisioflow
     restart: unless-stopped
     ports:
       - "8000:8000"
@@ -33,13 +33,14 @@ services:
     environment:
       DB_HOST: db
       DB_PORT: "5432"
-      DB_USER: ${POSTGRES_USER:-visio_user}
-      DB_PASSWORD: ${POSTGRES_PASSWORD:-visio_password_123456}
+      DB_USER: ${POSTGRES_USER:-visioflow}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-visioflow_demo_2026}
       DB_NAME: ${POSTGRES_DB:-visioflow}
       JWT_SECRET_KEY: ${JWT_SECRET_KEY:-e83a73df016ba34185bc029707e4d8fb4be0cda803bb4c5409a63be3d4d420a8}
       JWT_EXPIRE_MINUTES: ${JWT_EXPIRE_MINUTES:-30}
       APP_ENV: ${APP_ENV:-development}
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:8081,http://localhost:5000,http://localhost:19006}
+      VISION_SERVICE_URL: http://flask_service:5000
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')"]
       interval: 10s
@@ -52,7 +53,6 @@ services:
   # --- SERVICIO FLASK ---
   flask_service:
     build: ./contador_personas_flask
-    container_name: FlaskVisioflow
     restart: unless-stopped
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -67,16 +67,28 @@ services:
       FLASK_HOST: "0.0.0.0"
       FLASK_PORT: "5000"
       FLASK_DEBUG: "0"
+      APP_ENV: ${APP_ENV:-local}
       FLASK_SECRET_KEY: ${FLASK_SECRET_KEY:-b912389d7fa02353a23a8e9d22ff0678d91c13bc20d77be60c85c39178f0d8a5}
       API_SERVICE_USERNAME: ${API_SERVICE_USERNAME:-admin}
       API_SERVICE_PASSWORD: ${API_SERVICE_PASSWORD:-123456}
+      CAMERA_ID: ${CAMERA_ID:-cam-01}
+      SENSOR_MODE: ${SENSOR_MODE:-monocular}
+      VISIOFLOW_DATA_DIR: /app/data
+      VISIOFLOW_START_BACKGROUND: ${VISIOFLOW_START_BACKGROUND:-1}
+      CALIBRATION_INVALIDATED: ${CALIBRATION_INVALIDATED:-0}
+      API_RATE_LIMIT_REQUESTS: ${API_RATE_LIMIT_REQUESTS:-80}
+      API_GLOBAL_RATE_LIMIT_REQUESTS: ${API_GLOBAL_RATE_LIMIT_REQUESTS:-1200}
+      API_RATE_LIMIT_WINDOW_SECONDS: ${API_RATE_LIMIT_WINDOW_SECONDS:-10}
+      MAX_MJPEG_STREAMS: ${MAX_MJPEG_STREAMS:-4}
+      MAX_MJPEG_STREAMS_PER_USER: ${MAX_MJPEG_STREAMS_PER_USER:-1}
       PYTHONUNBUFFERED: "1"
       OMP_NUM_THREADS: "4"
       OPENBLAS_NUM_THREADS: "4"
       MKL_NUM_THREADS: "4"
-      CAMERA_SOURCE: "${CAMERA_SOURCE:-0}"
-    devices:
-      - "${CAMERA_DEVICE:-/dev/null}:/dev/video0"
+      # En Windows, ini_cam.bat publica la webcam y Docker consume este MJPEG.
+      # En Linux se puede definir CAMERA_SOURCE=/dev/video0 en .env.
+      CAMERA_SOURCE: "${CAMERA_SOURCE:-http://host.docker.internal:5001/video}"
+      LOCAL_DEMO_AUTH: ${LOCAL_DEMO_AUTH:-0}
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/health')"]
       interval: 10s
@@ -86,10 +98,11 @@ services:
     networks:
       - visioflow-net
     volumes:
-      - ./contador_personas_flask/app:/app/app
+      - visioflow_data:/app/data
 
 volumes:
-  postgres_data:
+  postgres_data_v1:
+  visioflow_data:
 
 networks:
   visioflow-net:

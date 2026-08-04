@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Image, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
-import { authenticateLocal, DEMO_LOGIN, LocalSession } from '../localStore';
+import { DEMO_LOGIN, LocalSession } from '../localStore';
+import { loginApi } from '../liveApi';
 
 export function LoginScreen({ onAuthenticated }: { onAuthenticated: (session: LocalSession) => void }) {
   const [username, setUsername] = useState<string>(DEMO_LOGIN.username);
@@ -14,14 +15,15 @@ export function LoginScreen({ onAuthenticated }: { onAuthenticated: (session: Lo
       return;
     }
     setBusy(true);
-    const session = await authenticateLocal(username, password);
-    setBusy(false);
-    if (!session) {
-      setError('Las credenciales de demostración no coinciden.');
-      return;
+    try {
+      const session = await loginApi(username, password);
+      setError('');
+      onAuthenticated(session);
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'No fue posible conectar con la API.');
+    } finally {
+      setBusy(false);
     }
-    setError('');
-    onAuthenticated(session);
   };
 
   return (
@@ -58,8 +60,8 @@ export function LoginScreen({ onAuthenticated }: { onAuthenticated: (session: Lo
         </Pressable>
 
         <View style={styles.demoCard}>
-          <Text style={styles.demoTitle}>ACCESO DE PRUEBA</Text>
-          <Text style={styles.demoText}>Admin: admin / admin · Operador: operador / visioflow</Text>
+          <Text style={styles.demoTitle}>ACCESO DE PRESENTACIÓN</Text>
+          <Text style={styles.demoText}>Usuario: {DEMO_LOGIN.username} · Contraseña: {DEMO_LOGIN.password}</Text>
         </View>
       </View>
     </KeyboardAvoidingView>

@@ -114,8 +114,6 @@ class DemoLiveStore:
         captured_at = snapshot.get("capturedAt") or _utc_now()
         with self.lock:
             for track in snapshot.get("tracks", []):
-                if not track.get("positionValid"):
-                    continue
                 tracker_id = str(track.get("trackerId"))
                 identity = (frame_id, tracker_id)
                 if identity in self.seen:
@@ -139,6 +137,7 @@ class DemoLiveStore:
                         "z": z,
                         "areaId": _area_for_point(x, y),
                         "confidence": float(track.get("confidence", 0.0)),
+                        "positionSource": track.get("positionSource", "world_calibration"),
                     }
                 )
             if len(self.seen) > 24000:
@@ -156,9 +155,10 @@ class DemoLiveStore:
 def seed_corridor_areas(tracker: Any) -> None:
     for area in CORRIDOR_AREAS:
         x1, y1, x2, y2 = area["imageRect"]
-        tracker.add_local_area(
+        local = tracker.add_local_area(
             area["name"], x1, y1, x2, y2, external_id=area["areaId"]
         )
+        tracker.sync_area(local["id"])
 
 
 def _corridor_scene() -> dict[str, Any]:
@@ -258,7 +258,7 @@ def site_area_state(site_id: str):
         if area_id in counts:
             counts[area_id] = int(area.get("current_count", 0))
     observed_at = snapshot.get("capturedAt") or _utc_now()
-    current_app.extensions["alert_store"].evaluate(CORRIDOR_SITE_ID, counts)
+    current_app.extensions["api_client"].evaluate_alerts(CORRIDOR_SITE_ID, counts)
     return jsonify(
         {
             "items": [
@@ -278,13 +278,12 @@ def site_area_state(site_id: str):
 def site_alerts(site_id: str):
     if request.method == "OPTIONS":
         return "", 204
-    store = current_app.extensions["alert_store"]
+    client = current_app.extensions["api_client"]
     if request.method == "GET":
-        return jsonify({"items": store.list(site_id)})
-    try:
-        return jsonify({"item": store.create(site_id, request.get_json(silent=True) or {})}), 201
-    except (TypeError, ValueError) as exc:
-        return jsonify({"ok": False, "error": str(exc)}), 400
+        items = client.list_alerts(site_id)
+        return (jsonify({"items": items}), 200) if items is not None else (jsonify({"ok": False, "error": "API central no disponible."}), 503)
+    item = client.create_alert(site_id, request.get_json(silent=True) or {})
+    return (jsonify({"item": item}), 201) if item else (jsonify({"ok": False, "error": client.last_error or "No se pudo crear la alerta."}), 400)
 
 
 @demo_api_bp.route(
@@ -294,14 +293,14 @@ def site_alerts(site_id: str):
 def site_alert(site_id: str, alert_id: str):
     if request.method == "OPTIONS":
         return "", 204
-    store = current_app.extensions["alert_store"]
+    client = current_app.extensions["api_client"]
     if request.method == "DELETE":
-        if not store.delete(site_id, alert_id):
+        if not client.delete_alert(site_id, alert_id):
             return jsonify({"ok": False, "error": "Alerta no encontrada."}), 404
         return jsonify({"ok": True, "alertId": alert_id})
-    item = store.update(site_id, alert_id, request.get_json(silent=True) or {})
+    item = client.update_alert(site_id, alert_id, request.get_json(silent=True) or {})
     if not item:
-        return jsonify({"ok": False, "error": "Alerta no encontrada."}), 404
+        return jsonify({"ok": False, "error": client.last_error or "Alerta no encontrada."}), 400
     return jsonify({"item": item})
 
 

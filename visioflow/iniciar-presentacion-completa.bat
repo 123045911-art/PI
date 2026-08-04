@@ -55,7 +55,7 @@ exit /b 1
 
 :flask_ready
 echo [2/3] API lista. Sitios: Mi pasillo y Sitio simulado.
-set "EXPO_PUBLIC_API_BASE_URL=http://%LAN_IP%:5000"
+set "EXPO_PUBLIC_API_BASE_URL=http://%LAN_IP%:8000"
 set "REACT_NATIVE_PACKAGER_HOSTNAME=%LAN_IP%"
 set "EXPO_NO_DEPENDENCY_VALIDATION=1"
 

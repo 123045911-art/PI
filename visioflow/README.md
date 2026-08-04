@@ -1,5 +1,7 @@
 # VisioFlow
 
+La aplicación usa FastAPI como único punto de acceso (`EXPO_PUBLIC_API_BASE_URL`, puerto `8000`). Flask conserva la interfaz web en el puerto `5000` y funciona como motor interno de visión.
+
 Aplicación móvil responsiva en React Native + Expo para representar trayectorias de personas como superficies térmicas 2.5D y patrones operativos verificables.
 
 La prueba integral del pasillo real, sus tres áreas, selección de sitio y API local está documentada en [`docs/prueba-integral-pasillo.md`](docs/prueba-integral-pasillo.md).

@@ -88,9 +88,14 @@ class OpenCVCameraProvider(CameraProvider):
 
     def _reader(self) -> None:
         failures = 0
+        next_reconnect_at = 0.0
         while not self.stopped:
             if self.cap is None or not self.cap.isOpened():
-                time.sleep(1.0)
+                now = time.monotonic()
+                if now >= next_reconnect_at:
+                    self._reconnect("fuente no disponible durante el arranque")
+                    next_reconnect_at = now + 2.0
+                time.sleep(0.25)
                 continue
             ok, frame = self.cap.read()
             if not ok:

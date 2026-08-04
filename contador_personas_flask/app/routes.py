@@ -155,12 +155,8 @@ def mutate_area(area_id: int):
     if not service:
         return jsonify({"ok": False, "error": "Servicio de tracking no disponible."}), 503
     if request.method == "DELETE":
-        with service.lock:
-            existing = dict(service.areas.get(area_id) or {})
         if not service.delete_area(area_id):
             return jsonify({"ok": False, "error": "Area no encontrada."}), 404
-        external_id = str(existing.get("external_id") or f"area-local-{area_id}")
-        current_app.extensions["alert_store"].delete_for_area("pasillo-real", external_id)
         return jsonify({"ok": True, "areaId": area_id})
     payload = request.get_json(silent=True) or {}
     required = ("name", "x1", "y1", "x2", "y2")

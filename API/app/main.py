@@ -8,7 +8,9 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 
-from app.router import areas, auth, dashboard, events, heatmap, state, users
+from app.data.db import engine
+from app.models import Base
+from app.router import areas, auth, dashboard, events, heatmap, live, state, users
 
 # ── Configuración de entorno ───────────────────────────────────────────────────
 ENV = os.getenv("APP_ENV", "production").lower()
@@ -35,6 +37,11 @@ app = FastAPI(
     openapi_url="/openapi.json" if IS_DEV else None,
 )
 
+
+@app.on_event("startup")
+def create_missing_tables() -> None:
+    Base.metadata.create_all(bind=engine)
+
 # ── Middlewares ────────────────────────────────────────────────────────────────
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
@@ -53,7 +60,13 @@ app.add_middleware(
 async def validation_exception_handler(
     request: Request, exc: RequestValidationError
 ):
-    return JSONResponse(status_code=422, content={"detail": exc.errors()})
+    # Excluir objetos ValueError internos para que el mensaje siempre sea JSON
+    # serializable y el cliente reciba 422 en lugar de un error 500.
+    safe_errors = [
+        {key: value for key, value in error.items() if key not in {"ctx", "input"}}
+        for error in exc.errors()
+    ]
+    return JSONResponse(status_code=422, content={"detail": safe_errors})
 
 
 # ── Endpoints de diagnóstico ───────────────────────────────────────────────────
@@ -81,3 +94,4 @@ app.include_router(state.router)
 app.include_router(heatmap.router)
 app.include_router(dashboard.router)
 app.include_router(users.router)
+app.include_router(live.router)

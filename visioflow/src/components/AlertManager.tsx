@@ -3,7 +3,7 @@ import { Animated, PanResponder, Pressable, ScrollView, StyleSheet, Text, TextIn
 import Slider from '@react-native-community/slider';
 import { AppModal } from './AppModal';
 import { DAY_NAMES } from '../history';
-import { AlertScheduleMode, createLocalAlert, deleteLocalAlert, getAlertScheduleLabel, getAlertStatusLabel, getAlertTypeLabel, LocalAlert, LocalSession, updateLocalAlert } from '../localStore';
+import { AlertScheduleMode, deleteLocalAlert, getAlertScheduleLabel, getAlertStatusLabel, getAlertTypeLabel, LocalAlert, LocalSession } from '../localStore';
 
 type AreaOption = { id: string; name: string; peopleCount: number };
 
@@ -71,9 +71,9 @@ export function AlertManager({
   initialAreaId: string | null;
   session: LocalSession;
   alerts: LocalAlert[];
-  onCreated: (alert: LocalAlert) => void;
-  onUpdated: (alert: LocalAlert) => void;
-  onDeleted: (alertId: string) => void;
+  onCreated: (alert: LocalAlert) => void | Promise<void>;
+  onUpdated: (alert: LocalAlert) => void | Promise<void>;
+  onDeleted: (alertId: string) => void | Promise<void>;
 }) {
   const [areaId, setAreaId] = useState(initialAreaId ?? areas[0]?.id ?? '');
   const [flowRule, setFlowRule] = useState<'crowding' | 'low_flow'>('crowding');
@@ -125,17 +125,26 @@ export function AlertManager({
       peopleCountSnapshot: area.peopleCount,
       createdBy: session.username,
     } as const;
-    const existing = alerts.find((alert) => alert.id === editingAlertId);
-    if (existing) {
-      const updated = await updateLocalAlert({ ...existing, ...values });
-      onUpdated(updated);
-    } else {
-      const created = await createLocalAlert(values);
-      onCreated(created);
+    try {
+      const existing = alerts.find((alert) => alert.id === editingAlertId);
+      if (existing) {
+        const updated = { ...existing, ...values } as LocalAlert;
+        await onUpdated(updated);
+      } else {
+        const created: LocalAlert = {
+          ...values,
+          id: `alert-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+          createdAt: new Date().toISOString(),
+        };
+        await onCreated(created);
+      }
+      setError('');
+      setEditingAlertId(null);
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'No fue posible guardar la alerta.');
+    } finally {
+      setSaving(false);
     }
-    setSaving(false);
-    setError('');
-    setEditingAlertId(null);
   };
 
   const startEdit = (alert: LocalAlert) => {
@@ -150,9 +159,13 @@ export function AlertManager({
   };
 
   const removeAlert = async (alertId: string) => {
-    await deleteLocalAlert(alertId);
-    onDeleted(alertId);
-    if (editingAlertId === alertId) setEditingAlertId(null);
+    try {
+      await onDeleted(alertId);
+      await deleteLocalAlert(alertId);
+      if (editingAlertId === alertId) setEditingAlertId(null);
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'No fue posible eliminar la alerta.');
+    }
   };
 
   return (

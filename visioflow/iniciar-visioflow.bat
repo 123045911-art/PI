@@ -3,6 +3,21 @@ setlocal
 cd /d "%~dp0"
 title VisioFlow - Expo Go
 
+if not exist "package.json" (
+  echo [ERROR] No se encontro package.json en %CD%.
+  pause
+  exit /b 1
+)
+if not exist "node_modules\expo\bin\cli" (
+  echo Instalando dependencias Android por primera vez...
+  call npm install
+  if errorlevel 1 (
+    echo [ERROR] npm install fallo.
+    pause
+    exit /b 1
+  )
+)
+
 echo.
 echo  ==========================================
 echo           VISIOFLOW - EXPO GO
@@ -25,7 +40,7 @@ if not defined LAN_IP (
   goto end
 )
 set "REACT_NATIVE_PACKAGER_HOSTNAME=%LAN_IP%"
-set "EXPO_PUBLIC_API_BASE_URL=http://%LAN_IP%:5000"
+set "EXPO_PUBLIC_API_BASE_URL=http://%LAN_IP%:8000"
 echo Iniciando VisioFlow por LAN en %LAN_IP%...
 echo Android debe mostrar exp://%LAN_IP%:8081 o un puerto equivalente.
 echo La linea Web is waiting on localhost es normal y solo corresponde a la PC.
@@ -37,11 +52,24 @@ goto end
 
 :tunnel
 echo.
-echo Iniciando VisioFlow con tunel publico...
-echo Espera a que aparezca "Tunnel ready" y escanea el QR.
-echo IMPORTANTE: el tunel publica Metro, pero no publica la API Flask.
+echo Iniciando tunel publico para FastAPI...
+if exist ".api-tunnel-url" del /q ".api-tunnel-url"
+start "VisioFlow - API publica" cmd /k "cd /d ""%~dp0"" && node scripts\start-api-tunnel.js"
+for /L %%N in (1,1,45) do (
+  if exist ".api-tunnel-url" goto api_tunnel_ready
+  timeout /t 1 /nobreak >nul
+)
+echo [ERROR] El tunel de la API no entrego una URL.
+echo Revisa la terminal "VisioFlow - API publica".
+goto end
+
+:api_tunnel_ready
+set /p API_TUNNEL_URL=<".api-tunnel-url"
+set "EXPO_PUBLIC_API_BASE_URL=%API_TUNNEL_URL%"
+echo API publica: %EXPO_PUBLIC_API_BASE_URL%
+echo Iniciando el tunel de Expo. Escanea el QR cuando aparezca.
 echo.
-call npx -y node@22 node_modules/expo/bin/cli start --tunnel --go
+call npx -y node@22 node_modules/expo/bin/cli start --tunnel --go --clear
 goto end
 
 :end

@@ -1,3 +1,299 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #!/bin/bash
 
 echo "==================================================="
@@ -5,7 +301,7 @@ echo "       VISIOFLOW - INICIO DEL SISTEMA (LINUX)      "
 echo "==================================================="
 echo
 
-echo "[1/4] Detectando cámara..."
+echo "[1/3] Detectando cámara..."
 
 # Default fallback (suele ser la integrada si no hay otra)
 CAMERA_DEVICE="/dev/video0" 
@@ -58,7 +354,7 @@ export CAMERA_DEVICE
 export CAMERA_SOURCE=0  # Dentro de Docker siempre estará en /dev/video0 por el mapeo en el compose
 
 echo
-echo "[2/4] Verificando estado de la infraestructura de Docker..."
+echo "[2/3] Verificando estado de la infraestructura de Docker..."
 
 # Verificar si el demonio de Docker está corriendo
 if ! docker info >/dev/null 2>&1; then
@@ -79,21 +375,13 @@ else
 fi
 
 echo
-echo "[3/4] Verificando entorno de Node.js y aplicación móvil (visioflow)..."
+echo "[3/3] Verificando y preparando la aplicación móvil (Expo Go)..."
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 MOBILE_DIR="$SCRIPT_DIR/visioflow"
 
-if ! command -v node >/dev/null 2>&1 || ! command -v npm >/dev/null 2>&1; then
-    echo "[ADVERTENCIA] Node.js o npm no están instalados en el sistema principal."
-    echo "El backend (Flask + PostgreSQL + FastAPI) está corriendo en Docker."
-    echo "Para correr la app móvil Expo Go, instala Node.js (v18+) e intenta de nuevo."
-    echo "  sudo apt update && sudo apt install -y nodejs npm"
-    exit 1
-fi
-
 if [ -d "$MOBILE_DIR" ]; then
     if [ ! -d "$MOBILE_DIR/node_modules" ]; then
-        echo "[INFO] Instalando dependencias de Node en visioflow (primera ejecución)..."
+        echo "[INFO] Primera clonación detectada para la app móvil. Instalando dependencias en visioflow..."
         (cd "$MOBILE_DIR" && npm install) || { echo "[ERROR] Falló la instalación de dependencias npm."; exit 1; }
     fi
 else
@@ -101,7 +389,7 @@ else
     exit 1
 fi
 
-# Detectar IP LAN para Expo y conectar con Flask
+# Detectar IP LAN para Expo
 LAN_IP=$(hostname -I 2>/dev/null | awk '{print $1}')
 if [ -z "$LAN_IP" ]; then
     LAN_IP=$(ip route get 1.1.1.1 2>/dev/null | awk '{for(i=1;i<=NF;i++) if($i=="src") print $(i+1)}')
@@ -111,16 +399,7 @@ fi
 export REACT_NATIVE_PACKAGER_HOSTNAME="$LAN_IP"
 export EXPO_PUBLIC_API_BASE_URL="http://$LAN_IP:5000"
 
-# Crear/actualizar archivo .env dentro de visioflow para garantizar configuración en Expo
-cat <<EOF > "$MOBILE_DIR/.env"
-EXPO_PUBLIC_API_BASE_URL=http://$LAN_IP:5000
-REACT_NATIVE_PACKAGER_HOSTNAME=$LAN_IP
-EOF
-
-echo "[OK] Archivo de entorno visioflow/.env actualizado con EXPO_PUBLIC_API_BASE_URL=http://$LAN_IP:5000"
-
 echo
-echo "[4/4] Lanzando aplicación móvil VisioFlow (Expo Go)..."
 echo "==================================================="
 echo "[ÉXITO] ¡Infraestructura Backend y API en línea!"
 echo

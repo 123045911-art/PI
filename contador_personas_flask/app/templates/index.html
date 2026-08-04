@@ -37,7 +37,7 @@
         <form id="area-form">
           <label>
             Nombre
-            <input type="text" id="name" name="name" placeholder="Ej: Caja 1" required autocomplete="off" />
+            <input type="text" id="name" name="name" placeholder="Ej: Caja 1" required maxlength="100" autocomplete="off" />
           </label>
 
           <input type="hidden" id="x1" name="x1" />
@@ -67,7 +67,7 @@
               <option value="low_flow">Baja afluencia</option>
             </select>
           </label>
-          <label>Umbral de personas<input id="alert-threshold" type="number" min="1" value="1" required /></label>
+          <label>Umbral de personas<input id="alert-threshold" type="number" min="1" max="120" value="1" required /></label>
           <button type="submit" id="alert-save">Crear alerta</button>
           <button type="button" id="alert-cancel" class="btn-ghost hidden">Cancelar edicion</button>
           <p id="alert-message" class="form-message"></p>

@@ -3,7 +3,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 export type LocalSession = {
   username: string;
   displayName: string;
-  role: 'operator';
+  role: 'operator' | 'admin';
+  accessToken: string;
+  userId: number;
+  isAdmin: boolean;
   signedInAt: string;
 };
 
@@ -90,56 +93,9 @@ const LEGACY_DEMO_ALERT_IDS = new Set([
 // almacenar en el backend únicamente como hash Argon2id (con salt), nunca en
 // texto plano. La sesión local debe reemplazarse por access/refresh tokens
 // seguros y las alertas deben validarse y persistirse mediante la API.
-import { API_BASE_URL } from './liveApi';
+export const DEMO_LOGIN = { username: 'admin', password: '123456' };
 
-const DEMO_USER = {
-  username: 'operador',
-  password: 'visioflow',
-  displayName: 'Operador demo',
-} as const;
-
-export const DEMO_LOGIN = { username: DEMO_USER.username, password: DEMO_USER.password };
-
-export async function authenticateLocal(username: string, password: string) {
-  const u = username.trim();
-  const lower = u.toLowerCase();
-
-  // 1. Intentar autenticación contra la API de Flask (permite entrar a usuarios creados dinámicamente en Flask)
-  try {
-    const response = await fetch(`${API_BASE_URL}/api/v1/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-      body: JSON.stringify({ username: u, password }),
-    });
-    if (response.ok) {
-      const data = await response.json();
-      if (data?.ok && data?.user) {
-        const session: LocalSession = {
-          username: String(data.user.username || u),
-          displayName: data.user.is_admin ? 'Administrador VisioFlow' : `Usuario ${data.user.username}`,
-          role: 'operator',
-          signedInAt: new Date().toISOString(),
-        };
-        await AsyncStorage.setItem(SESSION_KEY, JSON.stringify(session));
-        return session;
-      }
-    }
-  } catch {
-    // Si no hay respuesta o la API está sin red, se valida con credenciales locales
-  }
-
-  // 2. Credenciales estáticas de respaldo (operador / visioflow y admin / admin)
-  const isAdmin = lower === 'admin' && (password === 'admin' || password === '123456' || password === 'root');
-  const isOperator = lower === 'operador' && password === 'visioflow';
-
-  if (!isAdmin && !isOperator) return null;
-
-  const session: LocalSession = {
-    username: u,
-    displayName: isAdmin ? 'Administrador VisioFlow' : 'Operador demo',
-    role: 'operator',
-    signedInAt: new Date().toISOString(),
-  };
+export async function saveLocalSession(session: LocalSession) {
   await AsyncStorage.setItem(SESSION_KEY, JSON.stringify(session));
   return session;
 }
@@ -148,7 +104,12 @@ export async function loadLocalSession() {
   const value = await AsyncStorage.getItem(SESSION_KEY);
   if (!value) return null;
   try {
-    return JSON.parse(value) as LocalSession;
+    const session = JSON.parse(value) as LocalSession;
+    if (!session.accessToken) {
+      await AsyncStorage.removeItem(SESSION_KEY);
+      return null;
+    }
+    return session;
   } catch {
     await AsyncStorage.removeItem(SESSION_KEY);
     return null;
@@ -193,7 +154,8 @@ export async function createLocalAlert(alert: Omit<LocalAlert, 'id' | 'createdAt
     createdAt: new Date().toISOString(),
   };
   const next = [created, ...alerts].slice(0, 50);
-  // Temporal: se guarda como JSON en texto plano hasta conectar POST /alerts.
+  // Caché local para que el sitio simulado funcione sin conexión. Las alertas
+  // del pasillo real se persisten y sincronizan mediante FastAPI.
   await AsyncStorage.setItem(ALERTS_KEY, JSON.stringify(next));
   return created;
 }

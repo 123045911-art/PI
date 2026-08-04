@@ -36,6 +36,15 @@ def get_area(db: Session, area_id: int) -> Area:
 def update_area(db: Session, area_id: int, data: AreaUpdate) -> Area:
     area = get_area(db, area_id)
     payload = data.model_dump(exclude_unset=True)
+    merged = {
+        "x1": payload.get("x1", area.x1), "y1": payload.get("y1", area.y1),
+        "x2": payload.get("x2", area.x2), "y2": payload.get("y2", area.y2),
+    }
+    if merged["x1"] == merged["x2"] or merged["y1"] == merged["y2"]:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="El rectángulo del área debe tener ancho y alto mayores que cero.",
+        )
     for key, value in payload.items():
         if key == "name" and isinstance(value, str):
             value = value.strip()

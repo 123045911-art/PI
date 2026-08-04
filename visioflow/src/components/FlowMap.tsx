@@ -14,7 +14,7 @@ import Svg, {
 } from 'react-native-svg';
 import { detectStoppedPoints } from '../analytics';
 import { FLOOR, isBlocked, SAMPLE_SECONDS, STATIC_OBJECTS, ZONES } from '../data';
-import { HeatScaleMode, MapPerspective, Metric, StaticObject, TrackPoint, ViewMode, Zone } from '../types';
+import { HeatScaleMode, MapPerspective, Metric, TrackPoint, ViewMode } from '../types';
 
 type Props = {
   points: TrackPoint[];
@@ -30,8 +30,6 @@ type Props = {
   showObjects: boolean;
   showTrackers: boolean;
   showTrails: boolean;
-  zones?: Zone[];
-  objects?: StaticObject[];
   comparison?: {
     baselinePoints: TrackPoint[];
     comparisonPoints: TrackPoint[];
@@ -371,12 +369,8 @@ export function FlowMap({
   showObjects,
   showTrackers,
   showTrails,
-  zones,
-  objects,
   comparison,
 }: Props) {
-  const activeZones = zones ?? ZONES;
-  const activeObjects = showObjects ? (objects ?? STATIC_OBJECTS) : [];
   const surface = useMemo(
     () => comparison
       ? buildDifferenceSurface(comparison.baselinePoints, comparison.comparisonPoints, scaleMode)
@@ -509,7 +503,7 @@ export function FlowMap({
           return <Path key={`grid-y-${index}`} d={`M ${start.x} ${start.y} L ${end.x} ${end.y}`} stroke="#aeb4af" strokeOpacity="0.2" strokeWidth="0.16" />;
         })}
 
-        {activeZones.map((zone) => {
+        {ZONES.map((zone) => {
           const corners = [
             project(zone.x, zone.y),
             project(zone.x + zone.width, zone.y),
@@ -582,7 +576,7 @@ export function FlowMap({
           return <Path key={`trail-${trackId}`} d={d} fill="none" stroke="#ffcc45" strokeOpacity="0.68" strokeWidth="0.42" />;
         })}
 
-        {activeObjects.map((object) => {
+        {showObjects && STATIC_OBJECTS.map((object) => {
           const base = [
             project(object.x, object.y),
             project(object.x + object.width, object.y),
@@ -620,7 +614,7 @@ export function FlowMap({
           );
         })}
 
-        {activeZones.map((zone) => {
+        {ZONES.map((zone) => {
           const corners = [
             project(zone.x, zone.y, 0.25),
             project(zone.x + zone.width, zone.y, 0.25),
@@ -650,7 +644,7 @@ export function FlowMap({
         style={styles.zoneSelector}
         contentContainerStyle={styles.zoneSelectorContent}
       >
-        {activeZones.map((zone) => {
+        {ZONES.map((zone) => {
           const selected = zone.id === selectedZone;
           return (
             <Pressable

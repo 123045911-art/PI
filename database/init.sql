@@ -3,6 +3,7 @@
 -- ============================================
 
 DROP TABLE IF EXISTS heatmap_points;
+DROP TABLE IF EXISTS alerts;
 DROP TABLE IF EXISTS area_state;
 DROP TABLE IF EXISTS area_events;
 DROP TABLE IF EXISTS areas;
@@ -82,6 +83,23 @@ CREATE TABLE users (
     is_admin BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE alerts (
+    id VARCHAR(64) PRIMARY KEY,
+    site_id VARCHAR(100) NOT NULL,
+    area_id VARCHAR(100) NOT NULL,
+    area_name VARCHAR(100) NOT NULL,
+    type VARCHAR(30) NOT NULL,
+    reason VARCHAR(500) NOT NULL,
+    status VARCHAR(30) NOT NULL DEFAULT 'watching',
+    threshold_people INT,
+    schedule_mode VARCHAR(20) NOT NULL DEFAULT 'all_days',
+    schedule_day INT,
+    schedule_date VARCHAR(10),
+    people_count_snapshot INT NOT NULL DEFAULT 0,
+    created_by VARCHAR(50) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 -- ============================================
 -- ÍNDICES (para rendimiento)
 -- ============================================
@@ -91,3 +109,5 @@ CREATE INDEX idx_area_events_timestamp ON area_events(timestamp);
 
 CREATE INDEX idx_heatmap_area_id ON heatmap_points(area_id);
 CREATE INDEX idx_heatmap_timestamp ON heatmap_points(timestamp);
+CREATE INDEX idx_alerts_site_id ON alerts(site_id);
+CREATE INDEX idx_alerts_area_id ON alerts(area_id);

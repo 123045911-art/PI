@@ -7,7 +7,6 @@ from app.core.tracker_service import TrackerService
 from app.core.api_client import VisioFlowApiClient
 from app.core.request_limits import SlidingWindowRateLimiter, StreamLimiter
 from app.core.local_users import LocalUserStore
-from app.core.alert_store import AlertStore
 from app.routes import main_bp
 from app.auth_routes import auth_bp
 from app.user_routes import user_bp
@@ -75,7 +74,6 @@ def create_app(
 
     app.extensions["vision_config"] = vision_config
     app.extensions["local_user_store"] = LocalUserStore(vision_config.data_root)
-    app.extensions["alert_store"] = AlertStore(vision_config.data_root)
     app.extensions["calibration_repository"] = calibration_repository
     app.extensions["scene_repository"] = scene_repository
     app.extensions["coordinate_transformer"] = coordinate_transformer

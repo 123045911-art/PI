@@ -3,6 +3,53 @@ from __future__ import annotations
 from app import create_app
 
 
+def _install_fake_central_api(app):
+    """Aísla las pruebas Flask sin depender de un FastAPI externo encendido."""
+    api = app.extensions["api_client"]
+    alerts = []
+
+    def create_alert(_site_id, payload):
+        item = {
+            **payload,
+            "id": payload.get("id", f"test-alert-{len(alerts) + 1}"),
+            "status": payload.get("status", "watching"),
+            "peopleCountSnapshot": payload.get("peopleCountSnapshot", 0),
+        }
+        alerts.insert(0, item)
+        return item
+
+    def evaluate_alerts(_site_id, counts):
+        for item in alerts:
+            count = int(counts.get(item["areaId"], 0))
+            item["peopleCountSnapshot"] = count
+            threshold = int(item.get("thresholdPeople", 0))
+            item["status"] = "triggered" if count >= threshold else "watching"
+        return alerts
+
+    def sync_alert_area(external_id, *, name=None, delete=False):
+        if delete:
+            alerts[:] = [item for item in alerts if item["areaId"] != external_id]
+        elif name:
+            for item in alerts:
+                if item["areaId"] == external_id:
+                    item["areaName"] = name
+        return True
+
+    def delete_alert(_site_id, alert_id):
+        before = len(alerts)
+        alerts[:] = [item for item in alerts if item["id"] != alert_id]
+        return len(alerts) != before
+
+    api.list_alerts = lambda _site_id: list(alerts)
+    api.create_alert = create_alert
+    api.evaluate_alerts = evaluate_alerts
+    api.delete_alert = delete_alert
+    api.sync_alert_area = sync_alert_area
+    api.create_area = lambda **payload: {"id": 99, **payload}
+    api.delete_area = lambda _area_id: True
+    return alerts
+
+
 def _login(client, admin=True):
     with client.session_transaction() as session:
         session["user"] = {"id": 1, "username": "tester", "is_admin": admin}
@@ -71,11 +118,7 @@ def test_demo_sites_expose_corridor_contract_without_login(vision_config):
     bootstrap = client.get("/api/v1/sites/pasillo-real/bootstrap")
     assert bootstrap.status_code == 200
     payload = bootstrap.get_json()
-    assert [area["areaId"] for area in payload["areas"]] == [
-        "zona-cercana",
-        "zona-media",
-        "zona-lejana",
-    ]
+    assert payload["areas"] == []
     assert payload["scenes"][0]["coordinateSystem"]["unit"] == "meter"
 
     points = client.get("/api/v1/sites/pasillo-real/track-points")
@@ -83,11 +126,7 @@ def test_demo_sites_expose_corridor_contract_without_login(vision_config):
     assert points.status_code == 200
     assert points.get_json() == {"items": [], "nextCursor": None}
     assert state.status_code == 200
-    assert {item["areaId"] for item in state.get_json()["items"]} == {
-        "zona-cercana",
-        "zona-media",
-        "zona-lejana",
-    }
+    assert state.get_json()["items"] == []
 
 
 def test_api_rate_limit_returns_retryable_429(vision_config, monkeypatch):
@@ -209,6 +248,7 @@ def test_demo_login_stays_disabled_outside_local_environment(vision_config, monk
 def test_area_state_and_alert_use_pixel_area_count_without_world_position(vision_config):
     app = create_app(start_background=False, vision_config=vision_config)
     app.config.update(TESTING=True)
+    _install_fake_central_api(app)
     tracker = app.extensions["tracker_service"]
     area = tracker.add_local_area(
         "Prueba alerta", 10, 10, 200, 200, external_id="area-alerta"
@@ -237,6 +277,7 @@ def test_area_state_and_alert_use_pixel_area_count_without_world_position(vision
 def test_deleting_area_removes_area_and_related_alerts(vision_config):
     app = create_app(start_background=False, vision_config=vision_config)
     app.config.update(TESTING=True)
+    _install_fake_central_api(app)
     client = app.test_client()
     _login(client)
     created_area = client.post(
@@ -266,18 +307,18 @@ def test_local_user_crud_and_login_work_without_central_server(vision_config, mo
 
     created = client.post(
         "/users/create",
-        data={"username": "operador2", "password": "secreto", "is_admin": "on"},
+        data={"username": "operador2", "password": "Secreto1", "is_admin": "on"},
     )
     assert created.status_code == 302
     user = app.extensions["local_user_store"].list()[0]
     updated = client.post(
         f"/users/edit/{user['id']}",
-        data={"username": "operador-editado", "password": "nuevo", "is_admin": "on"},
+        data={"username": "operador-editado", "password": "Nuevo123", "is_admin": "on"},
     )
     assert updated.status_code == 302
     client.get("/logout")
     login = client.post(
-        "/login", data={"username": "operador-editado", "password": "nuevo"}
+        "/login", data={"username": "operador-editado", "password": "Nuevo123"}
     )
     assert login.status_code == 302
     with client.session_transaction() as local_session:

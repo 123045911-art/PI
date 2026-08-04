@@ -31,6 +31,22 @@ class VisioFlowApiClient:
         self.timeout = timeout if timeout is not None else DEFAULT_TIMEOUT
         self._user_token: str | None = None
         self._service_token: str | None = None
+        self.last_error: str | None = None
+
+    @staticmethod
+    def _response_error(response: requests.Response) -> str:
+        try:
+            detail = response.json().get("detail")
+            if isinstance(detail, str):
+                return detail
+            if isinstance(detail, list):
+                return "; ".join(
+                    f"{str((item.get('loc') or [''])[-1])}: {item.get('msg', 'Dato inválido')}"
+                    for item in detail
+                )
+        except (ValueError, AttributeError, TypeError):
+            pass
+        return f"La API respondió HTTP {response.status_code}."
 
     def set_user_token(self, token: str | None) -> None:
         self._user_token = token
@@ -125,6 +141,108 @@ class VisioFlowApiClient:
                 exc,
                 url,
             )
+            return None
+
+    def update_area(self, area_id: int, **payload: Any) -> bool:
+        try:
+            response = requests.patch(
+                f"{self.base_url}/areas/{area_id}", json=payload,
+                headers=self._auth_headers(prefer_service=True), timeout=self.timeout,
+            )
+            return 200 <= response.status_code < 300
+        except requests.RequestException:
+            return False
+
+    def delete_area(self, area_id: int) -> bool:
+        try:
+            response = requests.delete(
+                f"{self.base_url}/areas/{area_id}",
+                headers=self._auth_headers(prefer_service=True), timeout=self.timeout,
+            )
+            return response.status_code == 204
+        except requests.RequestException:
+            return False
+
+    def sync_alert_area(self, external_area_id: str, *, name: str | None = None, delete: bool = False) -> bool:
+        path = f"/api/v1/sites/pasillo-real/alerts/by-area/{external_area_id}"
+        try:
+            if delete:
+                response = requests.delete(f"{self.base_url}{path}", headers=self._auth_headers(prefer_service=True), timeout=self.timeout)
+            else:
+                response = requests.patch(f"{self.base_url}{path}", json={"areaName": name}, headers=self._auth_headers(prefer_service=True), timeout=self.timeout)
+            return 200 <= response.status_code < 300
+        except requests.RequestException:
+            return False
+
+    def send_heatmap_point(self, *, track_id: int, cx: int, cy: int, timestamp_iso: str, area_id: int | None = None) -> bool:
+        try:
+            response = requests.post(
+                f"{self.base_url}/heatmap",
+                json={"track_id": track_id, "cx": cx, "cy": cy, "timestamp": timestamp_iso, "area_id": area_id},
+                headers=self._auth_headers(prefer_service=True), timeout=self.timeout,
+            )
+            return 200 <= response.status_code < 300
+        except requests.RequestException:
+            return False
+
+    def list_alerts(self, site_id: str) -> list[dict[str, Any]] | None:
+        try:
+            response = requests.get(
+                f"{self.base_url}/api/v1/sites/{site_id}/alerts",
+                headers=self._auth_headers(prefer_service=True), timeout=self.timeout,
+            )
+            return response.json().get("items", []) if response.status_code == 200 else None
+        except requests.RequestException:
+            return None
+
+    def create_alert(self, site_id: str, payload: dict[str, Any]) -> dict[str, Any] | None:
+        self.last_error = None
+        try:
+            response = requests.post(
+                f"{self.base_url}/api/v1/sites/{site_id}/alerts", json=payload,
+                headers=self._auth_headers(prefer_service=True), timeout=self.timeout,
+            )
+            if response.status_code == 201:
+                return response.json().get("item")
+            self.last_error = self._response_error(response)
+            return None
+        except requests.RequestException as exc:
+            self.last_error = f"No fue posible conectar con la API: {exc}"
+            return None
+
+    def update_alert(self, site_id: str, alert_id: str, payload: dict[str, Any]) -> dict[str, Any] | None:
+        self.last_error = None
+        try:
+            response = requests.patch(
+                f"{self.base_url}/api/v1/sites/{site_id}/alerts/{alert_id}", json=payload,
+                headers=self._auth_headers(prefer_service=True), timeout=self.timeout,
+            )
+            if response.status_code == 200:
+                return response.json().get("item")
+            self.last_error = self._response_error(response)
+            return None
+        except requests.RequestException as exc:
+            self.last_error = f"No fue posible conectar con la API: {exc}"
+            return None
+
+    def delete_alert(self, site_id: str, alert_id: str) -> bool:
+        try:
+            response = requests.delete(
+                f"{self.base_url}/api/v1/sites/{site_id}/alerts/{alert_id}",
+                headers=self._auth_headers(prefer_service=True), timeout=self.timeout,
+            )
+            return response.status_code == 200
+        except requests.RequestException:
+            return False
+
+    def evaluate_alerts(self, site_id: str, counts: dict[str, int]) -> list[dict[str, Any]] | None:
+        try:
+            response = requests.post(
+                f"{self.base_url}/api/v1/sites/{site_id}/alerts/evaluate",
+                json={"counts": counts}, headers=self._auth_headers(prefer_service=True), timeout=self.timeout,
+            )
+            return response.json().get("items", []) if response.status_code == 200 else None
+        except requests.RequestException:
             return None
 
     def post_event(
@@ -258,6 +376,7 @@ class VisioFlowApiClient:
         """POST /users/. Requiere JWT de administrador."""
         url = f"{self.base_url}/users/"
         payload = {"username": username, "password": password, "is_admin": is_admin_val}
+        self.last_error = None
         try:
             response = requests.post(
                 url,
@@ -267,8 +386,10 @@ class VisioFlowApiClient:
             )
             if response.status_code == 201:
                 return response.json()
+            self.last_error = self._response_error(response)
             return None
-        except requests.RequestException:
+        except requests.RequestException as exc:
+            self.last_error = f"No fue posible conectar con la API: {exc}"
             return None
 
     def update_user(

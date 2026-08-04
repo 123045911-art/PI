@@ -71,6 +71,7 @@ class TrackerService:
         self.last_flush_ts = time.time()
         self.latest_raw_frame: Optional[np.ndarray] = None
         self.latest_tracks: List[dict] = []
+        self.last_heatmap_sent: Dict[int, float] = {}
         self.frame_id = 0
         self.last_captured_at: Optional[str] = None
         self._load_local_areas()
@@ -193,8 +194,11 @@ class TrackerService:
         return model, tracker
 
     def add_area(self, name: str, x1: int, y1: int, x2: int, y2: int, is_admin: bool = False) -> dict:
-        if not name:
-            raise ValueError("El nombre del area es obligatorio.")
+        name = name.strip()
+        if not name or len(name) > 100:
+            raise ValueError("El nombre del área debe tener entre 1 y 100 caracteres.")
+        if min(x1, y1, x2, y2) < 0:
+            raise ValueError("Las coordenadas del área no pueden ser negativas.")
 
         rx1, rx2 = sorted((x1, x2))
         ry1, ry2 = sorted((y1, y2))
@@ -245,19 +249,26 @@ class TrackerService:
                         name,
                     )
             result = dict(self.areas[area_id])
+        api_id = result.get("api_id")
+        if api_id is not None:
+            self.api_client.update_area(int(api_id), name=result["name"], x1=rx1, y1=ry1, x2=rx2, y2=ry2)
+        self.api_client.sync_alert_area(str(result["external_id"]), name=result["name"])
         self._save_local_areas()
         return result
 
     def update_area(self, area_id: int, *, name: str, x1: int, y1: int, x2: int, y2: int) -> dict:
+        name = name.strip()
         rx1, rx2 = sorted((int(x1), int(x2)))
         ry1, ry2 = sorted((int(y1), int(y2)))
-        if not name.strip() or rx1 == rx2 or ry1 == ry2:
+        if min(rx1, ry1, rx2, ry2) < 0:
+            raise ValueError("Las coordenadas del área no pueden ser negativas.")
+        if not name or len(name) > 100 or rx1 == rx2 or ry1 == ry2:
             raise ValueError("El area requiere nombre y un rectangulo valido.")
         with self.lock:
             if area_id not in self.areas:
                 raise KeyError(area_id)
             self.areas[area_id].update(
-                {"name": name.strip(), "x1": rx1, "y1": ry1, "x2": rx2, "y2": ry2}
+                {"name": name, "x1": rx1, "y1": ry1, "x2": rx2, "y2": ry2}
             )
             result = dict(self.areas[area_id])
         self._save_local_areas()
@@ -267,10 +278,13 @@ class TrackerService:
         with self.lock:
             if area_id not in self.areas:
                 return False
-            self.areas.pop(area_id)
+            removed = self.areas.pop(area_id)
             for state in self.track_states.values():
                 state.get("inside_areas", set()).discard(area_id)
                 state.get("entry_times", {}).pop(area_id, None)
+        if removed.get("api_id") is not None:
+            self.api_client.delete_area(int(removed["api_id"]))
+        self.api_client.sync_alert_area(str(removed["external_id"]), delete=True)
         self._save_local_areas()
         return True
 
@@ -316,6 +330,25 @@ class TrackerService:
             result = dict(area)
         self._save_local_areas()
         return result
+
+    def sync_area(self, area_id: int) -> dict:
+        with self.lock:
+            area = self.areas.get(area_id)
+            if area is None:
+                raise KeyError(area_id)
+            if area.get("api_id") is not None:
+                return dict(area)
+            payload = dict(area)
+        created = self.api_client.create_area(
+            name=payload["name"], x1=payload["x1"], y1=payload["y1"],
+            x2=payload["x2"], y2=payload["y2"], is_admin=True,
+        )
+        if created and created.get("id") is not None:
+            with self.lock:
+                self.areas[area_id]["api_id"] = int(created["id"])
+                payload = dict(self.areas[area_id])
+            self._save_local_areas()
+        return payload
 
     def _point_in_area(self, cx: int, cy: int, area: dict) -> bool:
         return area["x1"] <= cx <= area["x2"] and area["y1"] <= cy <= area["y2"]
@@ -495,6 +528,7 @@ class TrackerService:
             now = time.time()
             active_track_ids = set()
             live_tracks: List[dict] = []
+            heatmap_samples: List[dict] = []
 
             for track in tracks:
                 track_id = int(track["trackId"])
@@ -557,15 +591,26 @@ class TrackerService:
                         }
                     )
                 except (ValueError, KeyError) as exc:
+                    height, width = frame.shape[:2]
                     live_track.update(
                         {
-                            "x": None,
-                            "y": None,
-                            "z": None,
+                            "x": round(max(0.0, min(1.75, float(foot_u) / max(width, 1) * 1.75)), 6),
+                            "y": round(max(0.0, min(4.5, (height - float(foot_v)) / max(height, 1) * 4.5)), 6),
+                            "z": 0.0,
+                            "positionSource": "image_approximation",
                             "positionWarning": str(exc),
                         }
                     )
                 live_tracks.append(live_track)
+
+                if now - self.last_heatmap_sent.get(track_id, 0.0) >= 1.0:
+                    containing = next((self.areas[item] for item in inside_now if self.areas[item].get("api_id") is not None), None)
+                    heatmap_samples.append({
+                        "track_id": track_id, "cx": int(round(foot_u)), "cy": int(round(foot_v)),
+                        "timestamp_iso": captured_at,
+                        "area_id": int(containing["api_id"]) if containing else None,
+                    })
+                    self.last_heatmap_sent[track_id] = now
 
                 cv2.rectangle(frame, (x1, y1), (x2, y2), (34, 197, 94), 2)
                 cv2.circle(frame, (int(foot_u), int(foot_v)), 4, (234, 179, 8), -1)
@@ -581,7 +626,9 @@ class TrackerService:
             self._draw_areas(frame)
             self._flush_events_to_csv_if_needed()
             self.latest_tracks = live_tracks
-            
+
+        for sample in heatmap_samples:
+            self.api_client.send_heatmap_point(**sample)
         return frame
 
     def _processing_loop(self):
