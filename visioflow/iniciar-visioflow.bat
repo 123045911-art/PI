@@ -23,17 +23,19 @@ echo  ==========================================
 echo           VISIOFLOW - EXPO GO
 echo  ==========================================
 echo.
-echo  [1] LAN    - Rapido, celular y PC en el mismo Wi-Fi
-echo  [2] Tunel  - Funciona entre redes, puede tardar mas
+echo  [1] LAN         - Rapido, celular y PC en el mismo Wi-Fi (API local)
+echo  [2] Tunel       - Funciona entre redes, puede tardar mas (API local)
+echo  [3] Produccion  - Usa el backend ya desplegado en AWS
 echo.
-choice /C 12 /N /M "Elige 1 o 2: "
+choice /C 123 /N /M "Elige 1, 2 o 3: "
 
+if errorlevel 3 goto production
 if errorlevel 2 goto tunnel
 
 :lan
 echo.
 set "LAN_IP="
-for /f "usebackq delims=" %%I in (`powershell -NoProfile -Command "$addresses = @(Get-NetIPAddress -InterfaceAlias 'Wi-Fi' -AddressFamily IPv4 -ErrorAction SilentlyContinue); if ($addresses.Count -gt 0) { [Console]::Write($addresses[0].IPAddress.Trim()) }"`) do set "LAN_IP=%%I"
+for /f "usebackq delims=" %%I in (`%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe -NoProfile -Command "$addresses = @(Get-NetIPAddress -InterfaceAlias 'Wi-Fi' -AddressFamily IPv4 -ErrorAction SilentlyContinue); if ($addresses.Count -gt 0) { [Console]::Write($addresses[0].IPAddress.Trim()) }"`) do set "LAN_IP=%%I"
 if not defined LAN_IP (
   echo [ERROR] No se pudo detectar una IP LAN con puerta de enlace.
   echo Conecta la PC al Wi-Fi y vuelve a ejecutar este archivo.
@@ -70,6 +72,25 @@ echo API publica: %EXPO_PUBLIC_API_BASE_URL%
 echo Iniciando el tunel de Expo. Escanea el QR cuando aparezca.
 echo.
 call npx -y node@22 node_modules/expo/bin/cli start --tunnel --go --clear
+goto end
+
+:production
+echo.
+echo Usando el backend de produccion en AWS (18-223-97-60.sslip.io).
+set "EXPO_PUBLIC_API_BASE_URL=https://18-223-97-60.sslip.io:8080"
+set "LAN_IP="
+for /f "usebackq delims=" %%I in (`%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe -NoProfile -Command "$addresses = @(Get-NetIPAddress -InterfaceAlias 'Wi-Fi' -AddressFamily IPv4 -ErrorAction SilentlyContinue); if ($addresses.Count -gt 0) { [Console]::Write($addresses[0].IPAddress.Trim()) }"`) do set "LAN_IP=%%I"
+if not defined LAN_IP (
+  echo [ERROR] No se pudo detectar una IP LAN con puerta de enlace.
+  echo Conecta la PC al Wi-Fi y vuelve a ejecutar este archivo.
+  goto end
+)
+set "REACT_NATIVE_PACKAGER_HOSTNAME=%LAN_IP%"
+echo Celular y PC deben estar en el mismo Wi-Fi para cargar la app (%LAN_IP%).
+echo API de produccion: %EXPO_PUBLIC_API_BASE_URL%
+echo Escanea el QR mostrado con Expo Go.
+echo.
+call npx -y node@22 node_modules/expo/bin/cli start --lan --go --clear
 goto end
 
 :end

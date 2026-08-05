@@ -1,0 +1,13 @@
+# Grafana corre en el servidor publico; Prometheus corre en el servidor
+# privado (172.31.17.57, otra instancia AWS en la misma VPC) - no comparten
+# red docker, por eso la URL usa la IP privada real en vez de un nombre de
+# servicio. Al estar en la misma VPC, este trafico no sale a internet.
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://172.31.17.57:9090
+    isDefault: true
+    editable: false

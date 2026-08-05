@@ -1,0 +1,15 @@
+# Override SOLO para pruebas locales: usa compose.public.yaml pero monta
+# haproxy.local.cfg en vez de haproxy.cfg (que trae el placeholder de AWS).
+#
+# Uso:
+#   docker compose -f compose.public.yaml -f compose.public.local.yaml up -d
+#
+# No subir este archivo a los servidores de AWS — es solo para probar en tu
+# maquina antes del despliegue.
+services:
+  haproxy:
+    volumes:
+      - ./haproxy/haproxy.local.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+      - ./haproxy/certs:/usr/local/etc/haproxy/certs:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

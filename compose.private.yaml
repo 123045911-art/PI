@@ -1,0 +1,249 @@
+# Stack de PRODUCCION para la instancia AWS "servidor privado".
+# No expone nada al internet publico directamente; solo el servidor publico
+# (compose.public.yaml, en la otra instancia) puede alcanzar los puertos de
+# api1/api2/api3 y flask, vía Security Group/red privada de AWS.
+#
+# Uso local (desarrollo en Windows con webcam fisica): sigue usando
+# docker-compose.yml + iniciar.bat, tal cual. Este archivo es solo para el
+# despliegue en las 2 instancias de AWS.
+
+services:
+  # --- BASE DE DATOS ---
+  db:
+    image: postgres:15
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-visioflow}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-visioflow_demo_2026}
+      POSTGRES_DB: ${POSTGRES_DB:-visioflow}
+    # SEGURIDAD: puerto de DB no expuesto al host, solo accesible en data_network.
+    volumes:
+      - postgres_data_v1:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-visioflow} -d ${POSTGRES_DB:-visioflow}"]
+      interval: 5s
+      retries: 5
+      timeout: 5s
+    networks:
+      - data_network
+
+  # --- REDIS: almacenamiento compartido del rate-limit entre las 3 replicas de la API ---
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - app_network
+      - data_network
+
+  # --- FASTAPI x3 (balanceadas por HAProxy en el servidor publico) ---
+  api1:
+    build: ./API
+    restart: unless-stopped
+    ports:
+      - "8001:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment: &api_env
+      DB_HOST: db
+      DB_PORT: "5432"
+      DB_USER: ${POSTGRES_USER:-visioflow}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-visioflow_demo_2026}
+      DB_NAME: ${POSTGRES_DB:-visioflow}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-e83a73df016ba34185bc029707e4d8fb4be0cda803bb4c5409a63be3d4d420a8}
+      JWT_EXPIRE_MINUTES: ${JWT_EXPIRE_MINUTES:-30}
+      ADMIN_INITIAL_USERNAME: ${ADMIN_INITIAL_USERNAME:-admin}
+      ADMIN_INITIAL_PASSWORD: ${ADMIN_INITIAL_PASSWORD:-visioflow123}
+      APP_ENV: ${APP_ENV:-production}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:8081,http://localhost:5000,http://localhost:19006}
+      VISION_SERVICE_URL: http://flask:5000
+      RATE_LIMIT_STORAGE_URI: redis://redis:6379
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    networks:
+      - app_network
+      - data_network
+
+  api2:
+    build: ./API
+    restart: unless-stopped
+    ports:
+      - "8002:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment: *api_env
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    networks:
+      - app_network
+      - data_network
+
+  api3:
+    build: ./API
+    restart: unless-stopped
+    ports:
+      - "8003:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment: *api_env
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    networks:
+      - app_network
+      - data_network
+
+  # --- FLASK (motor de vision): UNA sola instancia a proposito.
+  # Es dueña exclusiva de una camara fisica y mantiene el tracking en memoria;
+  # 2 replicas competirian por la misma camara y duplicarian conteos. El
+  # balanceo de carga real de este proyecto se demuestra con api1/api2/api3.
+  flask:
+    build: ./contador_personas_flask
+    restart: unless-stopped
+    ports:
+      - "5001:5000"
+    depends_on:
+      api1:
+        condition: service_healthy
+    environment:
+      VISIOFLOW_API_BASE_URL: http://api1:8000
+      API_BASE_URL: http://api1:8000
+      FLASK_HOST: "0.0.0.0"
+      FLASK_PORT: "5000"
+      FLASK_DEBUG: "0"
+      APP_ENV: ${APP_ENV:-production}
+      FLASK_SECRET_KEY: ${FLASK_SECRET_KEY:-b912389d7fa02353a23a8e9d22ff0678d91c13bc20d77be60c85c39178f0d8a5}
+      API_SERVICE_USERNAME: ${API_SERVICE_USERNAME:-admin}
+      API_SERVICE_PASSWORD: ${API_SERVICE_PASSWORD:-visioflow123}
+      CAMERA_ID: ${CAMERA_ID:-cam-01}
+      SENSOR_MODE: ${SENSOR_MODE:-monocular}
+      VISIOFLOW_DATA_DIR: /app/data
+      VISIOFLOW_START_BACKGROUND: ${VISIOFLOW_START_BACKGROUND:-1}
+      CALIBRATION_INVALIDATED: ${CALIBRATION_INVALIDATED:-0}
+      API_RATE_LIMIT_REQUESTS: ${API_RATE_LIMIT_REQUESTS:-80}
+      API_GLOBAL_RATE_LIMIT_REQUESTS: ${API_GLOBAL_RATE_LIMIT_REQUESTS:-1200}
+      API_RATE_LIMIT_WINDOW_SECONDS: ${API_RATE_LIMIT_WINDOW_SECONDS:-10}
+      MAX_MJPEG_STREAMS: ${MAX_MJPEG_STREAMS:-4}
+      MAX_MJPEG_STREAMS_PER_USER: ${MAX_MJPEG_STREAMS_PER_USER:-1}
+      PYTHONUNBUFFERED: "1"
+      OMP_NUM_THREADS: "4"
+      OPENBLAS_NUM_THREADS: "4"
+      MKL_NUM_THREADS: "4"
+      # En AWS: URL del streaming de la camara real (ej. tunel Tailscale al celular
+      # usado como camara IP). Definir en el .env de esta instancia.
+      CAMERA_SOURCE: "${CAMERA_SOURCE:?Define CAMERA_SOURCE en el .env del servidor privado}"
+      LOCAL_DEMO_AUTH: ${LOCAL_DEMO_AUTH:-0}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    networks:
+      - app_network
+    volumes:
+      - visioflow_data:/app/data
+
+  # --- MONITOREO ---
+  prometheus:
+    image: prom/prometheus:latest
+    restart: unless-stopped
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=15d
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - app_network
+      - monitoring_network
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    restart: unless-stopped
+    privileged: true
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker:/var/lib/docker:ro
+    networks:
+      - monitoring_network
+
+  node_exporter:
+    image: prom/node-exporter:latest
+    restart: unless-stopped
+    command:
+      - --path.rootfs=/host
+    volumes:
+      - /:/host:ro,rslave
+    networks:
+      - monitoring_network
+
+  redis_exporter:
+    image: oliver006/redis_exporter:latest
+    restart: unless-stopped
+    environment:
+      REDIS_ADDR: redis://redis:6379
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - data_network
+      - monitoring_network
+
+  postgres_exporter:
+    image: prometheuscommunity/postgres-exporter:latest
+    restart: unless-stopped
+    environment:
+      DATA_SOURCE_NAME: "postgresql://${POSTGRES_USER:-visioflow}:${POSTGRES_PASSWORD:-visioflow_demo_2026}@db:5432/${POSTGRES_DB:-visioflow}?sslmode=disable"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - data_network
+      - monitoring_network
+
+networks:
+  app_network:
+  data_network:
+    internal: true
+  monitoring_network:
+    internal: true
+
+volumes:
+  postgres_data_v1:
+  redis_data:
+  visioflow_data:
+  prometheus_data:

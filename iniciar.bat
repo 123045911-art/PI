@@ -27,7 +27,7 @@ if not exist "%~dp0visioflow\package.json" (
   )
 )
 
-powershell -NoProfile -Command "try { $h=Invoke-RestMethod 'http://127.0.0.1:5001/health' -TimeoutSec 2; if($h.camera_open){exit 0}else{exit 1} } catch { exit 1 }"
+"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -Command "try { $h=Invoke-RestMethod 'http://127.0.0.1:5001/health' -TimeoutSec 2; if($h.camera_open){exit 0}else{exit 1} } catch { exit 1 }"
 if errorlevel 1 (
   echo [1/3] Abriendo puente de camara...
   start "VISIOFLOW - Camara" cmd /k "cd /d ""%~dp0"" && call ini_cam.bat"
@@ -40,7 +40,7 @@ start "VISIOFLOW - Docker" cmd /k "cd /d ""%~dp0"" && docker compose up --build"
 
 echo Esperando FastAPI y Flask...
 for /L %%N in (1,1,120) do (
-  powershell -NoProfile -Command "try { Invoke-RestMethod 'http://127.0.0.1:8000/health' -TimeoutSec 2|Out-Null; Invoke-RestMethod 'http://127.0.0.1:5000/health' -TimeoutSec 2|Out-Null; exit 0 } catch { exit 1 }"
+  "%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -Command "try { Invoke-RestMethod 'http://127.0.0.1:8000/health' -TimeoutSec 2|Out-Null; Invoke-RestMethod 'http://127.0.0.1:5000/health' -TimeoutSec 2|Out-Null; exit 0 } catch { exit 1 }"
   if not errorlevel 1 goto services_ready
   timeout /t 1 /nobreak >nul
 )

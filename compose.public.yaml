@@ -1,0 +1,44 @@
+# Stack de PRODUCCION para la instancia AWS "servidor publico".
+# Es el unico punto de entrada desde internet: termina TLS y balancea hacia
+# los backends del servidor privado (compose.private.yaml, otra instancia).
+
+services:
+  haproxy:
+    image: haproxy:3.2-alpine
+    restart: unless-stopped
+    volumes:
+      - ./haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+      - ./haproxy/certs:/usr/local/etc/haproxy/certs:ro
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+      - "8404:8404"
+      - "8405:8405"
+    depends_on:
+      - grafana
+    networks:
+      - edge_network
+
+  grafana:
+    image: grafana/grafana:latest
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GF_SECURITY_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GF_SECURITY_ADMIN_PASSWORD:?Define GF_SECURITY_ADMIN_PASSWORD en el .env del servidor publico}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_SERVER_ROOT_URL: "%(protocol)s://%(domain)s/grafana/"
+      GF_SERVER_SERVE_FROM_SUB_PATH: "true"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+    expose:
+      - "3000"
+    networks:
+      - edge_network
+
+networks:
+  edge_network:
+
+volumes:
+  grafana_data:

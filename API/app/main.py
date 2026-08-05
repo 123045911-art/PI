@@ -17,7 +17,13 @@ ENV = os.getenv("APP_ENV", "production").lower()
 IS_DEV = ENV in ("development", "dev", "local")
 
 # ── Rate Limiter ───────────────────────────────────────────────────────────────
-limiter = Limiter(key_func=get_remote_address, default_limits=["100/minute"])
+# storage_uri en Redis comparte el conteo entre las replicas api1/api2/api3
+# detras de HAProxy; por defecto usa memoria (correcto para una sola replica).
+limiter = Limiter(
+    key_func=get_remote_address,
+    default_limits=["100/minute"],
+    storage_uri=os.getenv("RATE_LIMIT_STORAGE_URI", "memory://"),
+)
 
 # ── Orígenes CORS permitidos ───────────────────────────────────────────────────
 # En producción, listar explícitamente los orígenes permitidos.

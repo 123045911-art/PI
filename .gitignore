@@ -27,6 +27,8 @@ database/*.sqlite3
 .env.backup
 .env.local
 .env.*.local
+.env.aws.private
+.env.aws.public
 
 # IDEs y Editores
 .vscode/
