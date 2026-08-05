@@ -63,6 +63,19 @@ def _frame_from_request() -> np.ndarray:
     return frame
 
 
+@vision_bp.route("/api/live/push-frame", methods=["POST"])
+def push_frame():
+    if not session.get("user"):
+        return _error("Se requiere iniciar sesión.", 401)
+    try:
+        frame = _frame_from_request()
+    except ValueError as exc:
+        return _error(str(exc), 422)
+    if not _extension("tracker_service").ingest_pushed_frame(frame):
+        return _error("El motor de video aún no está listo.", 503)
+    return jsonify({"ok": True})
+
+
 @vision_bp.route("/configuration")
 def configuration_view():
     return render_template(

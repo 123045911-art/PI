@@ -154,12 +154,12 @@ services:
       MAX_MJPEG_STREAMS: ${MAX_MJPEG_STREAMS:-4}
       MAX_MJPEG_STREAMS_PER_USER: ${MAX_MJPEG_STREAMS_PER_USER:-1}
       PYTHONUNBUFFERED: "1"
-      OMP_NUM_THREADS: "4"
-      OPENBLAS_NUM_THREADS: "4"
-      MKL_NUM_THREADS: "4"
-      # En AWS: URL del streaming de la camara real (ej. tunel Tailscale al celular
-      # usado como camara IP). Definir en el .env de esta instancia.
-      CAMERA_SOURCE: "${CAMERA_SOURCE:?Define CAMERA_SOURCE en el .env del servidor privado}"
+      # Ajustado a los vCPUs reales de la instancia (2). Pedir mas hilos que
+      # nucleos genera contencion y hace la inferencia de YOLO MAS lenta, no
+      # mas rapida (visible como "trabado" en el video procesado).
+      OMP_NUM_THREADS: "2"
+      OPENBLAS_NUM_THREADS: "2"
+      MKL_NUM_THREADS: "2"
       LOCAL_DEMO_AUTH: ${LOCAL_DEMO_AUTH:-0}
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/health')"]

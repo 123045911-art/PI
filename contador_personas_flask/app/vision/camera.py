@@ -1,13 +1,11 @@
 from __future__ import annotations
 
 import logging
-import os
-import queue
 import threading
 import time
-from typing import Any
+from typing import Any, Optional
 
-import cv2
+import numpy as np
 
 
 logger = logging.getLogger("visioflow.camera")
@@ -34,133 +32,57 @@ class CameraProvider:
         }
 
 
-class OpenCVCameraProvider(CameraProvider):
-    """Proveedor asincrono RGB para indices locales, archivos o streams."""
+class BrowserPushCameraProvider(CameraProvider):
+    """Proveedor alimentado por frames que el navegador de un visitante sube
+    via HTTP (ver POST /api/live/push-frame). No hay hilo lector ni stream de
+    red que mantener: el ultimo frame recibido es la fuente de verdad, y
+    "gana" siempre el dispositivo mas reciente en empujar una imagen.
+    """
 
-    def __init__(self, src=None) -> None:
-        if src is None:
-            src = os.environ.get(
-                "CAMERA_SOURCE", "http://host.docker.internal:5001/video"
-            )
-            if str(src).isdigit():
-                src = int(src)
-        self.source = src
-        self.cap = self._open_capture()
-        self.last_frame_at = 0.0
-        self.last_frame_change_at = 0.0
-        self.reconnect_count = 0
-        self._last_signature = None
-        self._latest_frame = None
-        self._latest_frame_lock = threading.Lock()
-        if self.cap and self.cap.isOpened():
-            logger.info("Conectado al stream/camara en %s", src)
-        else:
-            logger.error("No se pudo conectar al stream/camara en %s", src)
-            if self.cap:
-                self.cap.release()
-            self.cap = None
-        self.q: queue.Queue = queue.Queue(maxsize=2)
-        self.stopped = False
-        self.t = threading.Thread(target=self._reader, daemon=True)
-        self.t.start()
+    STALE_AFTER_SECONDS = 8.0
 
-    def _open_capture(self):
-        cap = cv2.VideoCapture(self.source)
-        if cap and cap.isOpened():
-            # Mantener poca cola evita mostrar cuadros viejos cuando YOLO tarda.
-            cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
-        return cap
+    def __init__(self) -> None:
+        self._lock = threading.Lock()
+        self._latest_frame: Optional[np.ndarray] = None
+        self._last_push_at: float = 0.0
 
-    def _reconnect(self, reason: str) -> None:
-        logger.warning("Reabriendo camara %s: %s", self.source, reason)
-        if self.cap:
-            self.cap.release()
-        while not self.q.empty():
-            try:
-                self.q.get_nowait()
-            except queue.Empty:
-                break
-        time.sleep(0.25)
-        self.cap = self._open_capture()
-        self.reconnect_count += 1
-        self._last_signature = None
-        self.last_frame_change_at = time.monotonic()
-
-    def _reader(self) -> None:
-        failures = 0
-        next_reconnect_at = 0.0
-        while not self.stopped:
-            if self.cap is None or not self.cap.isOpened():
-                now = time.monotonic()
-                if now >= next_reconnect_at:
-                    self._reconnect("fuente no disponible durante el arranque")
-                    next_reconnect_at = now + 2.0
-                time.sleep(0.25)
-                continue
-            ok, frame = self.cap.read()
-            if not ok:
-                failures += 1
-                if failures > 30:
-                    self._reconnect("30 lecturas consecutivas fallaron")
-                    failures = 0
-                continue
-            failures = 0
-            now = time.monotonic()
-            self.last_frame_at = now
-            signature = cv2.resize(
-                cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY), (32, 18)
-            )
-            if self._last_signature is None:
-                self.last_frame_change_at = now
-            else:
-                change = float(cv2.mean(cv2.absdiff(signature, self._last_signature))[0])
-                if change >= 0.08:
-                    self.last_frame_change_at = now
-                elif now - self.last_frame_change_at > 4.0:
-                    self._reconnect("la fuente repitio el mismo cuadro por 4 segundos")
-                    continue
-            self._last_signature = signature
-            with self._latest_frame_lock:
-                self._latest_frame = frame
-            if not self.q.empty():
-                try:
-                    self.q.get_nowait()
-                except queue.Empty:
-                    pass
-            self.q.put(frame)
+    def push_frame(self, frame: np.ndarray) -> None:
+        with self._lock:
+            self._latest_frame = frame
+            self._last_push_at = time.monotonic()
 
     def read(self):
-        try:
-            return True, self.q.get(timeout=0.5)
-        except queue.Empty:
-            return False, None
+        with self._lock:
+            if not self._last_push_at:
+                return False, None
+            if time.monotonic() - self._last_push_at > self.STALE_AFTER_SECONDS:
+                return False, None
+            return True, self._latest_frame.copy()
 
     def latest_frame(self):
-        with self._latest_frame_lock:
+        with self._lock:
             return self._latest_frame.copy() if self._latest_frame is not None else None
 
     def isOpened(self) -> bool:  # noqa: N802
-        return self.cap is not None and self.cap.isOpened()
+        # Siempre True: TrackerService solo revisa esto una vez al arrancar
+        # para decidir si el pipeline queda "initialized". La disponibilidad
+        # real de imagen la reporta read() en cada tick (con recuperacion
+        # automatica ya manejada por TrackerService.process_frame()).
+        return True
 
     def status(self) -> dict[str, Any]:
         now = time.monotonic()
+        with self._lock:
+            last_push_at = self._last_push_at
         return {
             **super().status(),
-            "source": str(self.source),
+            "source": "browser-push",
             "lastFrameAgeSeconds": (
-                round(now - self.last_frame_at, 2) if self.last_frame_at else None
+                round(now - last_push_at, 2) if last_push_at else None
             ),
-            "lastFrameChangeAgeSeconds": (
-                round(now - self.last_frame_change_at, 2)
-                if self.last_frame_change_at
-                else None
-            ),
-            "reconnectCount": self.reconnect_count,
         }
 
     def release(self) -> None:
-        self.stopped = True
-        if self.t.is_alive():
-            self.t.join(timeout=1.0)
-        if self.cap:
-            self.cap.release()
+        with self._lock:
+            self._latest_frame = None
+            self._last_push_at = 0.0

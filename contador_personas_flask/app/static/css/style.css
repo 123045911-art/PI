@@ -97,6 +97,21 @@ h2 {
   color: var(--accent);
 }
 
+.own-camera-panel {
+  margin-top: 1rem;
+  padding: 1rem;
+}
+
+.own-camera-preview {
+  display: block;
+  width: 100%;
+  max-width: 320px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: #000;
+  margin: 0.5rem 0;
+}
+
 .form-actions {
   display: flex;
   flex-wrap: wrap;

@@ -13,7 +13,7 @@ from ultralytics.models.yolo import YOLO
 import os
 
 from app.core.api_client import VisioFlowApiClient
-from app.vision.camera import OpenCVCameraProvider
+from app.vision.camera import BrowserPushCameraProvider
 from app.vision.depth import DepthProvider, MonocularDepthProvider
 from app.vision.geometry import (
     IMAGE_COORDINATE_SYSTEM,
@@ -26,7 +26,7 @@ from app.vision.tracking import YoloDeepSortPersonTrackingAdapter
 
 logger = logging.getLogger("visioflow.api")
 
-AsyncVideoCapture = OpenCVCameraProvider
+AsyncVideoCapture = BrowserPushCameraProvider
 
 
 
@@ -505,9 +505,14 @@ class TrackerService:
         ok, frame = self.capture.read()
         if not ok or frame is None:
             with self.lock:
-                frame = np.zeros((720, 1280, 3), dtype=np.uint8)
-                cv2.putText(frame, "Cámara activa, pero no entrega imagen...", (40, 70),
-                            cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 0, 255), 2)
+                # Debe coincidir con la resolucion real de captura del navegador
+                # (640x480, ver getUserMedia en app.js). Si difiere, cualquier
+                # area dibujada mientras se mostraba este relleno queda
+                # calibrada contra el tamano equivocado y nunca vuelve a
+                # coincidir con las detecciones reales.
+                frame = np.zeros((480, 640, 3), dtype=np.uint8)
+                cv2.putText(frame, "Camara activa, sin imagen...", (30, 240),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
                 self._flush_events_to_csv_if_needed()
                 return frame
 
@@ -536,7 +541,27 @@ class TrackerService:
                 x1, y1, x2, y2 = [int(round(value)) for value in track["bbox"]]
                 confidence = float(track.get("confidence", 0.0))
 
-                foot_u, foot_v = bbox_foot_point((x1, y1, x2, y2))
+                try:
+                    foot_u, foot_v = bbox_foot_point((x1, y1, x2, y2))
+                except ValueError as exc:
+                    # DeepSort a veces entrega una caja momentaneamente invertida
+                    # (prediccion de Kalman entre detecciones). Se descarta solo
+                    # este track en este frame en vez de abortar el conteo de
+                    # areas completo para todos los demas.
+                    logger.warning("Track %s con bbox invalido, se omite este frame: %s", track_id, exc)
+                    continue
+
+                # Si la persona esta demasiado cerca de la camara (o la camara
+                # esta encuadrada muy arriba), sus pies reales quedan fuera del
+                # cuadro y la caja detectada termina cortada justo en el borde
+                # inferior de la imagen. Usar ese borde como "punto de los pies"
+                # es enganoso: nunca coincidira con areas que no lleguen hasta
+                # el borde. En ese caso usamos el centro vertical del cuerpo
+                # visible, mucho mas estable.
+                frame_height = frame.shape[0]
+                if y2 >= frame_height - 2:
+                    foot_v = (y1 + y2) / 2.0
+
                 inside_now = {
                     area_id
                     for area_id, area in self.areas.items()
@@ -718,6 +743,15 @@ class TrackerService:
             # FPS capping para el stream (no para el procesamiento)
             # Esto ahorra ancho de banda y CPU en los sockets
             time.sleep(0.10) # ~10 FPS; mantiene margen de CPU para YOLO
+
+    def ingest_pushed_frame(self, frame: np.ndarray) -> bool:
+        """Entrega un frame subido por el navegador de un visitante a la
+        fuente de video activa. Devuelve False si el pipeline aun no ha
+        terminado de inicializar (self.capture todavia es None)."""
+        if self.capture is None:
+            return False
+        self.capture.push_frame(frame)
+        return True
 
     def get_latest_raw_frame(self) -> Optional[np.ndarray]:
         with self.lock:

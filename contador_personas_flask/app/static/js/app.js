@@ -478,3 +478,91 @@ alertsContainer.addEventListener("click", async (event) => {
 alertCancel.addEventListener("click", resetAlertForm);
 fetchAlerts();
 setInterval(fetchAlerts, 2000);
+
+// --- Cámara del propio navegador: el visitante comparte su cámara y el
+// backend la usa como fuente de video para el conteo de personas. ---
+const ownCameraPreview = document.getElementById("own-camera-preview");
+const ownCameraCanvas = document.getElementById("own-camera-canvas");
+const btnShareCamera = document.getElementById("btn-share-camera");
+const ownCameraStatus = document.getElementById("own-camera-status");
+
+const OWN_CAMERA_PUSH_INTERVAL_MS = 333; // ~3 fps, de sobra para conteo
+let ownCameraStream = null;
+let ownCameraPushTimer = null;
+
+function setOwnCameraStatus(message, type = "success") {
+  ownCameraStatus.textContent = message;
+  ownCameraStatus.style.color = type === "error" ? "var(--danger, #f87171)" : "var(--accent)";
+}
+
+async function pushOwnCameraFrame() {
+  if (!ownCameraPreview.videoWidth || !ownCameraPreview.videoHeight) return;
+  ownCameraCanvas.width = ownCameraPreview.videoWidth;
+  ownCameraCanvas.height = ownCameraPreview.videoHeight;
+  const ctx2d = ownCameraCanvas.getContext("2d");
+  ctx2d.drawImage(ownCameraPreview, 0, 0, ownCameraCanvas.width, ownCameraCanvas.height);
+  const imageBase64 = ownCameraCanvas.toDataURL("image/jpeg", 0.7);
+  try {
+    const response = await fetch("/api/live/push-frame", {
+      method: "POST",
+      credentials: "same-origin",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ imageBase64 }),
+    });
+    if (!response.ok) {
+      const payload = await response.json().catch(() => ({}));
+      setOwnCameraStatus(payload.error || `El servidor respondió ${response.status}`, "error");
+      return;
+    }
+    setOwnCameraStatus("Compartiendo tu cámara con el sistema...");
+  } catch {
+    setOwnCameraStatus("No fue posible conectar con el servidor.", "error");
+  }
+}
+
+async function startSharingOwnCamera() {
+  try {
+    // Limitamos la resolucion a propósito: YOLO reescala internamente a
+    // 320px, así que pedir mas (algunos celulares capturan en 1080p+ por
+    // defecto) solo agrega peso a cada envio sin mejorar la deteccion, y
+    // hace que todo el pipeline se sienta mas lento/trabado.
+    ownCameraStream = await navigator.mediaDevices.getUserMedia({
+      video: {
+        facingMode: "environment",
+        width: { ideal: 640, max: 640 },
+        height: { ideal: 480, max: 480 },
+      },
+      audio: false,
+    });
+  } catch {
+    setOwnCameraStatus("No se pudo acceder a la cámara (permiso denegado o no disponible).", "error");
+    return;
+  }
+  ownCameraPreview.srcObject = ownCameraStream;
+  btnShareCamera.textContent = "Detener mi cámara";
+  setOwnCameraStatus("Cámara activada, iniciando envío...");
+  if (ownCameraPushTimer) clearInterval(ownCameraPushTimer);
+  ownCameraPushTimer = setInterval(pushOwnCameraFrame, OWN_CAMERA_PUSH_INTERVAL_MS);
+}
+
+function stopSharingOwnCamera() {
+  if (ownCameraPushTimer) {
+    clearInterval(ownCameraPushTimer);
+    ownCameraPushTimer = null;
+  }
+  if (ownCameraStream) {
+    ownCameraStream.getTracks().forEach((track) => track.stop());
+    ownCameraStream = null;
+  }
+  ownCameraPreview.srcObject = null;
+  btnShareCamera.textContent = "Activar mi cámara";
+  setOwnCameraStatus("Dejaste de compartir tu cámara.");
+}
+
+btnShareCamera.addEventListener("click", () => {
+  if (ownCameraStream) {
+    stopSharingOwnCamera();
+  } else {
+    startSharingOwnCamera();
+  }
+});
